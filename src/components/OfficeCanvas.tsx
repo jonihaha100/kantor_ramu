@@ -2332,13 +2332,23 @@ export default function OfficeCanvas({
 
       // 2. Call Meeting Button
       const btnX = 345; const btnY = 535; const btnW = 125; const btnH = 32;
-      ctx.fillStyle = meetingActiveRef.current ? "#ef4444" : "#4f46e5";
+      ctx.save();
+      if (meetingActiveRef.current) {
+        ctx.fillStyle = "#ef4444";
+        ctx.shadowColor = "rgba(239, 68, 68, 0.75)";
+        ctx.shadowBlur = 8;
+      } else {
+        ctx.fillStyle = "#4f46e5";
+        ctx.shadowColor = "rgba(79, 70, 229, 0.6)";
+        ctx.shadowBlur = 6;
+      }
       ctx.beginPath();
       ctx.roundRect(btnX, btnY, btnW, btnH, 8);
       ctx.fill();
       ctx.strokeStyle = "#ffffff";
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = 1.8;
       ctx.stroke();
+      ctx.restore();
 
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 11px monospace";
@@ -2412,11 +2422,22 @@ export default function OfficeCanvas({
       return;
     }
 
-    // 2. Meeting Button click (345 to 470, 535 to 567)
-    if (x >= 345 && x <= 470 && y >= 535 && y <= 567) {
-      meetingActiveRef.current = !meetingActiveRef.current;
+    // 2. Meeting Button click (generous hit box 340 to 475, 530 to 572)
+    if (x >= 340 && x <= 475 && y >= 530 && y <= 572) {
       if (onMeetingStart) {
         onMeetingStart();
+      } else {
+        meetingActiveRef.current = !meetingActiveRef.current;
+      }
+      return;
+    }
+
+    // 2b. Interactive Cupping Table click (triggers meeting)
+    if (Math.abs(x - CUPPING_TABLE.x) < 85 && Math.abs(y - CUPPING_TABLE.y) < 50) {
+      if (onMeetingStart) {
+        onMeetingStart();
+      } else {
+        meetingActiveRef.current = !meetingActiveRef.current;
       }
       return;
     }
@@ -2571,6 +2592,41 @@ export default function OfficeCanvas({
 
     // Prop check
     if (!foundAgent) {
+      // Check Call Meeting Button hover
+      if (x >= 340 && x <= 475 && y >= 530 && y <= 572) {
+        setHoveredProp({
+          name: "Tombol Call Meeting",
+          role: "Trigger Rapat Pleno 📢",
+          desc: meetingActiveRef.current 
+            ? "Klik untuk membubarkan rapat dan mengembalikan agen ke meja masing-masing." 
+            : "Klik untuk memanggil seluruh 11 agen divisi berkumpul di Cupping Table.",
+          emoji: "📢"
+        });
+        return;
+      }
+
+      // Check Coffee Break Button hover
+      if (x >= 200 && x <= 335 && y >= 530 && y <= 572) {
+        setHoveredProp({
+          name: "Tombol Coffee Break",
+          role: "Rehat Kopi Serentak ☕",
+          desc: "Klik untuk rehat ngopi specialty bersama seluruh staf Ramu.",
+          emoji: "☕"
+        });
+        return;
+      }
+
+      // Check Cupping Table hover
+      if (Math.abs(x - CUPPING_TABLE.x) < 85 && Math.abs(y - CUPPING_TABLE.y) < 50) {
+        setHoveredProp({
+          name: "Cupping Table & Lab",
+          role: "Meja Rapat Pleno & Sensory QC ☕",
+          desc: "Klik meja ini untuk memanggil seluruh tim mengadakan rapat koordinasi.",
+          emoji: "☕"
+        });
+        return;
+      }
+
       const cat = catRef.current;
       if (Math.sqrt((x - cat.x) ** 2 + (y - cat.y) ** 2) < 26) {
         setHoveredProp({

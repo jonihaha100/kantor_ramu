@@ -151,6 +151,33 @@ export default function VirtualOffice() {
     setOfficeEvents(prev => [event, ...prev.slice(0, 15)]);
   };
 
+  const handleToggleMeeting = (forcedState?: boolean) => {
+    setIsMeetingActive(prev => {
+      const next = typeof forcedState === "boolean" ? forcedState : !prev;
+      if (next) {
+        setSelectedAgent(null);
+        setDirectAgentSpeech(null);
+        handleOfficeEvent({
+          id: Math.random().toString(),
+          time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+          speaker: "Rama (GM)",
+          message: "📢 PERHATIAN TIM: Rapat pleno koordinasi di Cupping Table dimulai! Semua divisi segera merapat.",
+          type: "meeting"
+        });
+      } else {
+        setMeetingSpeaker(null);
+        handleOfficeEvent({
+          id: Math.random().toString(),
+          time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+          speaker: "Rama (GM)",
+          message: "Rapat selesai. Terima kasih tim, silakan kembali bertugas ke pos masing-masing.",
+          type: "meeting"
+        });
+      }
+      return next;
+    });
+  };
+
   const latestEvent = officeEvents[0] || null;
 
   const fetchProducts = async () => {
@@ -547,15 +574,17 @@ export default function VirtualOffice() {
 
               <div className="flex items-center gap-2.5">
                 <button 
-                  onClick={() => setIsMeetingActive(prev => !prev)}
+                  id="btn-call-meeting-top"
+                  onClick={() => handleToggleMeeting()}
                   className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow ${
                     isMeetingActive 
                       ? 'bg-rose-600 hover:bg-rose-500 text-white animate-pulse' 
-                      : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                      : 'bg-indigo-600 hover:bg-indigo-500 text-white hover:shadow-indigo-500/25'
                   }`}
+                  title="Panggil Rapat Tim (Call Meeting)"
                 >
-                  <span>☕</span>
-                  <span>{isMeetingActive ? "Tutup Rapat" : "Cupping Meeting"}</span>
+                  <span>{isMeetingActive ? "🔴" : "📢"}</span>
+                  <span>{isMeetingActive ? "Tutup Rapat" : "Call Meeting"}</span>
                 </button>
 
                 <button
@@ -617,6 +646,7 @@ export default function VirtualOffice() {
                             setDirectAgentSpeech(null);
                           }}
                           isMeetingActive={isMeetingActive}
+                          onMeetingStart={handleToggleMeeting}
                           meetingSpeaker={meetingSpeaker || directAgentSpeech}
                           onOfficeEvent={handleOfficeEvent}
                         />
