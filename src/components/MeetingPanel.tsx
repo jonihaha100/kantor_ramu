@@ -5,6 +5,7 @@ import { Users, Send, CheckCircle2, Sparkles, X, MessageSquare } from "lucide-re
 interface MeetingPanelProps {
   onClose: () => void;
   onSpeakerChange?: (speaker: { speaker: string; text: string } | null) => void;
+  onViewProjects?: () => void;
 }
 
 const TOPIC_SUGGESTIONS = [
@@ -14,7 +15,7 @@ const TOPIC_SUGGESTIONS = [
   "Ekspansi Kemitraan Suplai B2B ke 3 Kafe Baru"
 ];
 
-export default function MeetingPanel({ onClose, onSpeakerChange }: MeetingPanelProps) {
+export default function MeetingPanel({ onClose, onSpeakerChange, onViewProjects }: MeetingPanelProps) {
   const [topic, setTopic] = useState("");
   const [discussion, setDiscussion] = useState<{ speaker: string; text: string }[]>([]);
   const [activeTurn, setActiveTurn] = useState<number>(-1);
@@ -187,14 +188,28 @@ export default function MeetingPanel({ onClose, onSpeakerChange }: MeetingPanelP
         })}
 
         {isCompleted && (
-          <div className="p-3 bg-emerald-950/40 border border-emerald-500/30 rounded-xl text-emerald-300 text-xs space-y-1 flex items-start gap-2.5">
-            <CheckCircle2 size={16} className="shrink-0 mt-0.5 text-emerald-400" />
-            <div>
-              <div className="font-bold">Rapat Selesai & Tindak Lanjut Terbuat!</div>
-              <div className="text-slate-400 text-[11px]">
-                Tiket tugas baru telah didelegasikan secara otomatis ke Kanban Board Proyek.
+          <div className="p-3.5 bg-emerald-950/40 border border-emerald-500/30 rounded-xl text-emerald-300 text-xs space-y-2.5 flex flex-col">
+            <div className="flex items-start gap-2.5">
+              <CheckCircle2 size={16} className="shrink-0 mt-0.5 text-emerald-400" />
+              <div>
+                <div className="font-bold text-white">Rapat Selesai & Tindak Lanjut Terbuat!</div>
+                <div className="text-slate-300 text-[11px] leading-relaxed">
+                  Perintah Anda sebagai pemilik usaha telah otomatis didelegasikan ke tim dan tercatat di database status <span className="text-amber-400 font-bold">IN_PROGRESS</span>.
+                </div>
               </div>
             </div>
+            {onViewProjects && (
+              <button
+                onClick={() => {
+                  if (onSpeakerChange) onSpeakerChange(null);
+                  onClose();
+                  onViewProjects();
+                }}
+                className="w-full py-2 px-3 bg-emerald-600/30 hover:bg-emerald-600 border border-emerald-500/50 hover:border-emerald-400 text-emerald-200 hover:text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow"
+              >
+                <span>📋 Buka Kanban Board (Menu Projects)</span>
+              </button>
+            )}
           </div>
         )}
 

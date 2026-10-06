@@ -191,6 +191,7 @@ export default function VirtualOffice() {
                     setMeetingSpeaker(null);
                   }}
                   onSpeakerChange={setMeetingSpeaker}
+                  onViewProjects={() => setActiveTab("Projects")}
                 />
               ) : (
                 <ControlPanel 
