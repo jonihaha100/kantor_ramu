@@ -25,9 +25,21 @@ export default function MeetingPanel({ onClose, onSpeakerChange, onViewProjects,
   const [isCompleted, setIsCompleted] = useState(false);
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
+  const hasAutoStartedRef = useRef(false);
+
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [discussion, activeTurn]);
+
+  // Auto-start plenary meeting on panel mount so discussion immediately starts on canvas
+  useEffect(() => {
+    if (!hasAutoStartedRef.current && discussion.length === 0 && !isLoading) {
+      hasAutoStartedRef.current = true;
+      const initialTopic = "Evaluasi Operasional, Roastery & Penjualan Hari Ini";
+      setTopic(initialTopic);
+      startMeeting(initialTopic);
+    }
+  }, []);
 
   // Turn-by-turn animation synchronization with Canvas
   useEffect(() => {

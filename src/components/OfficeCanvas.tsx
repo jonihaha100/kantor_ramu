@@ -2366,79 +2366,109 @@ export default function OfficeCanvas({
     };
   }, [selectedAgent, meetingSpeaker, onOfficeEvent]);
 
-  // Click handler: supports agents and cute interactive props
-  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  // Accurate coordinate converter factoring in object-contain scale and letterbox offsets
+  const getCanvasCoords = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) return { x: -1, y: -1 };
 
     const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (canvas.width / rect.width);
-    const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+    const clientX = e.clientX - rect.left;
+    const clientY = e.clientY - rect.top;
 
-    // 1. Coffee Break Button click (205 to 330, 535 to 567)
-    if (x >= 205 && x <= 330 && y >= 535 && y <= 567) {
-      const coffeeQuotes = [
-        "Espresso double shot biar fokus! ☕",
-        "Americano panas pas buat rekap margin! ☕",
-        "Caramel latte dingin pelepas penat chat CS ☕",
-        "Kopi hitam tubruk teman ngoding Next.js 💻",
-        "Cupping Bajawa Honey 87.5 poin! 🍯",
-        "Es kopi susu buat ide konten viral TikTok! ✨",
-        "Cold brew nitro penambah energi scale-up ads! 🚀",
-        "Filter V60 buat meeting deal kafe B2B! ☕",
-        "Fresh roasted langsung dari drum Probat! 🔥",
-        "Kopi seduh botolan teman kurir kargo! 📦",
-        "Kopi petik merah asli Takengon Gayo! 🌿"
-      ];
-      if (selectedAgent) {
-        // If an agent is selected, ONLY the selected agent drinks and says coffee quote!
-        const target = agentsRef.current.find(a => a.id === selectedAgent);
-        if (target) {
-          target.activity = "drinking";
-          target.waitTimer = 5.5;
-          target.sipTimer = 5.5;
-          target.message = "Ngopi dulu sebentar ya bos! ☕";
-          target.messageTimer = 4.5;
-        }
-      } else {
-        agentsRef.current.forEach((a, idx) => {
-          a.activity = "drinking";
-          a.waitTimer = 5.5;
-          a.sipTimer = 5.5;
-          a.message = coffeeQuotes[idx % coffeeQuotes.length];
-          a.messageTimer = 4.5;
-        });
-      }
+    const canvasRatio = canvas.width / canvas.height; // 1000 / 600 = 1.66667
+    const elementRatio = rect.width / rect.height;
 
-      if (onOfficeEvent) {
-        onOfficeEvent({
-          id: Math.random().toString(),
-          time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
-          speaker: selectedAgent ? (selectedAgent.split(" ")[0] + " ☕") : "Ramu HQ ☕",
-          message: selectedAgent ? "Rehat ngopi specialty sejenak." : "Coffee break serentak! Seluruh 11 agen menikmati seduhan kopi Nusantara bersama.",
-          type: "system"
-        });
+    let scale = 1;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    if (elementRatio > canvasRatio) {
+      // Letterbox on left and right (pillarbox)
+      scale = rect.height / canvas.height;
+      offsetX = (rect.width - canvas.width * scale) / 2;
+    } else {
+      // Letterbox on top and bottom
+      scale = rect.width / canvas.width;
+      offsetY = (rect.height - canvas.height * scale) / 2;
+    }
+
+    const x = (clientX - offsetX) / scale;
+    const y = (clientY - offsetY) / scale;
+    return { x, y };
+  };
+
+  const triggerCoffeeBreak = () => {
+    const coffeeQuotes = [
+      "Espresso double shot biar fokus! ☕",
+      "Americano panas pas buat rekap margin! ☕",
+      "Caramel latte dingin pelepas penat chat CS ☕",
+      "Kopi hitam tubruk teman ngoding Next.js 💻",
+      "Cupping Bajawa Honey 87.5 poin! 🍯",
+      "Es kopi susu buat ide konten viral TikTok! ✨",
+      "Cold brew nitro penambah energi scale-up ads! 🚀",
+      "Filter V60 buat meeting deal kafe B2B! ☕",
+      "Fresh roasted langsung dari drum Probat! 🔥",
+      "Kopi seduh botolan teman kurir kargo! 📦",
+      "Kopi petik merah asli Takengon Gayo! 🌿"
+    ];
+    if (selectedAgent) {
+      const target = agentsRef.current.find(a => a.id === selectedAgent);
+      if (target) {
+        target.activity = "drinking";
+        target.waitTimer = 5.5;
+        target.sipTimer = 5.5;
+        target.message = "Ngopi dulu sebentar ya bos! ☕";
+        target.messageTimer = 4.5;
       }
+    } else {
+      agentsRef.current.forEach((a, idx) => {
+        a.activity = "drinking";
+        a.waitTimer = 5.5;
+        a.sipTimer = 5.5;
+        a.message = coffeeQuotes[idx % coffeeQuotes.length];
+        a.messageTimer = 4.5;
+      });
+    }
+
+    if (onOfficeEvent) {
+      onOfficeEvent({
+        id: Math.random().toString(),
+        time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+        speaker: selectedAgent ? (selectedAgent.split(" ")[0] + " ☕") : "Ramu HQ ☕",
+        message: selectedAgent ? "Rehat ngopi specialty sejenak." : "Coffee break serentak! Seluruh 11 agen menikmati seduhan kopi Nusantara bersama.",
+        type: "system"
+      });
+    }
+  };
+
+  const triggerCallMeeting = () => {
+    if (onMeetingStart) {
+      onMeetingStart();
+    } else {
+      meetingActiveRef.current = !meetingActiveRef.current;
+    }
+  };
+
+  // Click handler: supports agents and cute interactive props
+  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const { x, y } = getCanvasCoords(e);
+    if (x < 0 || x > 1000 || y < 0 || y > 600) return;
+
+    // 1. Coffee Break Button click (200 to 335, 525 to 575)
+    if (x >= 200 && x <= 335 && y >= 525 && y <= 575) {
+      triggerCoffeeBreak();
       return;
     }
 
-    // 2. Meeting Button click (generous hit box 340 to 475, 530 to 572)
-    if (x >= 340 && x <= 475 && y >= 530 && y <= 572) {
-      if (onMeetingStart) {
-        onMeetingStart();
-      } else {
-        meetingActiveRef.current = !meetingActiveRef.current;
-      }
+    // 2. Meeting Button click (generous hit box 340 to 475, 525 to 575)
+    if (x >= 340 && x <= 475 && y >= 525 && y <= 575) {
+      triggerCallMeeting();
       return;
     }
 
     // 2b. Interactive Cupping Table click (triggers meeting)
     if (Math.abs(x - CUPPING_TABLE.x) < 85 && Math.abs(y - CUPPING_TABLE.y) < 50) {
-      if (onMeetingStart) {
-        onMeetingStart();
-      } else {
-        meetingActiveRef.current = !meetingActiveRef.current;
-      }
+      triggerCallMeeting();
       return;
     }
 
@@ -2573,11 +2603,12 @@ export default function OfficeCanvas({
 
   // Hover detection for agents and interactive props
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (canvas.width / rect.width);
-    const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+    const { x, y } = getCanvasCoords(e);
+    if (x < 0 || x > 1000 || y < 0 || y > 600) {
+      setHoveredAgent(null);
+      setHoveredProp(null);
+      return;
+    }
 
     // Agent check
     let foundAgent: AgentData | null = null;
@@ -2703,6 +2734,35 @@ export default function OfficeCanvas({
           style={{ imageRendering: 'pixelated' }}
         />
 
+        {/* Floating Quick Action Buttons Bar Overlay */}
+        <div className="absolute bottom-2.5 sm:bottom-3.5 left-1/2 -translate-x-1/2 flex items-center gap-2.5 z-30 pointer-events-auto">
+          <button
+            type="button"
+            id="overlay-coffee-btn"
+            onClick={(e) => { e.stopPropagation(); triggerCoffeeBreak(); }}
+            className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-[#b45309]/90 hover:bg-[#d97706] text-white border border-[#fbbf24] shadow-[0_4px_12px_rgba(0,0,0,0.5)] backdrop-blur-sm flex items-center gap-1.5 transition-all active:scale-95 hover:scale-105 cursor-pointer"
+            title="Coffee break serentak seluruh agen"
+          >
+            <span>☕</span>
+            <span>Coffee Break</span>
+          </button>
+          
+          <button
+            type="button"
+            id="overlay-meeting-btn"
+            onClick={(e) => { e.stopPropagation(); triggerCallMeeting(); }}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 shadow-[0_4px_12px_rgba(0,0,0,0.5)] backdrop-blur-sm transition-all active:scale-95 hover:scale-105 cursor-pointer ${
+              meetingActiveRef.current 
+                ? "bg-rose-600 hover:bg-rose-500 text-white animate-pulse border-2 border-white ring-2 ring-rose-400/50" 
+                : "bg-indigo-600 hover:bg-indigo-500 text-white border-2 border-indigo-400 hover:border-white"
+            }`}
+            title="Panggil Rapat Tim (Call Meeting)"
+          >
+            <span>{meetingActiveRef.current ? "🔴" : "📢"}</span>
+            <span>{meetingActiveRef.current ? "End Meeting" : "Call Meeting"}</span>
+          </button>
+        </div>
+
         {/* Hover Agent Info Tooltip */}
         {hoveredAgent && (
           <div className="absolute top-3 left-3 bg-slate-900/95 backdrop-blur-md border border-slate-700 p-2.5 rounded-lg text-xs font-mono text-white shadow-xl pointer-events-none z-20 flex items-center gap-2.5 animate-in fade-in duration-150">
@@ -2750,6 +2810,31 @@ export default function OfficeCanvas({
           className="cursor-pointer block image-rendering-pixelated max-w-full"
           style={{ imageRendering: 'pixelated' }}
         />
+
+        {/* Floating Quick Action Buttons Bar Overlay */}
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2.5 z-30 pointer-events-auto">
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); triggerCoffeeBreak(); }}
+            className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-[#b45309]/90 hover:bg-[#d97706] text-white border border-[#fbbf24] shadow-lg flex items-center gap-1.5 transition-all active:scale-95 hover:scale-105 cursor-pointer"
+          >
+            <span>☕</span>
+            <span>Coffee Break</span>
+          </button>
+          
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); triggerCallMeeting(); }}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 shadow-lg transition-all active:scale-95 hover:scale-105 cursor-pointer ${
+              meetingActiveRef.current 
+                ? "bg-rose-600 hover:bg-rose-500 text-white animate-pulse border-2 border-white" 
+                : "bg-indigo-600 hover:bg-indigo-500 text-white border-2 border-indigo-400"
+            }`}
+          >
+            <span>{meetingActiveRef.current ? "🔴" : "📢"}</span>
+            <span>{meetingActiveRef.current ? "End Meeting" : "Call Meeting"}</span>
+          </button>
+        </div>
 
         {/* Hover Agent Info Tooltip */}
         {hoveredAgent && (
