@@ -154,6 +154,35 @@ DETAIL TINDAKAN & LANGKAH KERJA:
    Seluruh parameter kerja telah terverifikasi aman. Tugas siap ditutup atau dilanjutkan ke tahap distribusi ritel & B2B.`;
 }
 
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const task = await prisma.agentTask.findUnique({ where: { id } });
+    if (!task) {
+      return NextResponse.json({ error: "Task not found" }, { status: 404 });
+    }
+    let deliverable = null;
+    if (task.metadata) {
+      try {
+        const meta = JSON.parse(task.metadata);
+        deliverable = meta.deliverable || null;
+      } catch {}
+    }
+    return NextResponse.json({
+      success: true,
+      data: {
+        task,
+        deliverable
+      }
+    });
+  } catch (error: any) {
+    return NextResponse.json({ error: error?.message || "Failed to get deliverable" }, { status: 500 });
+  }
+}
+
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }

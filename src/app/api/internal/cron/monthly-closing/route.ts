@@ -92,7 +92,9 @@ async function handleCronClosing(req: Request) {
 
     // Also call internal reports closing API if available
     try {
-      await fetch(`http://localhost:3001/api/internal/reports`, {
+      const host = req.headers.get("host") || "localhost:3001";
+      const protocol = req.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
+      await fetch(`${protocol}://${host}/api/internal/reports`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
