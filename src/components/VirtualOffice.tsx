@@ -376,114 +376,192 @@ export default function VirtualOffice() {
     switch (activeTab) {
       case "Office HQ":
         return (
-          <div className="flex-1 flex min-w-0 bg-[#0f172a]">
-            <div className="flex-1 flex flex-col min-w-0">
-              
-              {/* Top Bar with Live Stats & Owner Verified Badge */}
-              <div className="h-16 flex items-center justify-between px-6 shrink-0 border-b border-slate-800 bg-[#161a2b]">
-                <div className="flex items-center gap-4">
-                  <div className="font-bold text-white tracking-[0.18em] font-mono text-base uppercase flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    RAMU ROASTERY HQ
-                  </div>
-                  <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-xs font-mono font-bold border border-indigo-500/30">
-                    11 AI Agents Alive
-                  </span>
-                  <span className="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[11px] font-mono font-bold border border-amber-500/30 shadow-sm">
-                    <span>👑</span>
-                    <span>Owner Mode</span>
-                  </span>
+          <div className="flex-1 flex flex-col min-w-0 bg-[#0c101c] overflow-y-auto relative font-sans">
+            {/* Retro Ambient Background Overlay */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#1d273d]/70 via-[#0e1424]/90 to-[#070a12] pointer-events-none"></div>
+
+            {/* Top HUD Bar with Live Stats & Controls */}
+            <div className="relative z-10 h-14 flex items-center justify-between px-4 sm:px-6 shrink-0 border-b border-slate-800/80 bg-[#121624]/80 backdrop-blur-md">
+              <div className="flex items-center gap-3">
+                <div className="font-bold text-white tracking-[0.16em] font-mono text-sm uppercase flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  RAMU ROASTERY HQ
                 </div>
+                <span className="hidden sm:inline-block px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[11px] font-mono font-bold border border-indigo-500/30">
+                  11 AI Agents Alive
+                </span>
+                <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[11px] font-mono font-bold border border-amber-500/30 shadow-sm">
+                  <span>👑</span>
+                  <span>Owner Mode</span>
+                </span>
+              </div>
 
-                {/* Live Activity Ticker */}
-                <div className="hidden lg:flex items-center gap-2 max-w-md px-3 py-1.5 rounded-lg bg-slate-900/80 border border-slate-800 text-xs font-mono text-slate-300 overflow-hidden">
-                  <Radio size={13} className="text-amber-400 animate-pulse shrink-0" />
-                  <span className="text-slate-500 shrink-0 font-bold">LIVE:</span>
-                  <div className="truncate">
-                    {latestEvent ? (
-                      <span>
-                        <strong className="text-indigo-300">[{latestEvent.speaker}]</strong> {latestEvent.message}
-                      </span>
-                    ) : (
-                      "Semua agen sedang bertugas di pos masing-masing."
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <button 
-                    onClick={() => setIsMeetingActive(prev => !prev)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow ${
-                      isMeetingActive 
-                        ? 'bg-rose-600 hover:bg-rose-500 text-white animate-pulse' 
-                        : 'bg-indigo-600 hover:bg-indigo-500 text-white'
-                    }`}
-                  >
-                    <span>☕</span>
-                    <span>{isMeetingActive ? "Tutup Rapat" : "Cupping Meeting"}</span>
-                  </button>
-
-                  <button
-                    onClick={handleOwnerLogout}
-                    className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
-                    title="Kunci Akses Kantor (Lock)"
-                  >
-                    <Lock size={15} />
-                  </button>
+              {/* Live Activity Ticker */}
+              <div className="hidden lg:flex items-center gap-2 max-w-md px-3 py-1 rounded-lg bg-slate-900/90 border border-slate-800 text-[11px] font-mono text-slate-300 overflow-hidden">
+                <Radio size={12} className="text-amber-400 animate-pulse shrink-0" />
+                <span className="text-slate-500 shrink-0 font-bold">LIVE:</span>
+                <div className="truncate">
+                  {latestEvent ? (
+                    <span>
+                      <strong className="text-indigo-300">[{latestEvent.speaker}]</strong> {latestEvent.message}
+                    </span>
+                  ) : (
+                    "Semua agen sedang bertugas di pos masing-masing."
+                  )}
                 </div>
               </div>
 
-              {/* Main 2D Pixel Office Canvas */}
-              <div className="flex-1 relative overflow-hidden bg-[#0d1322]">
-                <OfficeCanvas 
-                  selectedAgent={selectedAgent}
-                  onSelectAgent={(agent) => {
-                    setSelectedAgent(agent);
-                    setIsMeetingActive(false);
-                  }}
-                  isMeetingActive={isMeetingActive}
-                  meetingSpeaker={meetingSpeaker}
-                  onOfficeEvent={handleOfficeEvent}
-                />
-              </div>
+              <div className="flex items-center gap-2.5">
+                <button 
+                  onClick={() => setIsMeetingActive(prev => !prev)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 transition-all shadow ${
+                    isMeetingActive 
+                      ? 'bg-rose-600 hover:bg-rose-500 text-white animate-pulse' 
+                      : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                  }`}
+                >
+                  <span>☕</span>
+                  <span>{isMeetingActive ? "Tutup Rapat" : "Cupping Meeting"}</span>
+                </button>
 
-              {/* Bottom Office Activity Status Strip */}
-              <div className="h-10 bg-[#121624] border-t border-slate-800 px-6 flex items-center justify-between text-xs font-mono shrink-0">
-                <div className="flex items-center gap-4 text-slate-400">
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-                    Suhu Gudang: 22°C / 60% RH
-                  </span>
-                  <span className="text-slate-600">|</span>
-                  <span>Roaster Probat: 205°C Running</span>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <span className="text-slate-400">Agen Beroperasi:</span>
-                  <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">
-                    11 / 11 Online
-                  </span>
-                </div>
+                <button
+                  onClick={handleOwnerLogout}
+                  className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
+                  title="Kunci Akses Kantor (Lock)"
+                >
+                  <Lock size={15} />
+                </button>
               </div>
             </div>
 
-            {/* Right Sidebar Drawer */}
-            <div className="w-[360px] bg-[#161a2b] border-l border-slate-800 shrink-0 z-20 flex flex-col">
-              {isMeetingActive ? (
-                <MeetingPanel 
-                  onClose={() => {
-                    setIsMeetingActive(false);
-                    setMeetingSpeaker(null);
-                  }}
-                  onSpeakerChange={setMeetingSpeaker}
-                  onViewProjects={() => setActiveTab("Projects")}
-                />
-              ) : (
-                <ControlPanel 
-                  selectedAgent={selectedAgent} 
-                  onClose={() => setSelectedAgent(null)} 
-                />
-              )}
+            {/* AI Office Centerpiece Area */}
+            <div className="relative z-10 flex-1 flex flex-col justify-start py-4 sm:py-6 px-2 sm:px-4 md:px-6">
+              
+              {/* Retro Pixel Header from Reference Image */}
+              <div className="text-center mb-4 sm:mb-6 select-none">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-pixel text-white tracking-widest uppercase drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
+                  AI OFFICE
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-300 font-pixel tracking-wider mt-2.5 opacity-90 drop-shadow">
+                  A virtual office with some familiar digital employees...
+                </p>
+              </div>
+
+              {/* The Metallic CRT Monitor Frame */}
+              <div className="w-full max-w-[1240px] mx-auto">
+                <div className="relative rounded-xl overflow-hidden shadow-[0_25px_60px_rgba(0,0,0,0.95)] border-4 border-[#4a5568]">
+                  
+                  {/* Top Metallic Handle / Rail with Rivets */}
+                  <div className="h-7 bg-gradient-to-r from-[#6b778a] via-[#c2cdd8] via-[#e2e8f0] via-[#c2cdd8] to-[#6b778a] border-b-2 border-[#475569] flex items-center justify-between px-3 shadow-inner">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#475569] border border-[#f1f5f9] shadow-inner inline-block"></span>
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#475569] border border-[#f1f5f9] shadow-inner inline-block"></span>
+                    </div>
+                    <div className="text-[10px] font-silkscreen font-bold text-[#334155] tracking-widest uppercase">
+                      RAMU CRT MONITOR • MULTI-AGENT TERMINAL
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#475569] border border-[#f1f5f9] shadow-inner inline-block"></span>
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#475569] border border-[#f1f5f9] shadow-inner inline-block"></span>
+                    </div>
+                  </div>
+
+                  {/* Metallic Bezel Border Enclosing Screen */}
+                  <div className="p-2 sm:p-3 md:p-3.5 bg-gradient-to-b from-[#8392a5] via-[#64748b] to-[#475569] border-t-2 border-l-2 border-[#94a3b8] border-r-2 border-b-2 border-[#334155]">
+                    
+                    {/* Inner Screen Container */}
+                    <div className="bg-[#10141e] border-4 border-[#1e2430] rounded shadow-[inset_0_4px_12px_rgba(0,0,0,0.8)] flex flex-col lg:flex-row h-[500px] sm:h-[560px] lg:h-[620px] overflow-hidden">
+                      
+                      {/* Left Pane: 2D RPG Office Canvas */}
+                      <div className="flex-1 h-[280px] sm:h-[340px] lg:h-full relative overflow-hidden bg-[#0d1322]">
+                        <OfficeCanvas 
+                          contained={true}
+                          selectedAgent={selectedAgent}
+                          onSelectAgent={(agent) => {
+                            setSelectedAgent(agent);
+                            setIsMeetingActive(false);
+                          }}
+                          isMeetingActive={isMeetingActive}
+                          meetingSpeaker={meetingSpeaker}
+                          onOfficeEvent={handleOfficeEvent}
+                        />
+                      </div>
+
+                      {/* Right Pane: Peach Terminal / Meeting Panel */}
+                      <div className="w-full lg:w-[380px] xl:w-[420px] h-[220px] sm:h-[220px] lg:h-full shrink-0 border-t-4 lg:border-t-0 lg:border-l-4 border-[#2b3345] bg-[#df9d76] flex flex-col overflow-hidden relative">
+                        {isMeetingActive ? (
+                          <MeetingPanel 
+                            theme="retro"
+                            onClose={() => {
+                              setIsMeetingActive(false);
+                              setMeetingSpeaker(null);
+                            }}
+                            onSpeakerChange={setMeetingSpeaker}
+                            onViewProjects={() => setActiveTab("Projects")}
+                          />
+                        ) : (
+                          <ControlPanel 
+                            theme="retro"
+                            selectedAgent={selectedAgent} 
+                            onClose={() => setSelectedAgent(null)} 
+                          />
+                        )}
+                      </div>
+
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* Bottom Character Roster Dock (From Reference Image) */}
+              <div className="w-full max-w-[1240px] mx-auto mt-4 sm:mt-5 pb-6">
+                <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
+                  {ALL_AGENTS_DATA.map((agent) => {
+                    const isSelected = selectedAgent === agent.id;
+                    return (
+                      <button
+                        key={agent.id}
+                        onClick={() => {
+                          if (isSelected) {
+                            setSelectedAgent(null);
+                          } else {
+                            setSelectedAgent(agent.id);
+                            setIsMeetingActive(false);
+                          }
+                        }}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-md font-silkscreen text-[11px] md:text-xs transition-all shadow-md select-none border-2 ${
+                          isSelected
+                            ? "bg-[#3f4c6e] border-amber-400 text-amber-200 scale-105 shadow-[0_0_12px_rgba(251,191,36,0.6)] -translate-y-0.5"
+                            : "bg-[#20273a] hover:bg-[#2e374f] border-[#445070] hover:border-[#67779f] text-slate-200 hover:text-white"
+                        }`}
+                      >
+                        <span className="text-base leading-none drop-shadow">{agent.emoji}</span>
+                        <span className="font-bold tracking-wider">{agent.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Roastery Telemetry Footer Strip */}
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 bg-[#121624]/90 border border-slate-800 rounded-lg text-xs font-mono text-slate-400">
+                  <div className="flex items-center gap-3">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                      Suhu Gudang: 22°C / 60% RH
+                    </span>
+                    <span className="text-slate-600">|</span>
+                    <span>Roaster Probat: 205°C Running</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>Ramu Digital Workforce:</span>
+                    <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">
+                      11 / 11 Online
+                    </span>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         );

@@ -18,6 +18,7 @@ interface OfficeCanvasProps {
   isMeetingActive?: boolean;
   meetingSpeaker?: { speaker: string; text: string } | null;
   onOfficeEvent?: (event: OfficeEventLog) => void;
+  contained?: boolean;
 }
 
 type AgentActivity = 
@@ -175,7 +176,8 @@ export default function OfficeCanvas({
   onMeetingStart,
   isMeetingActive = false,
   meetingSpeaker = null,
-  onOfficeEvent
+  onOfficeEvent,
+  contained = false
 }: OfficeCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const agentsRef = useRef<AgentData[]>(JSON.parse(JSON.stringify(INITIAL_AGENTS)));
@@ -1745,6 +1747,54 @@ export default function OfficeCanvas({
       setHoveredProp(null);
     }
   };
+
+  if (contained) {
+    return (
+      <div className="w-full h-full relative overflow-hidden bg-[#0d1322] flex items-center justify-center select-none">
+        {/* Subtle scanline overlay for retro CRT monitor aesthetic */}
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-transparent to-black/30 z-10"></div>
+
+        <canvas
+          ref={canvasRef}
+          width={1000}
+          height={600}
+          onClick={handleCanvasClick}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={() => { setHoveredAgent(null); setHoveredProp(null); }}
+          className="cursor-pointer block image-rendering-pixelated w-full h-full object-contain"
+          style={{ imageRendering: 'pixelated' }}
+        />
+
+        {/* Hover Agent Info Tooltip */}
+        {hoveredAgent && (
+          <div className="absolute top-3 left-3 bg-slate-900/95 backdrop-blur-md border border-slate-700 p-2.5 rounded-lg text-xs font-mono text-white shadow-xl pointer-events-none z-20 flex items-center gap-2.5 animate-in fade-in duration-150">
+            <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-xs">
+              {hoveredAgent.label[0]}
+            </div>
+            <div>
+              <div className="font-bold text-xs text-indigo-300">{hoveredAgent.id}</div>
+              <div className="text-[11px] text-slate-400">Tugas: <span className="text-emerald-400">{hoveredAgent.roleBadge}</span></div>
+              <div className="text-[11px] text-slate-400">Status: <span className="text-amber-400 capitalize">{hoveredAgent.activity}</span></div>
+            </div>
+          </div>
+        )}
+
+        {/* Hover Prop Info Tooltip */}
+        {hoveredProp && !hoveredAgent && (
+          <div className="absolute top-3 left-3 bg-slate-900/95 backdrop-blur-md border border-indigo-500/40 p-2.5 rounded-lg text-xs font-mono text-white shadow-2xl pointer-events-none z-20 flex items-center gap-2.5 animate-in fade-in duration-150">
+            <div className="text-xl p-1 bg-slate-800 rounded-lg border border-slate-700">
+              {hoveredProp.emoji}
+            </div>
+            <div>
+              <div className="font-bold text-xs text-indigo-300">{hoveredProp.name} <span className="text-[10px] text-slate-400 font-normal">({hoveredProp.role})</span></div>
+              <div className="text-slate-300 text-[10px]">{hoveredProp.desc}</div>
+              <div className="text-emerald-400 text-[9px] mt-0.5 font-semibold">💡 Klik objek ini untuk berinteraksi!</div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-[#0a0f1d] relative">

@@ -6,6 +6,7 @@ interface MeetingPanelProps {
   onClose: () => void;
   onSpeakerChange?: (speaker: { speaker: string; text: string } | null) => void;
   onViewProjects?: () => void;
+  theme?: "retro" | "dark";
 }
 
 const TOPIC_SUGGESTIONS = [
@@ -15,7 +16,7 @@ const TOPIC_SUGGESTIONS = [
   "Ekspansi Kemitraan Suplai B2B ke 3 Kafe Baru"
 ];
 
-export default function MeetingPanel({ onClose, onSpeakerChange, onViewProjects }: MeetingPanelProps) {
+export default function MeetingPanel({ onClose, onSpeakerChange, onViewProjects, theme = "retro" }: MeetingPanelProps) {
   const [topic, setTopic] = useState("");
   const [discussion, setDiscussion] = useState<{ speaker: string; text: string }[]>([]);
   const [activeTurn, setActiveTurn] = useState<number>(-1);
@@ -86,16 +87,16 @@ export default function MeetingPanel({ onClose, onSpeakerChange, onViewProjects 
   const visibleDiscussion = activeTurn >= 0 ? discussion.slice(0, activeTurn + 1) : [];
 
   return (
-    <div className="flex flex-col h-full bg-[#161a2b] border-l border-slate-800 text-slate-300 font-mono text-sm">
+    <div className={`flex flex-col h-full font-mono text-sm ${theme === "retro" ? "bg-[#df9d76] text-[#3e2208]" : "bg-[#161a2b] border-l border-slate-800 text-slate-300"}`}>
       {/* Header */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-slate-800 shrink-0 bg-[#121624]">
+      <div className={`h-16 flex items-center justify-between px-4 border-b shrink-0 ${theme === "retro" ? "bg-[#c9865f] border-[#ad6e49] text-[#2d1808]" : "bg-[#121624] border-slate-800"}`}>
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${theme === "retro" ? "bg-[#fff8ea] text-[#3e2208] border-2 border-[#ad6e49]" : "bg-indigo-600/30 border border-indigo-500/40 text-indigo-400"}`}>
             <Users size={18} />
           </div>
           <div>
-            <h2 className="font-bold text-white text-sm">Cupping Table Meeting</h2>
-            <div className="text-[11px] text-slate-400">Multi-Agent Synchronized Chamber</div>
+            <h2 className={`font-bold text-sm ${theme === "retro" ? "text-[#2d1808] font-silkscreen" : "text-white"}`}>Cupping Table Meeting</h2>
+            <div className={`text-[11px] ${theme === "retro" ? "text-[#5c3214]" : "text-slate-400"}`}>Multi-Agent Synchronized Chamber</div>
           </div>
         </div>
         <button 
@@ -103,7 +104,7 @@ export default function MeetingPanel({ onClose, onSpeakerChange, onViewProjects 
             if (onSpeakerChange) onSpeakerChange(null);
             onClose();
           }}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+          className={`p-1.5 rounded-lg transition-colors ${theme === "retro" ? "text-[#4a260c] hover:bg-[#b8754e]" : "text-slate-400 hover:text-white hover:bg-slate-800"}`}
         >
           <X size={18} />
         </button>
@@ -112,18 +113,18 @@ export default function MeetingPanel({ onClose, onSpeakerChange, onViewProjects 
       {/* Discussion Container */}
       <div className="flex-1 p-4 overflow-y-auto space-y-4">
         {discussion.length === 0 && !isLoading ? (
-          <div className="h-full flex flex-col justify-center items-center text-center space-y-4 text-slate-400">
-            <div className="text-4xl p-4 bg-slate-800/40 rounded-full border border-slate-700/50">☕</div>
+          <div className={`h-full flex flex-col justify-center items-center text-center space-y-4 ${theme === "retro" ? "text-[#5c3214]" : "text-slate-400"}`}>
+            <div className={`text-4xl p-4 rounded-full border ${theme === "retro" ? "bg-[#fff8ea] border-[#ad6e49]" : "bg-slate-800/40 border-slate-700/50"}`}>☕</div>
             <div className="space-y-1 max-w-xs">
-              <div className="font-bold text-white text-sm">Para Agen Sudah Berkumpul</div>
-              <p className="text-xs text-slate-400">
+              <div className={`font-bold text-sm ${theme === "retro" ? "text-[#2d1808] font-silkscreen" : "text-white"}`}>Para Agen Sudah Berkumpul</div>
+              <p className={`text-xs ${theme === "retro" ? "text-[#4a260c]" : "text-slate-400"}`}>
                 Ketik topik rapat atau pilih agenda strategis berikut untuk memulai diskusi hidup antar divisi.
               </p>
             </div>
 
             {/* Quick Topic Chips */}
             <div className="w-full space-y-2 pt-2">
-              <div className="text-[11px] uppercase tracking-wider text-slate-500 text-left font-semibold">
+              <div className={`text-[11px] uppercase tracking-wider text-left font-semibold ${theme === "retro" ? "text-[#4a260c] font-silkscreen" : "text-slate-500"}`}>
                 Agenda Prioritas Hari Ini:
               </div>
               {TOPIC_SUGGESTIONS.map((sug, i) => (
@@ -133,9 +134,9 @@ export default function MeetingPanel({ onClose, onSpeakerChange, onViewProjects 
                     setTopic(sug);
                     startMeeting(sug);
                   }}
-                  className="w-full text-left p-2.5 rounded-lg bg-[#1e2336] hover:bg-indigo-600/20 border border-slate-700 hover:border-indigo-500/50 text-xs text-slate-300 hover:text-indigo-300 transition-all flex items-center gap-2 group"
+                  className={`w-full text-left p-2.5 rounded-lg text-xs transition-all flex items-center gap-2 group ${theme === "retro" ? "bg-[#fff8ea] hover:bg-[#fff2d6] border border-[#ad6e49] text-[#3e2208]" : "bg-[#1e2336] hover:bg-indigo-600/20 border border-slate-700 hover:border-indigo-500/50 text-slate-300 hover:text-indigo-300"}`}
                 >
-                  <Sparkles size={13} className="text-indigo-400 group-hover:scale-110 transition-transform shrink-0" />
+                  <Sparkles size={13} className={`group-hover:scale-110 transition-transform shrink-0 ${theme === "retro" ? "text-[#b45309]" : "text-indigo-400"}`} />
                   <span className="truncate">{sug}</span>
                 </button>
               ))}
@@ -145,8 +146,8 @@ export default function MeetingPanel({ onClose, onSpeakerChange, onViewProjects 
 
         {isLoading && (
           <div className="flex flex-col items-center justify-center h-full space-y-3">
-            <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-            <div className="text-xs text-indigo-300 animate-pulse">Menghubungkan agen ke Cupping Table...</div>
+            <div className={`w-8 h-8 border-2 rounded-full animate-spin ${theme === "retro" ? "border-[#3e2208] border-t-transparent" : "border-indigo-500 border-t-transparent"}`}></div>
+            <div className={`text-xs animate-pulse ${theme === "retro" ? "text-[#3e2208] font-bold" : "text-indigo-300"}`}>Menghubungkan agen ke Cupping Table...</div>
           </div>
         )}
 
@@ -162,11 +163,11 @@ export default function MeetingPanel({ onClose, onSpeakerChange, onViewProjects 
               }`}
             >
               <div className="flex items-center gap-2 px-1">
-                <span className={`text-[11px] font-bold ${isCurrent ? "text-amber-400 animate-pulse" : "text-indigo-300"}`}>
+                <span className={`text-[11px] font-bold ${isCurrent ? (theme === "retro" ? "text-[#854d0e] animate-pulse font-silkscreen" : "text-amber-400 animate-pulse") : (theme === "retro" ? "text-[#5c3214] font-silkscreen" : "text-indigo-300")}`}>
                   {msg.speaker}
                 </span>
                 {isCurrent && (
-                  <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[9px] font-semibold">
+                  <span className={`px-1.5 py-0.5 rounded text-[9px] font-semibold ${theme === "retro" ? "bg-[#b45309] text-white" : "bg-amber-500/20 text-amber-300"}`}>
                     Speaking on Canvas
                   </span>
                 )}
@@ -174,12 +175,12 @@ export default function MeetingPanel({ onClose, onSpeakerChange, onViewProjects 
 
               <div className={`p-3 rounded-xl max-w-[90%] text-xs leading-relaxed border transition-all ${
                 isCurrent 
-                  ? "border-amber-400/80 shadow-[0_0_15px_rgba(251,191,36,0.15)]" 
-                  : "border-slate-800"
+                  ? (theme === "retro" ? "border-[#854d0e] shadow-md ring-2 ring-[#b45309]/30" : "border-amber-400/80 shadow-[0_0_15px_rgba(251,191,36,0.15)]") 
+                  : (theme === "retro" ? "border-[#caa085]" : "border-slate-800")
               } ${
                 isRama 
-                  ? "bg-[#1e2336] text-slate-200 rounded-tl-none" 
-                  : "bg-indigo-950/60 text-indigo-100 rounded-tr-none border-indigo-900/50"
+                  ? (theme === "retro" ? "bg-[#fff8ea] text-[#3e2208] rounded-tl-none shadow-sm" : "bg-[#1e2336] text-slate-200 rounded-tl-none") 
+                  : (theme === "retro" ? "bg-[#fff1dc] text-[#451a03] rounded-tr-none shadow-sm" : "bg-indigo-950/60 text-indigo-100 rounded-tr-none border-indigo-900/50")
               }`}>
                 {msg.text}
               </div>
@@ -188,13 +189,13 @@ export default function MeetingPanel({ onClose, onSpeakerChange, onViewProjects 
         })}
 
         {isCompleted && (
-          <div className="p-3.5 bg-emerald-950/40 border border-emerald-500/30 rounded-xl text-emerald-300 text-xs space-y-2.5 flex flex-col">
+          <div className={`p-3.5 rounded-xl text-xs space-y-2.5 flex flex-col border ${theme === "retro" ? "bg-[#fff8ea] border-2 border-emerald-700 text-emerald-950" : "bg-emerald-950/40 border-emerald-500/30 text-emerald-300"}`}>
             <div className="flex items-start gap-2.5">
-              <CheckCircle2 size={16} className="shrink-0 mt-0.5 text-emerald-400" />
+              <CheckCircle2 size={16} className={`shrink-0 mt-0.5 ${theme === "retro" ? "text-emerald-700" : "text-emerald-400"}`} />
               <div>
-                <div className="font-bold text-white">Rapat Selesai & Tindak Lanjut Terbuat!</div>
-                <div className="text-slate-300 text-[11px] leading-relaxed">
-                  Perintah Anda sebagai pemilik usaha telah otomatis didelegasikan ke tim dan tercatat di database status <span className="text-amber-400 font-bold">IN_PROGRESS</span>.
+                <div className={`font-bold ${theme === "retro" ? "text-emerald-900 font-silkscreen text-[11px]" : "text-white"}`}>Rapat Selesai & Tindak Lanjut Terbuat!</div>
+                <div className={`text-[11px] leading-relaxed ${theme === "retro" ? "text-emerald-800" : "text-slate-300"}`}>
+                  Perintah Anda sebagai pemilik usaha telah otomatis didelegasikan ke tim dan tercatat di database status <span className="font-bold underline">IN_PROGRESS</span>.
                 </div>
               </div>
             </div>
@@ -205,7 +206,7 @@ export default function MeetingPanel({ onClose, onSpeakerChange, onViewProjects 
                   onClose();
                   onViewProjects();
                 }}
-                className="w-full py-2 px-3 bg-emerald-600/30 hover:bg-emerald-600 border border-emerald-500/50 hover:border-emerald-400 text-emerald-200 hover:text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow"
+                className={`w-full py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow ${theme === "retro" ? "bg-emerald-800 hover:bg-emerald-900 text-white" : "bg-emerald-600/30 hover:bg-emerald-600 border border-emerald-500/50 text-emerald-200 hover:text-white"}`}
               >
                 <span>📋 Buka Kanban Board (Menu Projects)</span>
               </button>
@@ -217,7 +218,7 @@ export default function MeetingPanel({ onClose, onSpeakerChange, onViewProjects 
       </div>
 
       {/* Input Area */}
-      <div className="p-3 bg-[#121624] border-t border-slate-800">
+      <div className={`p-3 border-t ${theme === "retro" ? "bg-[#c9865f] border-t-2 border-[#ad6e49]" : "bg-[#121624] border-slate-800"}`}>
         <form onSubmit={(e) => { e.preventDefault(); startMeeting(); }} className="flex gap-2">
           <input
             type="text"
@@ -225,12 +226,12 @@ export default function MeetingPanel({ onClose, onSpeakerChange, onViewProjects 
             onChange={(e) => setTopic(e.target.value)}
             placeholder="Ketik topik rapat..."
             disabled={isLoading || (activeTurn >= 0 && !isCompleted)}
-            className="flex-1 px-3 py-2 bg-[#1e2336] border border-slate-700 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono disabled:opacity-50"
+            className={`flex-1 px-3 py-2 rounded-lg text-xs font-mono disabled:opacity-50 ${theme === "retro" ? "bg-[#fff8ea] border-2 border-[#ad6e49] text-[#3e2208] placeholder-[#8d5b38]" : "bg-[#1e2336] border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500"}`}
           />
           <button
             type="submit"
             disabled={isLoading || !topic.trim() || (activeTurn >= 0 && !isCompleted)}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-colors text-xs disabled:opacity-50 flex items-center gap-1.5 shadow"
+            className={`px-4 py-2 font-bold rounded-lg transition-colors text-xs disabled:opacity-50 flex items-center gap-1.5 shadow ${theme === "retro" ? "bg-[#3e2208] hover:bg-[#201003] text-[#fff8ea]" : "bg-indigo-600 hover:bg-indigo-500 text-white"}`}
           >
             <Send size={13} />
             <span>Mulai</span>
