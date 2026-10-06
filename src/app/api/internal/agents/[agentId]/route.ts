@@ -261,17 +261,55 @@ Jika ingin menyamakan visi seluruh tim, Anda bisa klik tombol 'Cupping Meeting' 
     roleTitle: "Lead Full-Stack Web Developer",
     department: "Engineering & Tech",
     personality: "Geeky, presisi, tech-savvy, mengutamakan performa web dan kelancaran checkout.",
-    handleLocalReply: async (userMsg: string) => {
+    handleLocalReply: async (userMsg: string, history: any[] = []) => {
       const lower = userMsg.toLowerCase();
-      if (lower.includes("bug") || lower.includes("error") || lower.includes("lemot") || lower.includes("web") || lower.includes("server") || lower.includes("checkout")) {
+      const lastBotMsg = history.filter(h => h.sender === "agent").pop()?.text || "";
+
+      // 1. Ready to update / deploy new features
+      if (lower.includes("update") || lower.includes("siap") || lower.includes("fitur") || lower.includes("buatkan") || lower.includes("tambah") || lower.includes("ubah") || lower.includes("ganti")) {
+        const task = await prisma.agentTask.create({
+          data: {
+            title: `Web Dev: ${userMsg.slice(0, 45)}...`,
+            description: userMsg,
+            role: "WEB & TECH",
+            status: "IN_PROGRESS"
+          }
+        }).catch(() => null);
+
+        const taskId = task ? ` (Tiket Kanban: #${task.id.slice(0, 4)})` : "";
+        return `Siap 100% bos! Saya langsung siapkan branch baru di Git untuk update ini${taskId}.
+
+Rencana teknis saya:
+1. Jalankan pengujian di staging preview agar checkout tidak terganggu.
+2. Optimasi bundle aset & query database Prisma agar response time tetap di bawah 20ms.
+3. Begitu Anda konfirmasi, saya push langsung ke production Vercel.
+
+Ada detail spesifik tampilan atau fungsi checkout yang mau kita prioritaskan lebih dulu?`;
+      }
+
+      // 2. Status / Progress of Website
+      if (lower.includes("sejauh mana") || lower.includes("progress") || lower.includes("status") || lower.includes("kondisi") || lower.includes("web") || lower.includes("server") || lower.includes("checkout")) {
+        if (lastBotMsg.includes("Status sistem web store kita")) {
+          return `Melanjutkan update sebelumnya bos:
+Infrastruktur web store kita saat ini berjalan sangat stabil. Semua pipeline order dari checkout sampai update stok ke database Supabase berjalan real-time tanpa antrean tertunda.
+
+Langkah berikutnya yang siap saya kerjakan:
+• Integrasi auto-notifikasi WhatsApp resi pengiriman bersama Gilang & Sari.
+• Optimasi SEO & Core Web Vitals untuk kata kunci 'Specialty Coffee Roastery'.
+
+Apakah Anda mau saya mulai kerjakan integrasi auto-notifikasi resi sekarang?`;
+        }
+
         return `Status sistem web store kita:
 • Next.js 15 App Router: Server running normal di Edge Vercel dengan cache time 60s.
-• Latency Checkout: 9ms respons time via Midtrans QRIS API.
+• Database: Terhubung langsung ke cloud Supabase dengan latency kueri 12ms.
+• Latency Checkout: 9ms response time via Midtrans QRIS API.
 • Bug Fix: Masalah ganti varian gilingan di halaman produk sudah saya patch di commit terbaru.
 
 Conversion rate checkout naik dari 2.4% ke 3.1% setelah implementasi one-click checkout. Ada fitur baru seperti sistem subscription langganan kopi mingguan yang mau kita bangun?`;
       }
-      return `Paham bos! Mengenai "${userMsg}", infrastruktur teknis dan database SQLite lokal kita sudah sangat optimal. Data pesanan dan tugas agen tersinkronisasi dua arah tanpa lag. Saya pastikan performa web kita tetap 99/100 di Google PageSpeed!`;
+
+      return `Paham bos! Mengenai "${userMsg}", infrastruktur teknis dan database kita sudah sangat optimal. Data pesanan dan tugas agen tersinkronisasi dua arah tanpa lag. Saya pastikan performa web kita tetap 99/100 di Google PageSpeed!`;
     }
   },
 
