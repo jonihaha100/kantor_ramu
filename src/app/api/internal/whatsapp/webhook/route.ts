@@ -69,10 +69,17 @@ export function generateSariResponse(name: string, message: string): { reply: st
     };
   }
 
+  if (msg.includes("buka") || msg.includes("tutup") || msg.includes("jam") || msg.includes("closing") || msg.includes("operasional") || msg.includes("online") || msg.includes("aktif") || msg.includes("malam") || msg.includes("subuh")) {
+    return {
+      intent: "RECOMMENDATION",
+      reply: `Halo ${callerName}! ✨ Layanan WhatsApp Customer Service Ramu Roastery beroperasi 24 Jam Non-Stop (Standby 24/7 tanpa jam closing)! ☕\n\nKakak bebas bertanya, konsultasi ukuran gilingan, atau memesan kopi kapan saja—baik pagi, siang, maupun larut malam. Sari selalu aktif membalas langsung di sini!\n\nUntuk pengiriman paket diproses setiap hari kerja dengan same-day dispatch sebelum jam 15:00 WIB via Paxel & J&T Cargo. Ada yang bisa Sari bantu pilihkan varian kopinya untuk kakak sekarang?`
+    };
+  }
+
   // General friendly barista answer
   return {
     intent: "GENERAL",
-    reply: `Halo ${callerName}! Terima kasih sudah menghubungi WhatsApp Ramu Roastery. Saya Sari, siap membantu kebutuhan kopi berkualitas Nusantara untuk kakak. ☕\n\nAda yang bisa Sari bantu seputar pilihan biji kopi specialty, rekomendasi seduh, konsultasi ukuran gilingan, atau pesanan grosir B2B untuk kafe kakak?`
+    reply: `Halo ${callerName}! Terima kasih sudah menghubungi WhatsApp Ramu Roastery. Saya Sari, siap membantu 24 Jam Non-Stop tanpa jam closing untuk kebutuhan kopi specialty kakak. ☕\n\nAda yang bisa Sari bantu seputar pilihan biji kopi specialty, rekomendasi seduh, konsultasi ukuran gilingan, atau pesanan grosir B2B untuk kafe kakak?`
   };
 }
 
@@ -153,6 +160,8 @@ export async function POST(req: Request) {
         const model = genAI.getGenerativeModel({
           model: "gemini-3.5-flash-lite",
           systemInstruction: `Kamu adalah Sari, Customer Service Lead Ramu Roastery (Specialty Coffee Roastery Nusantara).
+KEBIJAKAN JAM KERJA: CS WhatsApp Ramu Roastery beroperasi 24 JAM NON-STOP (STANDBY 24/7 TANPA JAM CLOSING / TIDAK ADA JAM TUTUP). Kapan pun pelanggan mengirim chat (pagi, siang, tengah malam, dini hari), kamu SELALU aktif dan merespons dengan ramah, cepat, dan profesional.
+DILARANG PERNAH menyatakan "kami sedang tutup" atau "di luar jam kerja", karena layanan customer service selalu standby tanpa henti.
 Gaya bicaramu sangat ramah, hangat, sopan, menguasai ilmu seduh kopi, ukuran gilingan (fine, medium, coarse), dan profil rasa beans Nusantara (Gayo, Flores, Dampit, House Blend).
 Gunakan sapaan "Kak [Nama]" atau "Kakak". Berikan solusi seduh yang solutif dan tawarkan panduan gilingan yang tepat. Jangan terlalu kaku, gunakan sedikit emoji kopi yang manis.`
         });

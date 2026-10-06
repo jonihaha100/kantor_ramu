@@ -9,10 +9,12 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       data: {
-        status: "ONLINE",
+        status: "ONLINE 24/7 (TANPA JAM CLOSING)",
+        operatingHours: "24 Jam Non-Stop (Always Active)",
         agent: {
           name: "Sari",
           role: "Customer Service Lead & Virtual Barista",
+          shift: "Standby 24/7 (Tanpa Jam Closing)",
           csat: "98.4%",
           avgResponseTime: "1.2 detik (Instant AI Auto-Reply)"
         },

@@ -128,9 +128,13 @@ const AGENTS_LIST: AgentProfile[] = [
     name: "Sari",
     fullName: "Sari (CS)",
     role: "Customer Service & Experience Lead",
-    keywords: ["sari", "cs", "customer service", "pelanggan", "pembeli", "komplain", "chat", "wa", "whatsapp", "tanya", "grind size", "gilingan", "tiket"],
+    keywords: ["sari", "cs", "customer service", "pelanggan", "pembeli", "komplain", "chat", "wa", "whatsapp", "tanya", "grind size", "gilingan", "tiket", "closing", "jam", "24 jam", "tutup"],
     generateAnswer: (topic, greeting) => {
-      return `${greeting} bos! Update customer service WhatsApp & marketplace: Waktu respon rata-rata kita di 2 menit dengan CSAT 98%. Pertanyaan terbanyak hari ini mengenai panduan grind size untuk seduh V60 di rumah dan promo bundle biji kopi. Semua komplain tertangani tuntas tanpa eskalasi.`;
+      const t = topic.toLowerCase();
+      if (t.includes("closing") || t.includes("jam") || t.includes("tutup") || t.includes("24") || t.includes("aktif")) {
+        return `${greeting} bos! Layanan WhatsApp CS Ramu Roastery beroperasi 24 Jam Non-Stop tanpa jam closing. Mau pagi, siang, atau tengah malam sekalipun, saya selalu standby aktif merespons setiap pertanyaan pelanggan di WhatsApp dalam hitungan detik!`;
+      }
+      return `${greeting} bos! Update customer service WhatsApp (Standby 24/7 Tanpa Jam Closing): Waktu respon rata-rata 1.2 menit dengan CSAT 98.4%. Pertanyaan terbanyak seputar panduan grind size seduh manual dan rekomendasi beans specialty. Layanan chat kita selalu aktif melayani pelanggan tanpa henti!`;
     }
   },
   {

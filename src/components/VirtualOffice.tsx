@@ -41,7 +41,7 @@ const ALL_AGENTS_DATA: {
   currentTask: string;
 }[] = [
   { id: "Rama (GM)", name: "Rama", role: "General Manager", dept: "Executive", emoji: "👨‍💼", color: "bg-blue-500", status: "Active", currentTask: "Reviewing weekly strategy & KPI" },
-  { id: "Sari (CS)", name: "Sari", role: "Customer Service", dept: "Support", emoji: "👩‍💼", color: "bg-pink-500", status: "Active", currentTask: "Answering ticket WA & grind size inquiries" },
+  { id: "Sari (CS)", name: "Sari", role: "Customer Service (24/7 Non-Stop)", dept: "Support", emoji: "👩‍💼", color: "bg-pink-500", status: "Active 24/7", currentTask: "Standby 24 Jam non-stop melayani chat WA & panduan seduh" },
   { id: "Rian (Web Dev)", name: "Rian", role: "Full-Stack Dev", dept: "Engineering", emoji: "👨‍💻", color: "bg-emerald-500", status: "Active", currentTask: "Optimizing Next.js 15 staging cache" },
   { id: "Fina (Finance)", name: "Fina", role: "Financial Lead", dept: "Finance", emoji: "👩‍💼", color: "bg-yellow-500", status: "Active", currentTask: "Reconciling daily sales Rp 14.2M" },
   { id: "Bayu (B2B)", name: "Bayu", role: "B2B Sales Lead", dept: "Commercial", emoji: "👨‍💼", color: "bg-rose-500", status: "Active", currentTask: "Closing 20kg/week deal with Kafe Sudut Temu" },
@@ -2041,11 +2041,11 @@ export default function VirtualOffice() {
                   </h1>
                   <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    GATEWAY ONLINE
+                    CS 24/7 ONLINE (TANPA JAM CLOSING)
                   </span>
                 </div>
                 <p className="text-slate-400 text-xs mt-1.5 leading-relaxed">
-                  Layanan pelanggan WhatsApp 24 jam berbasis AI, auto-responder edukasi gilingan biji kopi (*grind size*), dan live simulator percakapan riil.
+                  Layanan pelanggan WhatsApp 24 Jam Non-Stop tanpa jam closing. Kapan pun pelanggan bertanya di nomor WhatsApp, Sari selalu aktif membalas instan untuk konsultasi grind size, rekomendasi beans, dan status order.
                 </p>
               </div>
 

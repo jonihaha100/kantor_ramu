@@ -216,7 +216,14 @@ Hari ini ada 1 tiket komplain terkait paket sobek saat pengiriman via J&T Cargo.
 Biaya retur Rp 95.000 sudah saya koordinasikan dengan Fina untuk klaim asuransi ekspedisi. SOP pelayanan prima tetap terjaga!`;
       }
 
-      return `Siap bos! Terkait "${userMsg}", saya pastikan pengalaman pelanggan Ramu Roastery tetap nomor satu. Rata-rata response time kita di WhatsApp bisnis adalah 2 menit 15 detik dengan CSAT 98.4%. Ada pesan promo atau panduan seduh yang ingin kita broadcast ke database pelanggan loyal?`;
+      if (lower.includes("closing") || lower.includes("jam") || lower.includes("tutup") || lower.includes("operasional") || lower.includes("24 jam") || lower.includes("malam")) {
+        return `Laporan Jam Kerja CS WhatsApp:
+Layanan Customer Service Ramu Roastery beroperasi 24 JAM NON-STOP (STANDBY 24/7 TANPA JAM CLOSING)! 💬☕
+
+Kapan pun pelanggan bertanya atau pesan kopi di WhatsApp kita—baik pagi, siang, larut malam, maupun dini hari—saya selalu standby aktif membalas dalam hitungan detik. Tidak ada kata toko tutup untuk layanan chat pelanggan!`;
+      }
+
+      return `Siap bos! Terkait "${userMsg}", saya pastikan pengalaman pelanggan Ramu Roastery tetap nomor satu. Layanan WhatsApp kita standby 24 jam non-stop tanpa jam closing dengan CSAT 98.4%. Ada pesan promo atau panduan seduh yang ingin kita siapkan?`;
     }
   },
 

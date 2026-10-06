@@ -166,22 +166,26 @@ Status: Disetujui & Diterapkan
         kpiSummary: [
           { label: "Customer Satisfaction (CSAT)", value: "98.4%", target: "95.0%", status: "EXCEEDED" },
           { label: "Rata-rata Waktu Respon (FRT)", value: "1.2 menit", target: "< 3 menit", status: "EXCEEDED" },
+          { label: "Jam Operasional WhatsApp", value: "24 Jam Non-Stop", target: "24/7 Standby", status: "EXCEEDED" },
+          { label: "Jam Closing CS", value: "Tidak Ada (Always Active)", target: "Non-Stop", status: "ACHIEVED" },
           { label: "Tiket Komplain Tertangani", value: "100%", target: "99.0%", status: "ACHIEVED" },
           { label: "Konversi Konsultasi Grind Size ke Order", value: "41.2%", target: "30.0%", status: "EXCEEDED" }
         ],
-        workSummary: "Menangani seluruh interaksi WhatsApp customer service, konsultasi profil seduh (V60, Aeropress, Espresso), serta memandu pembeli memilih varian beans Nusantara. Menyelesaikan 3 kendala keterlambatan ekspedisi tanpa review negatif.",
+        workSummary: "Menangani seluruh interaksi WhatsApp customer service 24 jam non-stop tanpa jam closing, konsultasi profil seduh (V60, Aeropress, Espresso), serta memandu pembeli memilih varian beans Nusantara kapan pun pelanggan bertanya (pagi, siang, malam, dini hari). Menyelesaikan 3 kendala keterlambatan ekspedisi tanpa review negatif.",
         deliverables: [
           {
             id: "del-cs-1",
-            title: "Log Rekapitulasi 140+ Percakapan Konsultasi Gilingan & Seduh",
+            title: "Log Rekapitulasi 140+ Percakapan Konsultasi Gilingan & Seduh (24/7 Standby)",
             date: "05 Okt 2026",
             type: "Transkrip CS & Support",
-            snippet: "Panduan pemilihan gilingan biji kopi (Fine, Medium, Coarse) terbukti menaikkan repeat purchase 28%.",
+            snippet: "Layanan WhatsApp aktif 24 jam penuh tanpa jam closing, menaikkan kepuasan dan repeat purchase hingga 28%.",
             fullText: `LAPORAN LAYANAN PELANGGAN RAMU CS:
 Penanggung Jawab: Sari (CS Lead)
+Kebijakan Jam Kerja: 24 Jam Non-Stop (Standby 24/7 Tanpa Jam Closing)
 
 1. REKAPITULASI TIKET:
 • Total Inquiries: 142 pesan masuk (WhatsApp & Web Livechat).
+• Jadwal Layanan: Selalu aktif 24 jam, tidak ada jam tutup/closing. Respon instan kapan pun pelanggan bertanya (pagi, siang, malam, dini hari).
 • Topik Dominan: 54% Konsultasi ukuran gilingan alat seduh rumahan, 32% Tanya tanggal sangrai (roast date), 14% Lacak paket ekspedisi.
 
 2. PENANGANAN KOMPLAIN:

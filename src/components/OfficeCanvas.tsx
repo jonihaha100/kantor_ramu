@@ -125,7 +125,7 @@ const INITIAL_AGENTS: AgentData[] = [
   // Office Hub (Left Cluster)
   { id: "Rama (GM)", deskX: 130, deskY: 150, x: 130, y: 150, color: "#3b82f6", label: "Rama", hair: "#1e1e1e", roleBadge: "GM Review", activity: "working", targetX: 130, targetY: 150, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
   { id: "Fina (Finance)", deskX: 130, deskY: 260, x: 130, y: 260, color: "#eab308", label: "Fina", hair: "#451a03", roleBadge: "Rekap Rp 14.2M", activity: "working", targetX: 130, targetY: 260, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
-  { id: "Sari (CS)", deskX: 130, deskY: 380, x: 130, y: 380, color: "#ec4899", label: "Sari", hair: "#5c3a21", roleBadge: "Tiket WA #1042", activity: "working", targetX: 130, targetY: 380, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
+  { id: "Sari (CS)", deskX: 130, deskY: 380, x: 130, y: 380, color: "#ec4899", label: "Sari", hair: "#5c3a21", roleBadge: "CS WA 24/7 💬", activity: "working", targetX: 130, targetY: 380, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
   { id: "Rian (Web Dev)", deskX: 130, deskY: 490, x: 130, y: 490, color: "#10b981", label: "Rian", hair: "#d97706", roleBadge: "Dev Next.js", activity: "working", targetX: 130, targetY: 490, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
 
   // Center-Left Marketing & Commercial Pod
@@ -1720,7 +1720,7 @@ export default function OfficeCanvas({
             cat.timer = spot.preferredState === "sleeping" ? 16 : (spot.preferredState === "eating" ? 7 : 5.5);
 
             if (spot.name.includes("Sari")) {
-              cat.message = "Meong~ *purrr* Nemenin Sari bales chat WA! 🐱";
+              cat.message = "Meong~ *purrr* Nemenin Sari bales chat WA 24 jam non-stop! 🐱💬";
               cat.messageTimer = 3.5;
             } else if (spot.name.includes("Rama")) {
               cat.message = "Mroww~ Nungguin GM Rama selesai meeting. ☕";
@@ -2044,17 +2044,24 @@ export default function OfficeCanvas({
 
           // Occasional individual break
           if (!activeCollabRef.current && agent.waitTimer <= 0 && Math.random() < 0.003) {
-            if (agent.isOfficeWorker) {
+            if (agent.id.includes("Sari")) {
+              // Sari is 24/7 dedicated CS without closing hours - remains at her post with quick coffee sip
+              agent.sipTimer = 3.5;
+              agent.message = "Standby WA 24/7 💬";
+              agent.messageTimer = 2.5;
+            } else if (agent.isOfficeWorker) {
               agent.targetX = WATER_COOLER.x - 30;
               agent.targetY = WATER_COOLER.y + 15;
               agent.message = "Isi tumbler..";
+              agent.activity = "walking";
+              agent.messageTimer = 3;
             } else {
               agent.targetX = ROASTER_MACHINE.x - 35;
               agent.targetY = ROASTER_MACHINE.y + 40;
               agent.message = "Cek drum sangrai";
+              agent.activity = "walking";
+              agent.messageTimer = 3;
             }
-            agent.activity = "walking";
-            agent.messageTimer = 3;
           }
         } 
         else if (agent.activity === "walking" || agent.activity === "collaborating_walk") {
@@ -2583,13 +2590,23 @@ export default function OfficeCanvas({
         clickedAgent = agent.id as AgentRole;
         // Trigger live coffee sip, happy eyes & greetings ONLY for this agent
         agent.sipTimer = 3.8;
-        const agentGreetings = [
-          "Halo bos! Mau ngopi atau ada task baru? ☕",
-          "Standby bos! Sambil seruput kopi fresh. ☕",
-          "Kopi Ramu emang paling nikmat nemenin kerja! ☕",
-          "Siap laksanakan arahan! Ngopi dulu sebentar. ☕"
-        ];
-        agent.message = agentGreetings[Math.floor(Math.random() * agentGreetings.length)];
+        if (agent.id.includes("Sari")) {
+          const sariQuotes = [
+            "Halo bos! CS WhatsApp standby 24 jam non-stop tanpa jam closing! 💬☕",
+            "Siap bos! Chat WA masuk jam berapa pun langsung saya balas secepat kilat! ⚡",
+            "Layanan CS 24/7 aktif terus! CSAT kita 98.4% dan pelanggan puas banget. ✨",
+            "Standby di WhatsApp 24/7, pandu grind size & orderan beans tanpa henti! ☕"
+          ];
+          agent.message = sariQuotes[Math.floor(Math.random() * sariQuotes.length)];
+        } else {
+          const agentGreetings = [
+            "Halo bos! Mau ngopi atau ada task baru? ☕",
+            "Standby bos! Sambil seruput kopi fresh. ☕",
+            "Kopi Ramu emang paling nikmat nemenin kerja! ☕",
+            "Siap laksanakan arahan! Ngopi dulu sebentar. ☕"
+          ];
+          agent.message = agentGreetings[Math.floor(Math.random() * agentGreetings.length)];
+        }
         agent.messageTimer = 3.5;
       } else {
         // Clear speech message on all other agents
