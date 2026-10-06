@@ -68,6 +68,43 @@ const ESPRESSO_BAR = { x: 465, y: 80 };
 const PALLET_JACK = { x: 730, y: 525 };
 const SERVER_RACK = { x: 45, y: 485 };
 const PACKING_BENCH = { x: 890, y: 220 };
+const CAT_BED = { x: 370, y: 460 };
+const CAT_BOWL = { x: 410, y: 460 };
+
+export type CatState =
+  | "sleeping"
+  | "stretching"
+  | "sitting"
+  | "grooming"
+  | "eating"
+  | "walking"
+  | "sniffing"
+  | "butt_wiggle"
+  | "pouncing"
+  | "purring"
+  | "startled";
+
+export interface CatSpot {
+  name: string;
+  x: number;
+  y: number;
+  preferredState: CatState;
+  desc: string;
+}
+
+const CAT_SPOTS: CatSpot[] = [
+  { name: "Kasur Mochi", x: 370, y: 460, preferredState: "sleeping", desc: "Tidur melingkar di kasur bulu empuk 💤" },
+  { name: "Mangkuk Makanan", x: 410, y: 460, preferredState: "eating", desc: "Makan biskuit tuna & minum air segar 🐟" },
+  { name: "Sofa Santai", x: 475, y: 475, preferredState: "grooming", desc: "Bersantai di sofa beludru sambil bersolek ✨" },
+  { name: "Karpet Cupping", x: 390, y: 285, preferredState: "stretching", desc: "Menggeliat manja di atas karpet Persia 🐾" },
+  { name: "Meja Sari (CS)", x: 175, y: 380, preferredState: "sniffing", desc: "Menemani Sari membalas chat pelanggan 💬" },
+  { name: "Meja Rama (GM)", x: 175, y: 150, preferredState: "sitting", desc: "Duduk anggun mengawasi operasional kantor 👔" },
+  { name: "Meja Rian (Dev)", x: 175, y: 490, preferredState: "sniffing", desc: "Mengendus rubber ducky & codingan Rian 💻" },
+  { name: "Meja Kafin (R&D)", x: 285, y: 490, preferredState: "sitting", desc: "Mencium aroma seduhan kopi cupping ☕" },
+  { name: "Area Bar Kopi", x: 440, y: 115, preferredState: "butt_wiggle", desc: "Mengincar remah biji kopi sangrai 🎯" },
+  { name: "Dekat Jendela Terang", x: 575, y: 80, preferredState: "sitting", desc: "Menikmati hangatnya cahaya matahari pagi ☀️" },
+  { name: "Pintu Roastery", x: 625, y: 280, preferredState: "sitting", desc: "Mengintip kesibukan di gudang roastery 🏭" }
+];
 
 // Meeting spots around the Cupping Table (Radius ~75px)
 const MEETING_SPOTS = [
@@ -187,16 +224,22 @@ export default function OfficeCanvas({
 
   // Autonomous Props & Pet states
   const catRef = useRef({
-    x: 395,
-    y: 350,
-    targetX: 395,
-    targetY: 350,
-    state: "sleeping" as "sleeping" | "walking" | "sitting",
-    timer: 6,
+    x: 370,
+    y: 460,
+    targetX: 370,
+    targetY: 460,
+    targetSpotName: "Kasur Mochi",
+    state: "sleeping" as CatState,
+    facingLeft: false,
+    speed: 38,
+    timer: 8,
+    walkCycle: 0,
+    pounceProgress: 0,
     tailAngle: 0,
+    actionDesc: "Tidur siang nyenyak di kasur bulu empuk 💤",
     message: null as string | null,
     messageTimer: 0,
-    hearts: [] as { x: number; y: number; life: number }[]
+    hearts: [] as { x: number; y: number; life: number; char?: string }[]
   });
 
   const roombaRef = useRef({
@@ -604,6 +647,112 @@ export default function OfficeCanvas({
       };
       drawBreakSofa(475, 490);
 
+      // --- 8b. Mochi's Cozy Pet Station (Plush Donut Bed, Ceramic Twin Bowls & Scratch Post) ---
+      const drawCatStation = (bedX: number, bedY: number, bowlX: number, bowlY: number) => {
+        // 1. Plush Donut Fleece Cat Bed
+        ctx.fillStyle = "#fbcfe8";
+        ctx.beginPath();
+        ctx.ellipse(bedX, bedY, 18, 13, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#f472b6";
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        // Inner fleece cushion
+        ctx.fillStyle = "#fff1f2";
+        ctx.beginPath();
+        ctx.ellipse(bedX, bedY, 12, 8.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Stitched paw motif on bed
+        ctx.fillStyle = "#fb7185";
+        ctx.beginPath();
+        ctx.ellipse(bedX, bedY + 1, 3, 2.2, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(bedX - 3, bedY - 2, 1.2, 0, Math.PI * 2);
+        ctx.arc(bedX, bedY - 3.2, 1.2, 0, Math.PI * 2);
+        ctx.arc(bedX + 3, bedY - 2, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Little embroidered label: "MOCHI 🐾"
+        ctx.fillStyle = "#9d174d";
+        ctx.font = "bold 5.5px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText("MOCHI 🐾", bedX, bedY + 11);
+
+        // 2. Ceramic Twin Food & Water Bowls on Bamboo Stand
+        ctx.fillStyle = "#b45309";
+        ctx.beginPath();
+        ctx.roundRect(bowlX - 16, bowlY - 7, 32, 14, 3);
+        ctx.fill();
+        ctx.fillStyle = "#78350f";
+        ctx.fillRect(bowlX - 16, bowlY + 6, 32, 2);
+
+        // Left Water Bowl (Ocean Cyan with water shine)
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(bowlX - 8, bowlY, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#38bdf8";
+        ctx.beginPath();
+        ctx.arc(bowlX - 8, bowlY, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+        ctx.beginPath();
+        ctx.arc(bowlX - 9, bowlY - 1.5, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Right Food Bowl (Salmon rim with crunchy tuna kibble & fish treat)
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(bowlX + 8, bowlY, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#fed7aa";
+        ctx.beginPath();
+        ctx.arc(bowlX + 8, bowlY, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#78350f";
+        ctx.fillRect(bowlX + 6.5, bowlY - 2, 2, 2);
+        ctx.fillRect(bowlX + 8.5, bowlY - 0.5, 2, 2);
+        ctx.fillRect(bowlX + 6, bowlY + 1, 2, 2);
+        ctx.fillStyle = "#ea580c";
+        ctx.fillRect(bowlX + 8, bowlY - 2.5, 1.5, 1.5);
+
+        // 3. Sisal Scratch Post & Yarn Ball
+        const postX = bedX - 25;
+        const postY = bedY + 15;
+        ctx.fillStyle = "#78350f";
+        ctx.beginPath();
+        ctx.ellipse(postX, postY, 7, 3.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#fde047";
+        ctx.fillRect(postX - 2.5, postY - 16, 5, 16);
+        ctx.strokeStyle = "#ca8a04";
+        ctx.lineWidth = 1;
+        for (let py = postY - 14; py < postY; py += 3) {
+          ctx.beginPath();
+          ctx.moveTo(postX - 2.5, py);
+          ctx.lineTo(postX + 2.5, py);
+          ctx.stroke();
+        }
+
+        // Coral Yarn Ball
+        const yarnX = postX + 11;
+        const yarnY = postY + 2;
+        ctx.fillStyle = "#fb7185";
+        ctx.beginPath();
+        ctx.arc(yarnX, yarnY, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#fb7185";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(yarnX + 2, yarnY);
+        ctx.quadraticCurveTo(yarnX + 8, yarnY + 4, yarnX + 14, yarnY + 1);
+        ctx.stroke();
+      };
+      drawCatStation(CAT_BED.x, CAT_BED.y, CAT_BOWL.x, CAT_BOWL.y);
+
       // --- 9. Individual Desk Personalization & Props ---
       const drawDesk = (x: number, y: number, isWorking: boolean, agentId: string) => {
         const W = "#a16207"; const D = "#854d0e"; const G = "#334155"; 
@@ -913,76 +1062,754 @@ export default function OfficeCanvas({
       });
 
       // --- 15. Autonomous Pets & Mascots ---
-      // Mochi the Calico Cat Logic
+      // Draw Mochi the Calico Cat Helper
+      const drawMochiCat = (
+        targetCtx: CanvasRenderingContext2D,
+        c: typeof catRef.current,
+        tSec: number,
+        dt: number
+      ) => {
+        const cx = c.x;
+        const cy = c.y;
+
+        targetCtx.save();
+        targetCtx.translate(cx, cy);
+
+        if (c.facingLeft) {
+          targetCtx.scale(-1, 1);
+        }
+
+        // Soft ground shadow
+        targetCtx.fillStyle = "rgba(15, 23, 42, 0.22)";
+        targetCtx.beginPath();
+        const shadowW = (c.state === "sleeping" || c.state === "butt_wiggle") ? 13 : (c.state === "walking" ? 11 : 9);
+        targetCtx.ellipse(0, 9, shadowW, 3.8, 0, 0, Math.PI * 2);
+        targetCtx.fill();
+
+        const C_WHITE = "#ffffff";
+        const C_ORANGE = "#ea580c";
+        const C_BLACK = "#1c1917";
+        const C_PINK = "#f472b6";
+        const C_EYE = "#0f172a";
+
+        if (c.state === "sleeping") {
+          // --- 1. SLEEPING STATE ---
+          const breath = Math.sin(tSec * 2.8) * 1.0;
+
+          // Curled Calico Body
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.ellipse(0, 2 + breath, 11, 8.5, -0.15, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_ORANGE;
+          targetCtx.beginPath();
+          targetCtx.arc(-3, 1 + breath, 6, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_BLACK;
+          targetCtx.beginPath();
+          targetCtx.arc(4, -1 + breath, 5, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          // Head curled inward
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.arc(-7, 2 + breath, 5.5, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          // Ear
+          targetCtx.fillStyle = C_ORANGE;
+          targetCtx.beginPath();
+          targetCtx.moveTo(-10, -2 + breath);
+          targetCtx.lineTo(-7, -7 + breath);
+          targetCtx.lineTo(-4, -2 + breath);
+          targetCtx.fill();
+          targetCtx.fillStyle = C_PINK;
+          targetCtx.beginPath();
+          targetCtx.moveTo(-9, -2 + breath);
+          targetCtx.lineTo(-7, -5 + breath);
+          targetCtx.lineTo(-5, -2 + breath);
+          targetCtx.fill();
+
+          // Sleeping eye (^ . ^)
+          targetCtx.strokeStyle = C_EYE;
+          targetCtx.lineWidth = 1;
+          targetCtx.beginPath();
+          targetCtx.arc(-7, 1 + breath, 1.8, Math.PI, 0);
+          targetCtx.stroke();
+
+          // Tiny pink nose
+          targetCtx.fillStyle = C_PINK;
+          targetCtx.fillRect(-9, 2 + breath, 1.5, 1.5);
+
+          // Tucked tail with gentle twitch
+          targetCtx.strokeStyle = C_ORANGE;
+          targetCtx.lineWidth = 2.5;
+          targetCtx.beginPath();
+          targetCtx.moveTo(5, 5 + breath);
+          targetCtx.quadraticCurveTo(11, 11 + breath, -1 + Math.sin(tSec * 3) * 2, 7 + breath);
+          targetCtx.stroke();
+
+          // Floating Zzz
+          const zY = -12 - ((tSec * 14) % 22);
+          targetCtx.fillStyle = "#c084fc";
+          targetCtx.font = "bold 8.5px monospace";
+          targetCtx.textAlign = "center";
+          targetCtx.fillText("z Z", 6, zY);
+
+        } else if (c.state === "stretching") {
+          // --- 2. STRETCHING STATE (Downwards dog cat stretch & yawning) ---
+          const stretchT = Math.sin(tSec * 4);
+
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.moveTo(-10, -4);
+          targetCtx.quadraticCurveTo(-2, -6, 7, 3);
+          targetCtx.lineTo(9, 7);
+          targetCtx.lineTo(-7, 7);
+          targetCtx.closePath();
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_ORANGE;
+          targetCtx.beginPath();
+          targetCtx.arc(-5, -2, 5, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_BLACK;
+          targetCtx.beginPath();
+          targetCtx.arc(-8, -4, 4, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          // Head tilted down, yawning!
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.arc(8, 2, 5, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_ORANGE;
+          targetCtx.beginPath();
+          targetCtx.moveTo(5, -1);
+          targetCtx.lineTo(8, -6);
+          targetCtx.lineTo(11, -1);
+          targetCtx.fill();
+
+          // Open yawning mouth with pink tongue
+          targetCtx.fillStyle = C_PINK;
+          targetCtx.beginPath();
+          targetCtx.arc(10, 4, 2, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          // Extended front paws kneading
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.fillRect(8, 6, 6, 3);
+          targetCtx.strokeStyle = "rgba(148, 163, 184, 0.6)";
+          targetCtx.lineWidth = 1;
+          targetCtx.beginPath();
+          targetCtx.moveTo(14, 8); targetCtx.lineTo(16, 9);
+          targetCtx.stroke();
+
+          // Upright tail with curled hook
+          targetCtx.strokeStyle = C_ORANGE;
+          targetCtx.lineWidth = 2.5;
+          targetCtx.beginPath();
+          targetCtx.moveTo(-10, -3);
+          targetCtx.quadraticCurveTo(-14, -13, -11 + stretchT * 2, -18);
+          targetCtx.stroke();
+
+        } else if (c.state === "walking") {
+          // --- 3. WALKING STATE (Realistic 4-paw walk cycle) ---
+          c.walkCycle += dt * 12;
+          const bob = Math.abs(Math.sin(c.walkCycle)) * 1.5;
+
+          const legF1 = Math.sin(c.walkCycle) * 3.5;
+          const legF2 = Math.sin(c.walkCycle + Math.PI) * 3.5;
+          const legB1 = Math.sin(c.walkCycle + Math.PI * 0.5) * 3.5;
+          const legB2 = Math.sin(c.walkCycle + Math.PI * 1.5) * 3.5;
+
+          targetCtx.strokeStyle = C_WHITE;
+          targetCtx.lineWidth = 2.4;
+          targetCtx.lineCap = "round";
+
+          // Back legs
+          targetCtx.beginPath(); targetCtx.moveTo(-6, 2 - bob); targetCtx.lineTo(-6 + legB1, 9); targetCtx.stroke();
+          targetCtx.beginPath(); targetCtx.moveTo(-3, 2 - bob); targetCtx.lineTo(-3 + legB2, 9); targetCtx.stroke();
+
+          // Sleek Body
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.ellipse(0, -bob, 11, 7, 0, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_ORANGE;
+          targetCtx.beginPath();
+          targetCtx.arc(-2, -1 - bob, 5.5, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_BLACK;
+          targetCtx.beginPath();
+          targetCtx.arc(3, -2 - bob, 4.5, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          // Front legs
+          targetCtx.strokeStyle = C_WHITE;
+          targetCtx.beginPath(); targetCtx.moveTo(4, 2 - bob); targetCtx.lineTo(4 + legF1, 9); targetCtx.stroke();
+          targetCtx.beginPath(); targetCtx.moveTo(7, 2 - bob); targetCtx.lineTo(7 + legF2, 9); targetCtx.stroke();
+
+          // Head
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.arc(8, -6 - bob, 6, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_ORANGE;
+          targetCtx.beginPath();
+          targetCtx.arc(7, -8 - bob, 4, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          // Alert ears
+          targetCtx.fillStyle = C_ORANGE;
+          targetCtx.beginPath();
+          targetCtx.moveTo(6, -11 - bob); targetCtx.lineTo(8, -16 - bob); targetCtx.lineTo(10, -11 - bob); targetCtx.fill();
+          targetCtx.fillStyle = C_PINK;
+          targetCtx.beginPath();
+          targetCtx.moveTo(7, -11 - bob); targetCtx.lineTo(8, -14 - bob); targetCtx.lineTo(9, -11 - bob); targetCtx.fill();
+
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.moveTo(10, -10 - bob); targetCtx.lineTo(12, -15 - bob); targetCtx.lineTo(14, -10 - bob); targetCtx.fill();
+
+          // Big shiny eye
+          targetCtx.fillStyle = C_EYE;
+          targetCtx.fillRect(10, -7 - bob, 2.5, 2.5);
+          targetCtx.fillStyle = "#ffffff";
+          targetCtx.fillRect(10.5, -7.5 - bob, 1, 1);
+
+          // Pink nose & whiskers
+          targetCtx.fillStyle = C_PINK;
+          targetCtx.fillRect(13, -5 - bob, 1.5, 1.5);
+          targetCtx.strokeStyle = "rgba(255, 255, 255, 0.85)";
+          targetCtx.lineWidth = 0.8;
+          targetCtx.beginPath();
+          targetCtx.moveTo(12, -4 - bob); targetCtx.lineTo(17, -5 - bob);
+          targetCtx.moveTo(12, -3 - bob); targetCtx.lineTo(17, -2 - bob);
+          targetCtx.stroke();
+
+          // Question-mark happy tail swaying
+          targetCtx.strokeStyle = C_ORANGE;
+          targetCtx.lineWidth = 2.4;
+          targetCtx.beginPath();
+          targetCtx.moveTo(-9, -bob);
+          targetCtx.quadraticCurveTo(-14, -10 - bob, -11 + Math.sin(tSec * 6) * 3, -16 - bob);
+          targetCtx.stroke();
+
+        } else if (c.state === "grooming") {
+          // --- 4. GROOMING STATE (Licking front paw & wiping ear) ---
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.ellipse(0, 0, 8, 11, 0, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_ORANGE;
+          targetCtx.beginPath();
+          targetCtx.arc(-2, -2, 6, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_BLACK;
+          targetCtx.beginPath();
+          targetCtx.arc(3, 4, 4.5, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          // Head tilted toward grooming paw
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.arc(3, -9, 5.5, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.strokeStyle = C_EYE;
+          targetCtx.lineWidth = 1;
+          targetCtx.beginPath();
+          targetCtx.arc(4, -8, 2, Math.PI, 0);
+          targetCtx.stroke();
+
+          targetCtx.fillStyle = C_ORANGE;
+          targetCtx.beginPath();
+          targetCtx.moveTo(1, -13); targetCtx.lineTo(3, -18); targetCtx.lineTo(6, -13); targetCtx.fill();
+
+          // Grooming paw circular wipe
+          const pawCycle = tSec * 7;
+          const pawX = 3 + Math.cos(pawCycle) * 3.5;
+          const pawY = -9 + Math.sin(pawCycle) * 4;
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.arc(pawX, pawY, 2.5, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          // Pink tongue
+          if (Math.sin(pawCycle) > 0.3) {
+            targetCtx.fillStyle = C_PINK;
+            targetCtx.fillRect(5, -6, 2, 2);
+          }
+
+          // Sparkle
+          const spX = 9 + Math.sin(tSec * 4) * 3;
+          const spY = -14 + Math.cos(tSec * 4) * 2;
+          targetCtx.fillStyle = "#facc15";
+          targetCtx.font = "bold 7px monospace";
+          targetCtx.fillText("✨", spX, spY);
+
+          // Resting tail
+          targetCtx.strokeStyle = C_ORANGE;
+          targetCtx.lineWidth = 2.4;
+          targetCtx.beginPath();
+          targetCtx.moveTo(-5, 6);
+          targetCtx.quadraticCurveTo(-12, 11, -7 + Math.sin(tSec * 3) * 3, 6);
+          targetCtx.stroke();
+
+        } else if (c.state === "eating") {
+          // --- 5. EATING / DRINKING STATE ---
+          const bobMunch = Math.abs(Math.sin(tSec * 7)) * 3;
+
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.ellipse(-2, 1, 9, 7.5, 0.2, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_ORANGE;
+          targetCtx.beginPath();
+          targetCtx.arc(-4, 0, 5, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          // Dipping head
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.arc(6, 2 + bobMunch, 5.5, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_ORANGE;
+          targetCtx.beginPath();
+          targetCtx.moveTo(4, -3 + bobMunch); targetCtx.lineTo(6, -8 + bobMunch); targetCtx.lineTo(8, -3 + bobMunch); targetCtx.fill();
+
+          targetCtx.strokeStyle = C_EYE;
+          targetCtx.lineWidth = 1;
+          targetCtx.beginPath();
+          targetCtx.arc(7, 2 + bobMunch, 1.8, Math.PI, 0);
+          targetCtx.stroke();
+
+          targetCtx.strokeStyle = C_ORANGE;
+          targetCtx.lineWidth = 2.4;
+          targetCtx.beginPath();
+          targetCtx.moveTo(-10, 0);
+          targetCtx.quadraticCurveTo(-16, -6, -12 + Math.sin(tSec * 5) * 4, -13);
+          targetCtx.stroke();
+
+        } else if (c.state === "sniffing") {
+          // --- 6. SNIFFING / INVESTIGATION STATE ---
+          const sniffNod = Math.sin(tSec * 8) * 1.5;
+
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.ellipse(0, 1, 10, 7, 0, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_ORANGE;
+          targetCtx.beginPath();
+          targetCtx.arc(-3, 0, 5.5, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.arc(8, 2 + sniffNod, 5.5, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_ORANGE;
+          targetCtx.beginPath();
+          targetCtx.moveTo(6, -3 + sniffNod); targetCtx.lineTo(8, -8 + sniffNod); targetCtx.lineTo(10, -3 + sniffNod); targetCtx.fill();
+
+          targetCtx.fillStyle = C_EYE;
+          targetCtx.fillRect(8.5, 0 + sniffNod, 2.5, 2.5);
+          targetCtx.fillStyle = "#ffffff"; targetCtx.fillRect(9, 0 + sniffNod, 1, 1);
+
+          targetCtx.fillStyle = C_PINK;
+          targetCtx.fillRect(12, 3 + sniffNod, 1.8, 1.5);
+
+          targetCtx.strokeStyle = C_ORANGE;
+          targetCtx.lineWidth = 2.4;
+          targetCtx.beginPath();
+          targetCtx.moveTo(-9, 0);
+          targetCtx.quadraticCurveTo(-14, -5, -10 + Math.sin(tSec * 10) * 3, -12);
+          targetCtx.stroke();
+
+          targetCtx.fillStyle = "#38bdf8";
+          targetCtx.font = "bold 9px monospace";
+          targetCtx.fillText("?", 9, -10);
+
+        } else if (c.state === "butt_wiggle") {
+          // --- 7. BUTT WIGGLE BEFORE POUNCE ---
+          const wiggle = Math.sin(tSec * 22) * 3.5;
+
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.ellipse(-4 + wiggle, 2, 7.5, 6.5, 0, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_ORANGE;
+          targetCtx.beginPath();
+          targetCtx.arc(-5 + wiggle, 1, 5, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.ellipse(4, 5, 6.5, 4.5, 0, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.arc(7, 3, 5.5, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_EYE;
+          targetCtx.beginPath();
+          targetCtx.arc(8, 2, 2.2, 0, Math.PI * 2);
+          targetCtx.fill();
+          targetCtx.fillStyle = "#ffffff";
+          targetCtx.fillRect(8.5, 1.5, 1, 1);
+
+          targetCtx.strokeStyle = C_ORANGE;
+          targetCtx.lineWidth = 2.4;
+          targetCtx.beginPath();
+          targetCtx.moveTo(-10 + wiggle, 4);
+          targetCtx.quadraticCurveTo(-15 + wiggle, 6, -17 + Math.sin(tSec * 16) * 4, 3);
+          targetCtx.stroke();
+
+        } else if (c.state === "pouncing") {
+          // --- 8. POUNCING MID-AIR ---
+          c.pounceProgress = Math.min(1, c.pounceProgress + dt * 2.5);
+          const leapY = -Math.sin(c.pounceProgress * Math.PI) * 12;
+
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.ellipse(0, leapY, 12, 6, 0.2, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_ORANGE;
+          targetCtx.beginPath();
+          targetCtx.arc(-2, leapY - 1, 5, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.strokeStyle = C_WHITE;
+          targetCtx.lineWidth = 2.4;
+          targetCtx.beginPath(); targetCtx.moveTo(6, leapY + 2); targetCtx.lineTo(12, leapY + 5); targetCtx.stroke();
+          targetCtx.beginPath(); targetCtx.moveTo(-6, leapY + 2); targetCtx.lineTo(-11, leapY + 6); targetCtx.stroke();
+
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.arc(9, leapY - 2, 5.5, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.strokeStyle = C_ORANGE;
+          targetCtx.lineWidth = 2.4;
+          targetCtx.beginPath();
+          targetCtx.moveTo(-11, leapY);
+          targetCtx.lineTo(-17, leapY - 5);
+          targetCtx.stroke();
+
+        } else if (c.state === "purring") {
+          // --- 9. PURRING BLISS STATE ---
+          const purrShake = Math.sin(tSec * 32) * 0.8;
+
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.ellipse(0 + purrShake, 0, 8, 11, 0, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_ORANGE;
+          targetCtx.beginPath();
+          targetCtx.arc(-2 + purrShake, -2, 6, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_BLACK;
+          targetCtx.beginPath();
+          targetCtx.arc(3 + purrShake, 4, 4.5, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.arc(2 + purrShake, -10, 6, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          // Rosy blush
+          targetCtx.fillStyle = "rgba(244, 114, 182, 0.6)";
+          targetCtx.beginPath();
+          targetCtx.arc(-1 + purrShake, -8, 2.5, 0, Math.PI * 2);
+          targetCtx.arc(5 + purrShake, -8, 2.5, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          // Smiling eyes
+          targetCtx.strokeStyle = C_EYE;
+          targetCtx.lineWidth = 1.3;
+          targetCtx.beginPath();
+          targetCtx.arc(0 + purrShake, -10, 2, Math.PI, 0);
+          targetCtx.stroke();
+          targetCtx.beginPath();
+          targetCtx.arc(4 + purrShake, -10, 2, Math.PI, 0);
+          targetCtx.stroke();
+
+          targetCtx.fillStyle = C_PINK;
+          targetCtx.fillRect(1.5 + purrShake, -9, 1.8, 1.5);
+
+          targetCtx.strokeStyle = C_ORANGE;
+          targetCtx.lineWidth = 2.5;
+          targetCtx.beginPath();
+          targetCtx.moveTo(-5, 6);
+          targetCtx.quadraticCurveTo(-14 + purrShake * 2, -6, -8 + purrShake * 3, -15);
+          targetCtx.stroke();
+
+          const noteY = -15 - ((tSec * 16) % 20);
+          targetCtx.fillStyle = "#ec4899";
+          targetCtx.font = "bold 9px monospace";
+          targetCtx.fillText("♫ ♪", 10, noteY);
+
+        } else if (c.state === "startled") {
+          // --- 10. STARTLED STATE ---
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.ellipse(0, -3, 8, 12, 0, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_ORANGE;
+          targetCtx.beginPath();
+          targetCtx.arc(-2, -5, 5, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          // Bushy tail
+          targetCtx.strokeStyle = C_ORANGE;
+          targetCtx.lineWidth = 4.2;
+          targetCtx.beginPath();
+          targetCtx.moveTo(-6, 2);
+          targetCtx.lineTo(-12, -16);
+          targetCtx.stroke();
+
+          targetCtx.fillStyle = C_ORANGE;
+          targetCtx.beginPath();
+          targetCtx.moveTo(-2, -12); targetCtx.lineTo(-7, -15); targetCtx.lineTo(-1, -10); targetCtx.fill();
+
+          targetCtx.fillStyle = C_EYE;
+          targetCtx.beginPath();
+          targetCtx.arc(2, -10, 2.5, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = "#ef4444";
+          targetCtx.font = "bold 10px monospace";
+          targetCtx.fillText("!", 6, -18);
+
+        } else {
+          // --- 11. SITTING UPRIGHT STATE ---
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.ellipse(0, 0, 8, 11, 0, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_ORANGE;
+          targetCtx.beginPath();
+          targetCtx.arc(-2, -2, 6, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_BLACK;
+          targetCtx.beginPath();
+          targetCtx.arc(3, 4, 4.5, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.arc(2, -9, 6, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_ORANGE;
+          targetCtx.beginPath();
+          targetCtx.arc(1, -11, 4, 0, Math.PI * 2);
+          targetCtx.fill();
+
+          targetCtx.fillStyle = C_ORANGE;
+          targetCtx.beginPath();
+          targetCtx.moveTo(-1, -13); targetCtx.lineTo(1, -18); targetCtx.lineTo(4, -13); targetCtx.fill();
+          targetCtx.fillStyle = C_PINK;
+          targetCtx.beginPath();
+          targetCtx.moveTo(0, -13); targetCtx.lineTo(1, -16); targetCtx.lineTo(3, -13); targetCtx.fill();
+
+          targetCtx.fillStyle = C_WHITE;
+          targetCtx.beginPath();
+          targetCtx.moveTo(4, -13); targetCtx.lineTo(6, -18); targetCtx.lineTo(8, -13); targetCtx.fill();
+
+          const isBlinking = (tSec % 4.2) < 0.16;
+          if (isBlinking) {
+            targetCtx.strokeStyle = C_EYE;
+            targetCtx.lineWidth = 1.2;
+            targetCtx.beginPath();
+            targetCtx.moveTo(0, -9); targetCtx.lineTo(2, -9);
+            targetCtx.moveTo(4, -9); targetCtx.lineTo(6, -9);
+            targetCtx.stroke();
+          } else {
+            targetCtx.fillStyle = C_EYE;
+            targetCtx.fillRect(0, -10, 2.2, 2.2);
+            targetCtx.fillRect(4, -10, 2.2, 2.2);
+            targetCtx.fillStyle = "#ffffff";
+            targetCtx.fillRect(0.5, -10.5, 1, 1);
+            targetCtx.fillRect(4.5, -10.5, 1, 1);
+          }
+
+          targetCtx.fillStyle = C_PINK;
+          targetCtx.fillRect(2, -7.5, 1.8, 1.5);
+          targetCtx.strokeStyle = "rgba(255, 255, 255, 0.8)";
+          targetCtx.lineWidth = 0.8;
+          targetCtx.beginPath();
+          targetCtx.moveTo(1, -7); targetCtx.lineTo(-4, -8);
+          targetCtx.moveTo(1, -6); targetCtx.lineTo(-4, -5);
+          targetCtx.moveTo(4, -7); targetCtx.lineTo(9, -8);
+          targetCtx.moveTo(4, -6); targetCtx.lineTo(9, -5);
+          targetCtx.stroke();
+
+          targetCtx.strokeStyle = C_ORANGE;
+          targetCtx.lineWidth = 2.5;
+          targetCtx.beginPath();
+          targetCtx.moveTo(-5, 6);
+          targetCtx.quadraticCurveTo(-14, 10, -10 + Math.sin(tSec * 3) * 4, 5);
+          targetCtx.stroke();
+        }
+
+        targetCtx.restore();
+      };
+
+      // Autonomous Mochi State Machine & Navigation
       const cat = catRef.current;
-      cat.tailAngle = Math.sin(timeSec * 4) * 0.4;
-      if (cat.timer > 0) {
-        cat.timer -= deltaTime;
-        if (cat.timer <= 0) {
-          cat.state = cat.state === "sleeping" ? "sitting" : "sleeping";
-          cat.timer = cat.state === "sleeping" ? 10 : 6;
+      const rb = roombaRef.current;
+
+      // 1. Avoid Roomba if it gets too close
+      const distToRoomba = Math.sqrt((cat.x - rb.x) ** 2 + (cat.y - rb.y) ** 2);
+      if (distToRoomba < 42 && cat.state !== "startled" && cat.state !== "pouncing") {
+        cat.state = "startled";
+        cat.timer = 2.0;
+        cat.actionDesc = "Kaget dilewati robot vacuum RamuBot! 🙀";
+        cat.message = "Mrowww! 🙀";
+        cat.messageTimer = 2.0;
+        const escapeDx = cat.x - rb.x >= 0 ? 60 : -60;
+        cat.targetX = Math.max(90, Math.min(610, cat.x + escapeDx));
+        cat.targetY = Math.max(130, Math.min(510, cat.y + (cat.y > 300 ? -45 : 45)));
+      }
+
+      // 2. Walking & Movement
+      if (cat.state === "walking") {
+        const dx = cat.targetX - cat.x;
+        const dy = cat.targetY - cat.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist > 3) {
+          cat.facingLeft = dx < 0;
+          const moveStep = Math.min(cat.speed * deltaTime, dist);
+          cat.x += (dx / dist) * moveStep;
+          cat.y += (dy / dist) * moveStep;
+        } else {
+          cat.x = cat.targetX;
+          cat.y = cat.targetY;
+
+          // Arrived at destination
+          const spot = CAT_SPOTS.find(s => Math.sqrt((s.x - cat.targetX) ** 2 + (s.y - cat.targetY) ** 2) < 25);
+          if (spot) {
+            cat.state = spot.preferredState;
+            cat.actionDesc = spot.desc;
+            cat.timer = spot.preferredState === "sleeping" ? 16 : (spot.preferredState === "eating" ? 7 : 5.5);
+
+            if (spot.name.includes("Sari")) {
+              cat.message = "Meong~ *purrr* Nemenin Sari bales chat WA! 🐱";
+              cat.messageTimer = 3.5;
+            } else if (spot.name.includes("Rama")) {
+              cat.message = "Mroww~ Nungguin GM Rama selesai meeting. ☕";
+              cat.messageTimer = 3.5;
+            } else if (spot.name.includes("Rian")) {
+              cat.message = "Ngeong~ *sniff* Kodingan Next.js aman bang Rian? 🐾";
+              cat.messageTimer = 3.5;
+            } else if (spot.name.includes("Makanan")) {
+              cat.message = "Nyam nyam... biskuit tuna terenak! 🐟";
+              cat.messageTimer = 3.0;
+            }
+          } else {
+            cat.state = "sitting";
+            cat.actionDesc = "Duduk santai sambil mengamati kantor ☕";
+            cat.timer = 5;
+          }
+        }
+      } else {
+        // 3. State Timer & Transitions
+        if (cat.timer > 0) {
+          cat.timer -= deltaTime;
+          if (cat.timer <= 0) {
+            if (cat.state === "sleeping") {
+              cat.state = "stretching";
+              cat.timer = 2.6;
+              cat.actionDesc = "Menggeliat bangun tidur & menguap manja nyaa~ 🐾";
+              cat.message = "Nyaaa~ *yawn* Bangun tidur siang... 🥱";
+              cat.messageTimer = 2.5;
+            } else if (cat.state === "stretching") {
+              cat.state = "grooming";
+              cat.timer = 4.2;
+              cat.actionDesc = "Menjilati bulu & merapikan kumis dengan telaten ✨";
+            } else if (cat.state === "butt_wiggle") {
+              cat.state = "pouncing";
+              cat.pounceProgress = 0;
+              cat.timer = 1.0;
+              cat.actionDesc = "Menerkam bayangan dengan lincah! 🎯";
+            } else if (cat.state === "pouncing") {
+              cat.state = "sitting";
+              cat.timer = 3.0;
+              cat.actionDesc = "Puas bermain, duduk anggun mengibaskan ekor 😸";
+            } else if (cat.state === "startled") {
+              cat.state = "walking";
+              cat.targetX = CAT_BED.x;
+              cat.targetY = CAT_BED.y;
+              cat.targetSpotName = "Kasur Mochi";
+              cat.actionDesc = "Menjauh dari vacuum, jalan ke tempat aman 🐾";
+            } else {
+              // 25% chance of a playful butt_wiggle & pounce if currently sitting
+              if (Math.random() < 0.25 && cat.state === "sitting") {
+                cat.state = "butt_wiggle";
+                cat.timer = 2.0;
+                cat.actionDesc = "Mengincar sesuatu... pantat bergoyang siap menerkam! 🐾";
+              } else {
+                const availableSpots = CAT_SPOTS.filter(s => Math.sqrt((s.x - cat.x) ** 2 + (s.y - cat.y) ** 2) > 35);
+                const nextSpot = availableSpots[Math.floor(Math.random() * availableSpots.length)];
+                cat.targetX = nextSpot.x;
+                cat.targetY = nextSpot.y;
+                cat.targetSpotName = nextSpot.name;
+                cat.state = "walking";
+                cat.actionDesc = `Sedang berjalan santai menuju ${nextSpot.name} 🐈`;
+              }
+            }
+          }
         }
       }
 
-      // Draw Mochi the Calico Cat
-      const cx = cat.x;
-      const cy = cat.y;
-      if (cat.state === "sleeping") {
-        // Curled ball with rhythmic breathing
-        const breath = Math.sin(timeSec * 3) * 0.8;
-        ctx.fillStyle = "#ea580c"; ctx.beginPath(); ctx.arc(cx, cy + breath, 9, 0, Math.PI * 2); ctx.fill(); // Orange patch
-        ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(cx - 3, cy + breath, 7, 0, Math.PI * 2); ctx.fill(); // White belly
-        ctx.fillStyle = "#1c1917"; ctx.beginPath(); ctx.arc(cx + 4, cy - 2 + breath, 5, 0, Math.PI * 2); ctx.fill(); // Black patch
-        // Tail tucked
-        ctx.strokeStyle = "#ea580c"; ctx.lineWidth = 2.5;
-        ctx.beginPath(); ctx.arc(cx, cy + breath, 11, Math.PI * 0.2, Math.PI * 0.9); ctx.stroke();
+      // Render Mochi
+      drawMochiCat(ctx, cat, timeSec, deltaTime);
 
-        // Floating "Zzz"
-        const zY = cy - 14 - ((timeSec * 12) % 20);
-        ctx.fillStyle = "#c084fc";
-        ctx.font = "bold 8px monospace";
-        ctx.textAlign = "center";
-        ctx.fillText("z Z", cx + 8, zY);
-      } else {
-        // Sitting upright, ears alert, tail wagging
-        ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.ellipse(cx, cy, 7, 10, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = "#ea580c"; ctx.beginPath(); ctx.arc(cx - 2, cy - 8, 6, 0, Math.PI * 2); ctx.fill(); // Head
-        // Ears
-        ctx.fillStyle = "#f472b6";
-        ctx.beginPath(); ctx.moveTo(cx - 6, cy - 12); ctx.lineTo(cx - 3, cy - 17); ctx.lineTo(cx, cy - 12); ctx.fill();
-        ctx.beginPath(); ctx.moveTo(cx, cy - 12); ctx.lineTo(cx + 3, cy - 17); ctx.lineTo(cx + 6, cy - 12); ctx.fill();
-        // Eyes
-        ctx.fillStyle = "#0f172a";
-        ctx.fillRect(cx - 4, cy - 9, 2, 2);
-        ctx.fillRect(cx + 2, cy - 9, 2, 2);
-        // Wagging tail
-        ctx.strokeStyle = "#ea580c"; ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.moveTo(cx + 4, cy + 6);
-        ctx.quadraticCurveTo(cx + 12 + Math.sin(timeSec * 6) * 4, cy + 2, cx + 14, cy - 6);
-        ctx.stroke();
-      }
-
-      // Floating hearts when clicked
-      cat.hearts.forEach((h, hIdx) => {
-        h.y -= deltaTime * 20;
+      // Floating hearts and notes
+      cat.hearts.forEach((h) => {
+        h.y -= deltaTime * 22;
         h.life -= deltaTime;
         ctx.fillStyle = `rgba(244, 63, 94, ${Math.max(0, h.life)})`;
-        ctx.font = "bold 10px monospace";
+        ctx.font = "bold 11px monospace";
         ctx.textAlign = "center";
-        ctx.fillText("❤️", h.x, h.y);
+        ctx.fillText(h.char || "❤️", h.x, h.y);
       });
       cat.hearts = cat.hearts.filter(h => h.life > 0);
 
       // Speech bubble for Mochi
       if (cat.messageTimer > 0) {
         cat.messageTimer -= deltaTime;
-        if (cat.message) drawSpeechBubble(cx, cy, cat.message, "#fdf2f8", "#be185d");
+        if (cat.message) drawSpeechBubble(cat.x, cat.y, cat.message, "#fdf2f8", "#be185d");
         if (cat.messageTimer <= 0) cat.message = null;
       }
 
       // RamuBot the Roomba Vacuum Logic
-      const rb = roombaRef.current;
       rb.y += rb.vy * deltaTime;
       if (rb.y > 440) { rb.y = 440; rb.vy = -Math.abs(rb.vy); }
       if (rb.y < 140) { rb.y = 140; rb.vy = Math.abs(rb.vy); }
@@ -1597,25 +2424,31 @@ export default function OfficeCanvas({
     // 3. Interactive Mochi the Cat click
     const cat = catRef.current;
     const catDist = Math.sqrt((x - cat.x) ** 2 + (y - cat.y) ** 2);
-    if (catDist < 24) {
+    if (catDist < 26) {
+      cat.state = "purring";
+      cat.timer = 5.0;
+      cat.actionDesc = "Mendengkur manja karena baru saja dielus hangat! 😻";
       const catQuotes = [
-        "Ngeong! 🐾 *purrr* Mochi suka aroma Gayo Anaerobic!",
-        "Meow! ❤️ Mengelus Mochi nambah hoki penjualan roastery!",
-        "Zzz... 🐱 Jangan berisik ya, Mochi lagi tidur siang.",
-        "Ngeong! ☕ Teman setia roaster Ramu sejak 2024!"
+        "Purrrrrr~ ❤️ Mochi suka banget dielus di dagu!",
+        "Ngeong! 🐾 Chief Happiness Officer Ramu siap menyemangati tim!",
+        "Meoww~ ✨ Aroma kopi Gayo & seduhan V60 bikin Mochi rileks.",
+        "Purrr purrr~ 😻 Hoki penjualan roastery naik 100% setelah elus Mochi!",
+        "Mroww! ☕ Mochi teman setia barista & roaster Ramu Coffee sejak hari pertama."
       ];
       cat.message = catQuotes[Math.floor(Math.random() * catQuotes.length)];
       cat.messageTimer = 3.5;
       cat.hearts.push(
-        { x: cat.x - 6, y: cat.y - 12, life: 1.5 },
-        { x: cat.x + 8, y: cat.y - 16, life: 1.8 }
+        { x: cat.x - 8, y: cat.y - 14, life: 2.0, char: "❤️" },
+        { x: cat.x + 8, y: cat.y - 18, life: 2.2, char: "💖" },
+        { x: cat.x, y: cat.y - 24, life: 1.8, char: "🐾" },
+        { x: cat.x + 12, y: cat.y - 12, life: 2.5, char: "🎵" }
       );
       if (onOfficeEvent) {
         onOfficeEvent({
           id: Math.random().toString(),
           time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
           speaker: "Mochi (Cat 🐱)",
-          message: "Ngeong! *purrr* Mochi mendengkur senang dielus.",
+          message: "Purrrr... Mochi mendengkur bahagia sambil menggesekkan pipinya ke tangan Anda.",
           type: "system"
         });
       }
@@ -1739,8 +2572,31 @@ export default function OfficeCanvas({
     // Prop check
     if (!foundAgent) {
       const cat = catRef.current;
-      if (Math.sqrt((x - cat.x) ** 2 + (y - cat.y) ** 2) < 24) {
-        setHoveredProp({ name: "Mochi", role: "Maskot Kucing Kantor", desc: "Kucing belang penyemangat tim Ramu.", emoji: "🐱" });
+      if (Math.sqrt((x - cat.x) ** 2 + (y - cat.y) ** 2) < 26) {
+        setHoveredProp({
+          name: "Mochi",
+          role: "Chief Happiness Officer 🐾",
+          desc: cat.actionDesc || "Kucing belang penyemangat tim Ramu.",
+          emoji: "🐱"
+        });
+        return;
+      }
+      if (Math.abs(x - CAT_BED.x) < 20 && Math.abs(y - CAT_BED.y) < 16) {
+        setHoveredProp({
+          name: "Kasur Mochi",
+          role: "Cat Bed Station",
+          desc: "Kasur bulu empuk motif pink favorit Mochi untuk tidur siang nyenyak.",
+          emoji: "🛏️"
+        });
+        return;
+      }
+      if (Math.abs(x - CAT_BOWL.x) < 20 && Math.abs(y - CAT_BOWL.y) < 14) {
+        setHoveredProp({
+          name: "Mangkuk Makanan Mochi",
+          role: "Cat Feeding Station",
+          desc: "Mangkuk keramik berisi air segar & biskuit ikan tuna salmon kesukaan Mochi.",
+          emoji: "🐟"
+        });
         return;
       }
       const rb = roombaRef.current;
