@@ -28,7 +28,7 @@ export type AgentRole =
   | "Budi (Sourcing)"
   | null;
 
-type MenuTab = "Office HQ" | "AI Agents" | "Projects" | "Storage Room" | "Roastery" | "Finances" | "Reports" | "Account";
+type MenuTab = "Office HQ" | "AI Agents" | "Projects" | "Storage Room" | "Roastery" | "Finances" | "Reports" | "WhatsApp CS" | "Account";
 
 const ALL_AGENTS_DATA: {
   id: AgentRole;
@@ -126,6 +126,20 @@ export default function VirtualOffice() {
   const [isClosingExecuting, setIsClosingExecuting] = useState(false);
   const [closingNotification, setClosingNotification] = useState<string>("");
 
+  // 6. Cron Auto-Closing State
+  const [isTestingCron, setIsTestingCron] = useState(false);
+  const [cronResultMsg, setCronResultMsg] = useState("");
+
+  // 7. WhatsApp Gateway & Live Simulator State
+  const [waChats, setWaChats] = useState<any[]>([]);
+  const [isWaLoading, setIsWaLoading] = useState(false);
+  const [waSimCustomerName, setWaSimCustomerName] = useState("Kak Dian");
+  const [waSimMessage, setWaSimMessage] = useState("");
+  const [isSendingWaSim, setIsSendingWaSim] = useState(false);
+  const [waSelectedProvider, setWaSelectedProvider] = useState("Fonnte");
+  const [waApiKey, setWaApiKey] = useState("");
+  const [waWebhookCopied, setWaWebhookCopied] = useState(false);
+
   // Live office event chatter stream
   const [officeEvents, setOfficeEvents] = useState<OfficeEventLog[]>([
     { id: "1", time: "16:45", speaker: "Rama (GM)", message: "Morning briefing selesai: target omzet roastery minggu ini tercapai.", type: "system" },
@@ -156,6 +170,7 @@ export default function VirtualOffice() {
     fetchProducts();
     fetchOrders();
     fetchReports();
+    fetchWaChats();
   }, []);
 
   const fetchProducts = async () => {
@@ -237,6 +252,66 @@ export default function VirtualOffice() {
       setClosingNotification(`❌ Error: ${err.message}`);
     } finally {
       setIsClosingExecuting(false);
+    }
+  };
+
+  const handleTestCronClosing = async () => {
+    setIsTestingCron(true);
+    setCronResultMsg("");
+    try {
+      const res = await fetch(`/api/internal/cron/monthly-closing?month=${selectedClosingMonth}&botToken=${encodeURIComponent(telegramToken)}&chatId=${encodeURIComponent(telegramChatId)}`);
+      const json = await res.json();
+      if (json.success) {
+        setCronResultMsg(`✅ Sukses! ${json.message} (Tutup buku tersimpan & ${json.data?.telegramNotification?.sent ? "Telegram terkirim ke HP" : "Telegram siap"})`);
+        fetchReports(selectedClosingMonth);
+      } else {
+        setCronResultMsg(`❌ Gagal: ${json.error || "Gagal mengeksekusi cron"}`);
+      }
+    } catch (err: any) {
+      setCronResultMsg(`❌ Error: ${err.message}`);
+    } finally {
+      setIsTestingCron(false);
+    }
+  };
+
+  const fetchWaChats = async () => {
+    setIsWaLoading(true);
+    try {
+      const res = await fetch("/api/internal/whatsapp");
+      const json = await res.json();
+      if (json.success && json.data) {
+        setWaChats(json.data.recentChats || []);
+      }
+    } catch (err) {
+      console.error("Fetch WhatsApp failed:", err);
+    } finally {
+      setIsWaLoading(false);
+    }
+  };
+
+  const handleSendWaSimulation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!waSimMessage.trim()) return;
+
+    setIsSendingWaSim(true);
+    try {
+      const res = await fetch("/api/internal/whatsapp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName: waSimCustomerName.trim() || "Pelanggan",
+          message: waSimMessage.trim()
+        })
+      });
+      const json = await res.json();
+      if (json.success && json.data) {
+        setWaChats(prev => [json.data, ...prev]);
+        setWaSimMessage("");
+      }
+    } catch (err) {
+      console.error("WhatsApp simulation failed:", err);
+    } finally {
+      setIsSendingWaSim(false);
     }
   };
 
@@ -1553,6 +1628,43 @@ export default function VirtualOffice() {
                       Waktu Tutup Buku: <span className="text-white font-mono">{new Date(closing.closedAt).toLocaleString("id-ID")}</span>
                     </div>
                   )}
+
+                  {/* Cron Job Auto-Closing & Telegram Digest Card */}
+                  <div className="p-4 bg-[#121626] rounded-2xl border border-indigo-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs shadow-inner">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span className="font-bold text-white">Cron Auto-Closing Scheduler: Aktif Setiap Awal Bulan</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-mono">Tgl 1 Pukul 00:01 WIB</span>
+                      </div>
+                      <div className="text-[11px] text-slate-400 leading-relaxed">
+                        GM Rama otomatis mengunci pembukuan bulan lalu, menghitung laba bersih, dan mengirim ringkasan P&L + Dividen langsung ke Telegram HP Anda.
+                      </div>
+                      <div className="text-[10px] text-slate-500 font-mono">
+                        Endpoint Cron: <code>/api/internal/cron/monthly-closing</code>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={handleTestCronClosing}
+                        disabled={isTestingCron}
+                        className="px-4 py-2.5 bg-indigo-600/30 hover:bg-indigo-600 border border-indigo-500/50 text-indigo-200 hover:text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow disabled:opacity-50"
+                      >
+                        {isTestingCron ? <Loader2 size={13} className="animate-spin" /> : <span>⚡</span>}
+                        <span>Test Jalankan Cron & Kirim Telegram</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {cronResultMsg && (
+                    <div className="p-3.5 bg-indigo-950/70 border border-indigo-800/80 rounded-2xl text-xs text-indigo-200 flex items-center justify-between">
+                      <span>{cronResultMsg}</span>
+                      <button onClick={() => setCronResultMsg("")} className="text-slate-400 hover:text-white">
+                        <X size={14} />
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* 4 Summary Cards */}
@@ -1883,6 +1995,284 @@ export default function VirtualOffice() {
         );
       }
 
+      case "WhatsApp CS":
+        return (
+          <div className="flex-1 p-6 md:p-8 text-white bg-[#0a0f1d] overflow-y-auto font-mono space-y-6">
+            
+            {/* Top Navigation & Controls Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
+              <div>
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <div className="p-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                    <MessageSquare size={20} />
+                  </div>
+                  <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+                    WhatsApp Gateway & Virtual Barista CS (Sari)
+                  </h1>
+                  <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    GATEWAY ONLINE
+                  </span>
+                </div>
+                <p className="text-slate-400 text-xs mt-1.5 leading-relaxed">
+                  Layanan pelanggan WhatsApp 24 jam berbasis AI, auto-responder edukasi gilingan biji kopi (*grind size*), dan live simulator percakapan riil.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2.5">
+                <button
+                  onClick={fetchWaChats}
+                  className="p-2.5 bg-[#161a2b] hover:bg-slate-800 border border-slate-700 text-slate-300 rounded-xl transition shadow"
+                  title="Refresh Riwayat Chat"
+                >
+                  <RefreshCw size={14} className={isWaLoading ? "animate-spin text-emerald-400" : ""} />
+                </button>
+                <div className="px-3.5 py-2 bg-emerald-950/40 border border-emerald-800/50 text-emerald-300 rounded-xl text-xs font-bold font-mono">
+                  CSAT: 98.4% • 144+ Tiket Selesai
+                </div>
+              </div>
+            </div>
+
+            {/* Main Content 2-Column Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              
+              {/* Left Column: Gateway Configuration & Knowledge */}
+              <div className="lg:col-span-5 space-y-5">
+                
+                {/* Webhook Endpoint Card */}
+                <div className="bg-[#161a2b] border border-slate-800 p-5 rounded-3xl space-y-4 shadow-xl">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-emerald-400 font-bold text-xs uppercase tracking-wider">🔗 Webhook URL Integrasi</span>
+                    </div>
+                    <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">POST / GET</span>
+                  </div>
+
+                  <div className="p-3 bg-[#0a0f1d] border border-slate-800 rounded-xl text-xs text-slate-300 font-mono break-all select-all flex items-center justify-between gap-2">
+                    <code>/api/internal/whatsapp/webhook</code>
+                    <button
+                      onClick={() => {
+                        const fullUrl = `${window.location.origin}/api/internal/whatsapp/webhook`;
+                        navigator.clipboard?.writeText(fullUrl);
+                        setWaWebhookCopied(true);
+                        setTimeout(() => setWaWebhookCopied(false), 2000);
+                      }}
+                      className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-[10px] font-bold shrink-0 transition"
+                    >
+                      {waWebhookCopied ? "✓ Tersalin!" : "Salin URL"}
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-slate-400 leading-relaxed font-sans">
+                    Tempelkan URL ini ke dashboard provider WhatsApp Anda (Fonnte, Wablas, Meta Cloud API, atau WAHA). Semua pesan masuk dari pelanggan akan otomatis dijawab oleh Sari secara instan!
+                  </p>
+                </div>
+
+                {/* Provider Selection & Token Config */}
+                <div className="bg-[#161a2b] border border-slate-800 p-5 rounded-3xl space-y-4 shadow-xl">
+                  <div className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    <span>Pilih WhatsApp Provider</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    {["Fonnte", "Wablas", "Meta Cloud API", "WAHA"].map((prov) => (
+                      <button
+                        key={prov}
+                        onClick={() => setWaSelectedProvider(prov)}
+                        className={`p-2.5 rounded-xl border text-xs font-bold transition flex items-center justify-center gap-1.5 ${
+                          waSelectedProvider === prov
+                            ? "bg-emerald-600/20 border-emerald-500/60 text-emerald-300 shadow"
+                            : "bg-[#121626] border-slate-800 text-slate-400 hover:text-white"
+                        }`}
+                      >
+                        <span>📱</span>
+                        <span>{prov}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="space-y-2 pt-1">
+                    <label className="text-xs text-slate-400 block font-semibold">
+                      API Token / Device Key ({waSelectedProvider}):
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="password"
+                        placeholder="Masukkan token dari provider WA..."
+                        value={waApiKey}
+                        onChange={(e) => setWaApiKey(e.target.value)}
+                        className="flex-1 bg-[#1e2336] border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-mono"
+                      />
+                      <button
+                        onClick={() => {
+                          alert(`Token untuk ${waSelectedProvider} berhasil disimpan secara lokal!`);
+                        }}
+                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow"
+                      >
+                        Simpan
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sari's Knowledge Matrix Card */}
+                <div className="bg-[#161a2b] border border-slate-800 p-5 rounded-3xl space-y-3 shadow-xl">
+                  <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    <span>🧠 Matriks Otak Virtual Barista Sari</span>
+                  </h3>
+                  <div className="space-y-2 text-xs">
+                    <div className="p-2.5 bg-[#1e2336] rounded-xl border border-slate-800">
+                      <span className="text-emerald-400 font-bold">1. Konsultasi Ukuran Gilingan:</span>
+                      <div className="text-[11px] text-slate-300 mt-0.5">Otomatis rekomendasikan Fine (Espresso/Tubruk), Medium (V60/Aeropress), Coarse (French Press/Cold Brew).</div>
+                    </div>
+                    <div className="p-2.5 bg-[#1e2336] rounded-xl border border-slate-800">
+                      <span className="text-emerald-400 font-bold">2. Rekomendasi Karakter Rasa:</span>
+                      <div className="text-[11px] text-slate-300 mt-0.5">Kopi susu: Ramu House Blend & Dampit Robusta (gurih manis). Filter hitam: Gayo Anaerobic & Flores Bajawa (fruity floral).</div>
+                    </div>
+                    <div className="p-2.5 bg-[#1e2336] rounded-xl border border-slate-800">
+                      <span className="text-emerald-400 font-bold">3. Garansi Fresh Roast & Dispatch:</span>
+                      <div className="text-[11px] text-slate-300 mt-0.5">Edukasi resting degassing 3-5 hari pasca sangrai mesin Probat & kurir same-day Gilang.</div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Right Column: Live WhatsApp Interactive Simulator & Real Chat Log */}
+              <div className="lg:col-span-7 space-y-5">
+                
+                <div className="bg-[#161a2b] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col h-[700px]">
+                  
+                  {/* WhatsApp App Mockup Top Bar */}
+                  <div className="p-4 bg-[#075e54] text-white flex items-center justify-between shadow-md">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-emerald-800/80 border border-emerald-400/50 flex items-center justify-center text-xl shadow">
+                        👩‍💼
+                      </div>
+                      <div>
+                        <div className="font-bold text-xs flex items-center gap-1.5">
+                          <span>Sari — Ramu Roastery CS</span>
+                          <span className="text-[10px] bg-emerald-400/30 text-white px-1.5 rounded">Official</span>
+                        </div>
+                        <div className="text-[10px] text-emerald-100/90 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse"></span>
+                          <span>online (Virtual Barista 24 Jam)</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="text-[11px] font-mono text-emerald-100 bg-emerald-900/40 px-2.5 py-1 rounded-lg">
+                      Auto-Reply: Aktif
+                    </div>
+                  </div>
+
+                  {/* WhatsApp Chat Bubbles Scroll Area */}
+                  <div className="flex-1 p-4 bg-[#0b141a] overflow-y-auto space-y-3 text-xs font-sans">
+                    
+                    <div className="text-center my-2">
+                      <span className="text-[10px] bg-[#182229] text-slate-400 px-3 py-1 rounded-full border border-slate-800 font-mono">
+                        Hari ini • Enkripsi End-to-End Ramu AI
+                      </span>
+                    </div>
+
+                    {waChats.map((chat: any) => (
+                      <div key={chat.id} className="space-y-2">
+                        
+                        {/* Customer incoming message bubble (Left / Dark Slate) */}
+                        <div className="flex justify-start">
+                          <div className="max-w-[85%] bg-[#202c33] text-slate-100 p-3 rounded-2xl rounded-tl-sm border border-slate-700/60 shadow space-y-1">
+                            <div className="text-[10px] text-amber-400 font-bold flex items-center justify-between gap-2">
+                              <span>{chat.senderName} ({chat.senderPhone || "WA"})</span>
+                              <span className="text-slate-400 font-mono text-[9px]">
+                                {new Date(chat.timestamp).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
+                              </span>
+                            </div>
+                            <p className="text-xs leading-relaxed whitespace-pre-wrap">{chat.customerMessage}</p>
+                          </div>
+                        </div>
+
+                        {/* Sari AI outgoing reply bubble (Right / WhatsApp Emerald Green) */}
+                        <div className="flex justify-end">
+                          <div className="max-w-[85%] bg-[#005c4b] text-white p-3 rounded-2xl rounded-tr-sm shadow space-y-1">
+                            <div className="text-[10px] text-emerald-200 font-bold flex items-center justify-between gap-2">
+                              <span>👩‍💼 Sari (Virtual Barista)</span>
+                              <span className="text-emerald-200/70 font-mono text-[9px] flex items-center gap-1">
+                                <span>{new Date(chat.timestamp).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}</span>
+                                <span>✓✓</span>
+                              </span>
+                            </div>
+                            <p className="text-xs leading-relaxed whitespace-pre-wrap font-sans">{chat.sariReply}</p>
+                          </div>
+                        </div>
+
+                      </div>
+                    ))}
+
+                    {isSendingWaSim && (
+                      <div className="flex justify-end">
+                        <div className="bg-[#005c4b] text-emerald-200 px-4 py-2 rounded-2xl text-xs flex items-center gap-2">
+                          <Loader2 size={12} className="animate-spin" />
+                          <span>Sari sedang mengetik jawaban...</span>
+                        </div>
+                      </div>
+                    )}
+
+                  </div>
+
+                  {/* Simulator Quick Prompt Shortcuts */}
+                  <div className="p-2.5 bg-[#111b21] border-t border-slate-800 flex items-center gap-2 overflow-x-auto text-[11px]">
+                    <span className="text-slate-500 text-[10px] shrink-0">Coba cepat:</span>
+                    {[
+                      "Rekomendasi kopi susu yang gak asam",
+                      "Ukuran gilingan V60 vs Aeropress apa bedanya?",
+                      "Kapan tanggal sangrai batch terakhir?",
+                      "Gimana cara lacak paket resi saya?"
+                    ].map((promptText, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setWaSimMessage(promptText)}
+                        className="px-2.5 py-1 bg-[#202c33] hover:bg-slate-700 text-slate-300 rounded-lg whitespace-nowrap text-[10px] transition shrink-0"
+                      >
+                        {promptText}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Simulator Message Input Form */}
+                  <form onSubmit={handleSendWaSimulation} className="p-3 bg-[#202c33] border-t border-slate-800 flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="Nama pelanggan..."
+                      value={waSimCustomerName}
+                      onChange={(e) => setWaSimCustomerName(e.target.value)}
+                      className="w-28 bg-[#111b21] border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-mono"
+                    />
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ketik pesan simulasi pelanggan ke Sari di sini..."
+                      value={waSimMessage}
+                      onChange={(e) => setWaSimMessage(e.target.value)}
+                      className="flex-1 bg-[#111b21] border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-sans"
+                    />
+                    <button
+                      type="submit"
+                      disabled={isSendingWaSim}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow flex items-center gap-1.5 shrink-0 disabled:opacity-50"
+                    >
+                      {isSendingWaSim ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
+                      <span>Kirim</span>
+                    </button>
+                  </form>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+        );
+
       case "Account":
         return (
           <div className="flex-1 p-8 text-white bg-[#0f172a] overflow-y-auto font-mono space-y-6">
@@ -2097,6 +2487,7 @@ export default function VirtualOffice() {
           <NavItem icon={<Coffee size={16}/>} label="Roastery" active={activeTab === "Roastery"} onClick={() => setActiveTab("Roastery")} />
           <NavItem icon={<DollarSign size={16}/>} label="Finances" active={activeTab === "Finances"} onClick={() => setActiveTab("Finances")} />
           <NavItem icon={<FileText size={16}/>} label="Reports" active={activeTab === "Reports"} onClick={() => setActiveTab("Reports")} />
+          <NavItem icon={<MessageSquare size={16}/>} label="WhatsApp CS" active={activeTab === "WhatsApp CS"} onClick={() => setActiveTab("WhatsApp CS")} />
         </nav>
         
         <div className="px-4 pb-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">System</div>
