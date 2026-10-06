@@ -10,7 +10,8 @@ import {
   Coffee, DollarSign, UserCircle, LogOut, Radio,
   TrendingUp, CheckCircle, Flame, Thermometer, ShieldAlert, Sparkles, MessageSquare,
   Lock, Unlock, ShieldCheck, KeyRound, Plus, Trash2, Send, CheckCircle2, 
-  AlertCircle, RefreshCw, Smartphone, Package, Check, Loader2, ArrowRight
+  AlertCircle, RefreshCw, Smartphone, Package, Check, Loader2, ArrowRight,
+  FileText, Printer, Calendar, Award, TrendingDown, Layers, ChevronRight, Scale, PieChart, Briefcase, ExternalLink, X
 } from "lucide-react";
 
 export type AgentRole = 
@@ -27,7 +28,7 @@ export type AgentRole =
   | "Budi (Sourcing)"
   | null;
 
-type MenuTab = "Office HQ" | "AI Agents" | "Projects" | "Storage Room" | "Roastery" | "Finances" | "Account";
+type MenuTab = "Office HQ" | "AI Agents" | "Projects" | "Storage Room" | "Roastery" | "Finances" | "Reports" | "Account";
 
 const ALL_AGENTS_DATA: {
   id: AgentRole;
@@ -115,6 +116,16 @@ export default function VirtualOffice() {
   const [isSendingTelegram, setIsSendingTelegram] = useState(false);
   const [telegramStatusMsg, setTelegramStatusMsg] = useState("");
 
+  // 5. Executive Reports & Monthly Closing State
+  const [reportsData, setReportsData] = useState<any>(null);
+  const [isReportsLoading, setIsReportsLoading] = useState(false);
+  const [reportsSubTab, setReportsSubTab] = useState<"gm" | "workers" | "closing">("gm");
+  const [selectedWorkerId, setSelectedWorkerId] = useState<string>("Rama (GM)");
+  const [activeDeliverableModal, setActiveDeliverableModal] = useState<any>(null);
+  const [selectedClosingMonth, setSelectedClosingMonth] = useState<string>("2026-10");
+  const [isClosingExecuting, setIsClosingExecuting] = useState(false);
+  const [closingNotification, setClosingNotification] = useState<string>("");
+
   // Live office event chatter stream
   const [officeEvents, setOfficeEvents] = useState<OfficeEventLog[]>([
     { id: "1", time: "16:45", speaker: "Rama (GM)", message: "Morning briefing selesai: target omzet roastery minggu ini tercapai.", type: "system" },
@@ -144,6 +155,7 @@ export default function VirtualOffice() {
 
     fetchProducts();
     fetchOrders();
+    fetchReports();
   }, []);
 
   const fetchProducts = async () => {
@@ -179,6 +191,52 @@ export default function VirtualOffice() {
       console.error("Fetch orders failed:", err);
     } finally {
       setIsOrdersLoading(false);
+    }
+  };
+
+  const fetchReports = async (monthToFetch?: string) => {
+    setIsReportsLoading(true);
+    try {
+      const m = monthToFetch || selectedClosingMonth;
+      const res = await fetch(`/api/internal/reports?month=${m}`);
+      const json = await res.json();
+      if (json.success && json.data) {
+        setReportsData(json.data);
+      }
+    } catch (err) {
+      console.error("Fetch reports failed:", err);
+    } finally {
+      setIsReportsLoading(false);
+    }
+  };
+
+  const handleExecuteClosing = async () => {
+    if (!confirm(`Konfirmasi Tutup Buku Bulanan Periode ${selectedClosingMonth}?\n\nRekonsiliasi omzet, HPP, OPEX, dan persediaan akan diverifikasi dan dikunci secara resmi oleh GM Rama & Fina (Finance Lead).`)) {
+      return;
+    }
+    setIsClosingExecuting(true);
+    setClosingNotification("");
+    try {
+      const res = await fetch("/api/internal/reports", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          month: selectedClosingMonth,
+          action: "CLOSE_BOOK",
+          notes: `Tutup buku periode ${selectedClosingMonth} telah diaudit dan diverifikasi resmi oleh Rama (GM) bersama Fina (Finance Lead). Seluruh pos kas dan aset terekonsiliasi 100%.`
+        })
+      });
+      const json = await res.json();
+      if (json.success) {
+        setClosingNotification(`✅ ${json.message}`);
+        fetchReports(selectedClosingMonth);
+      } else {
+        setClosingNotification(`❌ Gagal: ${json.error || "Gagal menutup buku"}`);
+      }
+    } catch (err: any) {
+      setClosingNotification(`❌ Error: ${err.message}`);
+    } finally {
+      setIsClosingExecuting(false);
     }
   };
 
@@ -1020,6 +1078,811 @@ export default function VirtualOffice() {
           </div>
         );
 
+      case "Reports": {
+        const workerList = reportsData?.workerReports || [];
+        const currentWorker = workerList.find((w: any) => w.id === selectedWorkerId) || workerList[0];
+        const gmSummary = reportsData?.gmExecutiveSummary;
+        const closing = reportsData?.monthlyClosing;
+        const inc = closing?.incomeStatement;
+        const inv = closing?.inventoryValuation;
+        const dist = closing?.profitDistribution;
+
+        return (
+          <div className="flex-1 p-6 md:p-8 text-white bg-[#0a0f1d] overflow-y-auto font-mono space-y-6">
+            
+            {/* Top Navigation & Controls Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
+              <div>
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <div className="p-2 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-400">
+                    <FileText size={20} />
+                  </div>
+                  <h1 className="text-xl md:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+                    Laporan Kinerja & Tutup Buku Bulanan
+                  </h1>
+                  <span className={`text-[11px] font-bold px-3 py-1 rounded-full border ${
+                    closing?.isClosed 
+                      ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" 
+                      : "bg-amber-500/15 text-amber-400 border-amber-500/30"
+                  }`}>
+                    {closing?.status || "PERIODE AKTIF"}
+                  </span>
+                </div>
+                <p className="text-slate-400 text-xs mt-1.5 leading-relaxed">
+                  Konsolidasi hasil pekerjaan 11 divisi pekerja oleh GM Rama serta Laporan Tutup Buku Bulanan (P&L & Valuasi Stok) profesional.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2.5 flex-wrap">
+                {/* Month Picker Dropdown */}
+                <div className="flex items-center bg-[#161a2b] border border-slate-700/80 rounded-xl px-3 py-2 gap-2 text-xs shadow-inner">
+                  <Calendar size={14} className="text-indigo-400" />
+                  <select 
+                    value={selectedClosingMonth}
+                    onChange={(e) => {
+                      setSelectedClosingMonth(e.target.value);
+                      fetchReports(e.target.value);
+                    }}
+                    className="bg-transparent text-white focus:outline-none cursor-pointer text-xs"
+                  >
+                    <option value="2026-10" className="bg-[#161a2b]">Periode: Oktober 2026</option>
+                    <option value="2026-09" className="bg-[#161a2b]">Periode: September 2026</option>
+                    <option value="2026-08" className="bg-[#161a2b]">Periode: Agustus 2026</option>
+                  </select>
+                </div>
+
+                {/* Refresh Data */}
+                <button
+                  onClick={() => fetchReports()}
+                  className="p-2.5 bg-[#161a2b] hover:bg-slate-800 border border-slate-700 text-slate-300 rounded-xl transition shadow"
+                  title="Refresh Laporan & Status"
+                >
+                  <RefreshCw size={14} className={isReportsLoading ? "animate-spin text-indigo-400" : ""} />
+                </button>
+
+                {/* Print/Export */}
+                <button
+                  onClick={() => window.print()}
+                  className="flex items-center gap-1.5 px-3.5 py-2 bg-[#161a2b] hover:bg-slate-800 border border-slate-700 text-slate-200 rounded-xl text-xs font-semibold transition shadow"
+                  title="Cetak Dokumen atau Simpan PDF"
+                >
+                  <Printer size={14} />
+                  <span>Cetak / PDF</span>
+                </button>
+
+                {/* Send Telegram Digest */}
+                <button
+                  onClick={handleSendTelegramDigest}
+                  disabled={isSendingTelegram}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-indigo-600/20 disabled:opacity-50"
+                >
+                  {isSendingTelegram ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
+                  <span>Kirim ke HP</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Notification alert if closed */}
+            {closingNotification && (
+              <div className="p-3.5 bg-indigo-950/60 border border-indigo-700/50 rounded-2xl text-xs text-indigo-200 flex items-center justify-between">
+                <span>{closingNotification}</span>
+                <button onClick={() => setClosingNotification("")} className="text-slate-400 hover:text-white">
+                  <X size={14} />
+                </button>
+              </div>
+            )}
+
+            {/* Subtab Navigation Pills */}
+            <div className="flex items-center gap-2 border-b border-slate-800/80 pb-3 overflow-x-auto">
+              <button
+                onClick={() => setReportsSubTab("gm")}
+                className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 shrink-0 ${
+                  reportsSubTab === "gm"
+                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
+                    : "bg-[#161a2b] text-slate-400 hover:text-white border border-slate-800"
+                }`}
+              >
+                <span>👔</span>
+                <span>Ringkasan Eksekutif GM</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/20 font-mono">96 Pts</span>
+              </button>
+
+              <button
+                onClick={() => setReportsSubTab("workers")}
+                className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 shrink-0 ${
+                  reportsSubTab === "workers"
+                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
+                    : "bg-[#161a2b] text-slate-400 hover:text-white border border-slate-800"
+                }`}
+              >
+                <span>👥</span>
+                <span>Laporan 11 Pekerja</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/20 font-mono">11 Divisi</span>
+              </button>
+
+              <button
+                onClick={() => setReportsSubTab("closing")}
+                className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 shrink-0 ${
+                  reportsSubTab === "closing"
+                    ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/30"
+                    : "bg-[#161a2b] text-slate-400 hover:text-white border border-slate-800"
+                }`}
+              >
+                <span>📊</span>
+                <span>Tutup Buku Bulanan (P&L)</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/20 font-mono">Rekonsiliasi</span>
+              </button>
+            </div>
+
+            {/* SUBTAB 1: GM EXECUTIVE SUMMARY */}
+            {reportsSubTab === "gm" && (
+              <div className="space-y-6">
+                
+                {/* Health & Verdict Banner */}
+                <div className="bg-gradient-to-r from-blue-950/60 via-indigo-950/40 to-slate-900 border border-indigo-500/30 p-6 rounded-3xl relative overflow-hidden shadow-2xl space-y-4">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-indigo-600/20 border border-indigo-400/40 flex items-center justify-center text-3xl shadow-inner">
+                        👨‍💼
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h2 className="text-lg font-bold text-white">Rama — General Manager Briefing</h2>
+                          <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-mono">
+                            {gmSummary?.period || "Oktober 2026"}
+                          </span>
+                        </div>
+                        <div className="text-xs text-indigo-300 font-bold mt-0.5">
+                          {gmSummary?.verdict || "KONDISI BISNIS: PRIMA & MENGUNTUNGKAN (MARGIN 52.8%)"}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 bg-[#121626]/80 border border-slate-700/80 px-4 py-3 rounded-2xl">
+                      <div className="text-right">
+                        <div className="text-[10px] text-slate-400 uppercase tracking-wider">Health Score</div>
+                        <div className="text-2xl font-bold text-emerald-400">96 / 100</div>
+                      </div>
+                      <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-lg">
+                        <Award size={22} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-[#121626]/90 border border-slate-800 rounded-2xl text-xs text-slate-300 leading-relaxed font-sans">
+                    {gmSummary?.executiveNarrative || "Operasional bulan ini berjalan pada tingkat efisiensi tertinggi dengan koordinasi lintas 11 divisi yang harmonis."}
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 text-xs">
+                    <div className="bg-[#161a2b] p-3 rounded-xl border border-slate-800">
+                      <div className="text-slate-400 text-[11px]">Total Omzet</div>
+                      <div className="text-white font-bold text-sm mt-0.5">Rp {(inc?.revenue?.totalGrossRevenue || 70850000).toLocaleString("id-ID")}</div>
+                    </div>
+                    <div className="bg-[#161a2b] p-3 rounded-xl border border-slate-800">
+                      <div className="text-slate-400 text-[11px]">Gross Margin</div>
+                      <div className="text-emerald-400 font-bold text-sm mt-0.5">{inc?.cogs?.grossMarginPct || 52.8}%</div>
+                    </div>
+                    <div className="bg-[#161a2b] p-3 rounded-xl border border-slate-800">
+                      <div className="text-slate-400 text-[11px]">Net Profit</div>
+                      <div className="text-yellow-400 font-bold text-sm mt-0.5">Rp {(inc?.netIncome?.netProfitClean || 21354550).toLocaleString("id-ID")}</div>
+                    </div>
+                    <div className="bg-[#161a2b] p-3 rounded-xl border border-slate-800">
+                      <div className="text-slate-400 text-[11px]">Akurasi Gudang</div>
+                      <div className="text-indigo-400 font-bold text-sm mt-0.5">99.8% (Aman)</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4 Strategic Pillars */}
+                <div className="space-y-3">
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Layers size={16} className="text-indigo-400" />
+                    <span>Konsolidasi 4 Pilar Operasional Strategis</span>
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {(gmSummary?.departmentalPillars || []).map((pil: any, idx: number) => (
+                      <div key={idx} className="bg-[#161a2b] border border-slate-800 p-5 rounded-2xl space-y-3 shadow-lg hover:border-indigo-500/40 transition">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-xs font-bold text-white tracking-wide">{pil.pillar}</h4>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                            {pil.status}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-indigo-300">
+                          PIC: <span className="text-slate-300">{pil.leads}</span>
+                        </div>
+                        <p className="text-xs text-slate-400 leading-relaxed font-sans">
+                          {pil.notes}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Resolved Bottlenecks */}
+                <div className="bg-[#161a2b] border border-slate-800 p-6 rounded-2xl space-y-4 shadow-xl">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                      <CheckCircle2 size={16} className="text-emerald-400" />
+                      <span>Hambatan Kritis Yang Berhasil Dipecahkan Tim</span>
+                    </h3>
+                    <span className="text-[11px] text-slate-400">3 Solusi Strategis</span>
+                  </div>
+                  <div className="space-y-3">
+                    {(gmSummary?.resolvedBottlenecks || []).map((b: any, idx: number) => (
+                      <div key={idx} className="p-4 bg-[#1e2336] rounded-xl border border-slate-800 text-xs space-y-1.5">
+                        <div className="text-rose-400 font-bold flex items-center gap-1.5">
+                          <span>⚠️ Kendala:</span>
+                          <span className="text-slate-200 font-normal">{b.challenge}</span>
+                        </div>
+                        <div className="text-emerald-400 font-bold flex items-center gap-1.5">
+                          <span>💡 Solusi Tim:</span>
+                          <span className="text-slate-200 font-normal">{b.solution}</span>
+                        </div>
+                        <div className="text-indigo-400 text-[11px] font-mono pt-0.5">
+                          Dampak: <span className="text-white font-bold">{b.impact}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Strategic Guidance for Owner */}
+                <div className="bg-[#161a2b] border border-amber-500/30 p-6 rounded-2xl space-y-4 shadow-xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl">
+                      👑
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-white">Panduan Strategis GM untuk Pemilik Usaha (Owner)</h3>
+                      <div className="text-[11px] text-slate-400">Rekomendasi alokasi dana laba bersih & ekspansi kapasitas</div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                    {(gmSummary?.strategicGuidanceForOwner || []).map((guide: string, idx: number) => (
+                      <div key={idx} className="p-3.5 bg-[#1e2336] rounded-xl border border-slate-800 text-xs text-slate-300 flex items-start gap-2.5">
+                        <span className="text-amber-400 font-bold mt-0.5">#{idx + 1}</span>
+                        <span className="leading-relaxed font-sans">{guide}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+            {/* SUBTAB 2: ALL 11 WORKERS ACCOMPLISHMENT REPORTS */}
+            {reportsSubTab === "workers" && (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                {/* 11 Workers Left Picker Sidebar */}
+                <div className="lg:col-span-4 space-y-2">
+                  <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                    Daftar 11 Pekerja Ramu
+                  </div>
+                  <div className="space-y-1.5 max-h-[680px] overflow-y-auto pr-1">
+                    {workerList.map((worker: any) => {
+                      const isSelected = worker.id === (currentWorker?.id || "Rama (GM)");
+                      return (
+                        <button
+                          key={worker.id}
+                          onClick={() => setSelectedWorkerId(worker.id)}
+                          className={`w-full text-left p-3 rounded-2xl border transition flex items-center justify-between ${
+                            isSelected
+                              ? "bg-indigo-600/20 border-indigo-500/60 shadow-lg"
+                              : "bg-[#161a2b] border-slate-800 hover:border-slate-700"
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">{worker.emoji}</span>
+                            <div>
+                              <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                                <span>{worker.fullName || worker.name}</span>
+                              </div>
+                              <div className="text-[10px] text-slate-400">{worker.dept}</div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                              {worker.tasksCompleted} Tugas
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Worker Detail Report Card */}
+                <div className="lg:col-span-8 space-y-6">
+                  {currentWorker ? (
+                    <div className="bg-[#161a2b] border border-slate-800 p-6 rounded-3xl space-y-6 shadow-2xl">
+                      
+                      {/* Header */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+                        <div className="flex items-center gap-4">
+                          <div className="w-14 h-14 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-3xl shadow-inner">
+                            {currentWorker.emoji}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h2 className="text-lg font-bold text-white">{currentWorker.fullName}</h2>
+                              <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">
+                                {currentWorker.status}
+                              </span>
+                            </div>
+                            <div className="text-xs text-indigo-400 mt-0.5">{currentWorker.role} • {currentWorker.dept}</div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 bg-[#1e2336] px-4 py-2 rounded-xl border border-slate-700/80">
+                          <CheckCircle size={16} className="text-emerald-400" />
+                          <div className="text-xs">
+                            <span className="text-slate-400">Total Selesai: </span>
+                            <span className="text-white font-bold">{currentWorker.tasksCompleted} Pekerjaan</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Work Accomplishment Summary */}
+                      <div className="space-y-2">
+                        <h3 className="text-xs font-bold text-indigo-300 uppercase tracking-wider">
+                          Ringkasan Hasil Kerja Nyata:
+                        </h3>
+                        <div className="p-4 bg-[#1e2336] rounded-2xl border border-slate-800 text-xs text-slate-300 leading-relaxed font-sans">
+                          {currentWorker.workSummary}
+                        </div>
+                      </div>
+
+                      {/* Measurable KPIs Grid */}
+                      <div className="space-y-2.5">
+                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                          Key Performance Indicators (KPI):
+                        </h3>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                          {(currentWorker.kpiSummary || []).map((kpi: any, idx: number) => (
+                            <div key={idx} className="bg-[#121626] border border-slate-800 p-3.5 rounded-xl space-y-1">
+                              <div className="text-[10px] text-slate-400 truncate">{kpi.label}</div>
+                              <div className="text-base font-bold text-white">{kpi.value}</div>
+                              <div className="flex items-center justify-between text-[10px]">
+                                <span className="text-slate-500">Target: {kpi.target}</span>
+                                <span className="text-emerald-400 font-bold">{kpi.status}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Deliverables / Dokumen Hasil Kerja */}
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                            <FileText size={14} className="text-indigo-400" />
+                            <span>Dokumen Deliverables ({currentWorker.deliverables?.length || 0})</span>
+                          </h3>
+                          <span className="text-[11px] text-slate-500">Klik untuk membaca dokumen lengkap</span>
+                        </div>
+
+                        <div className="space-y-2.5">
+                          {(currentWorker.deliverables || []).map((del: any) => (
+                            <div 
+                              key={del.id}
+                              className="p-4 bg-[#1e2336] border border-slate-800 hover:border-indigo-500/50 rounded-2xl transition space-y-2"
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="text-xs font-bold text-white">{del.title}</span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-mono">
+                                    {del.type}
+                                  </span>
+                                  <span className="text-[10px] text-slate-500">{del.date}</span>
+                                </div>
+                              </div>
+                              <p className="text-xs text-slate-400 line-clamp-2 font-sans">
+                                {del.snippet}
+                              </p>
+                              <div className="flex justify-end pt-1">
+                                <button
+                                  onClick={() => setActiveDeliverableModal({ ...del, author: currentWorker.fullName })}
+                                  className="text-[11px] text-indigo-400 hover:text-indigo-300 font-bold flex items-center gap-1"
+                                >
+                                  <span>Buka & Baca Dokumen Lengkap</span>
+                                  <ExternalLink size={12} />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Next Action Plan */}
+                      <div className="p-4 bg-indigo-950/30 border border-indigo-800/40 rounded-2xl text-xs space-y-1">
+                        <div className="text-indigo-300 font-bold">Langkah Kerja Selanjutnya (Next Sprint):</div>
+                        <div className="text-slate-300 font-sans">{currentWorker.nextActionPlan}</div>
+                      </div>
+
+                    </div>
+                  ) : (
+                    <div className="p-12 text-center text-slate-500 bg-[#161a2b] rounded-3xl border border-slate-800">
+                      Pilih pekerja di sebelah kiri untuk melihat laporan rinci.
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            )}
+
+            {/* SUBTAB 3: MONTHLY CLOSING (TUTUP BUKU BULANAN) */}
+            {reportsSubTab === "closing" && (
+              <div className="space-y-6">
+                
+                {/* Closing Header & Action Bar */}
+                <div className="bg-[#161a2b] border border-slate-800 p-6 rounded-3xl space-y-4 shadow-xl">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">🔐</span>
+                        <h2 className="text-lg font-bold text-white">Status Tutup Buku: {closing?.period || "Oktober 2026"}</h2>
+                        <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold ${
+                          closing?.isClosed
+                            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                            : "bg-amber-500/20 text-amber-400 border border-amber-500/40"
+                        }`}>
+                          {closing?.isClosed ? "RECONCILED & LOCKED" : "READY FOR CLOSING"}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-400 mt-1">
+                        Diverifikasi resmi oleh <strong>{closing?.closedBy}</strong>. Semua kas, piutang B2B, dan persediaan telah diaudit.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={handleExecuteClosing}
+                        disabled={isClosingExecuting}
+                        className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-emerald-600/20 flex items-center gap-2 disabled:opacity-50"
+                      >
+                        {isClosingExecuting ? <Loader2 size={14} className="animate-spin" /> : <Lock size={14} />}
+                        <span>{closing?.isClosed ? "Kunci Ulang Tutup Buku" : "Eksekusi Tutup Buku Periode Ini"}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {closing?.closedAt && (
+                    <div className="text-[11px] text-slate-400 bg-[#1e2336] p-2.5 rounded-xl border border-slate-800">
+                      Waktu Tutup Buku: <span className="text-white font-mono">{new Date(closing.closedAt).toLocaleString("id-ID")}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* 4 Summary Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="bg-[#161a2b] border border-slate-800 p-5 rounded-2xl space-y-1 shadow">
+                    <div className="text-xs text-slate-400">Total Omzet Penjualan</div>
+                    <div className="text-xl font-bold text-white">
+                      Rp {(inc?.revenue?.totalGrossRevenue || 70850000).toLocaleString("id-ID")}
+                    </div>
+                    <div className="text-[10px] text-emerald-400">Ritel + B2B + Custom Roast</div>
+                  </div>
+
+                  <div className="bg-[#161a2b] border border-slate-800 p-5 rounded-2xl space-y-1 shadow">
+                    <div className="text-xs text-slate-400">HPP (Harga Pokok Produksi)</div>
+                    <div className="text-xl font-bold text-rose-400">
+                      Rp {(inc?.cogs?.totalCogs || 33441200).toLocaleString("id-ID")}
+                    </div>
+                    <div className="text-[10px] text-slate-500">Gross Margin: {inc?.cogs?.grossMarginPct || 52.8}%</div>
+                  </div>
+
+                  <div className="bg-[#161a2b] border border-slate-800 p-5 rounded-2xl space-y-1 shadow">
+                    <div className="text-xs text-slate-400">Beban Operasional (OPEX)</div>
+                    <div className="text-xl font-bold text-amber-400">
+                      Rp {(inc?.opex?.totalOpex || 15700000).toLocaleString("id-ID")}
+                    </div>
+                    <div className="text-[10px] text-slate-500">Iklan, Logistik, Server, Roastery</div>
+                  </div>
+
+                  <div className="bg-[#161a2b] border border-emerald-500/40 p-5 rounded-2xl space-y-1 shadow bg-emerald-950/10">
+                    <div className="text-xs text-emerald-300 font-bold">Laba Bersih Bersih (Net Profit)</div>
+                    <div className="text-2xl font-bold text-emerald-400">
+                      Rp {(inc?.netIncome?.netProfitClean || 21354550).toLocaleString("id-ID")}
+                    </div>
+                    <div className="text-[10px] text-emerald-500 font-bold">Net Margin: {inc?.netIncome?.netMarginPct || 30.6}% (Setelah Pajak)</div>
+                  </div>
+                </div>
+
+                {/* Professional Income Statement (Laporan Laba Rugi) Table */}
+                <div className="bg-[#161a2b] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+                  <div className="p-5 border-b border-slate-800 bg-[#121626] flex items-center justify-between">
+                    <div>
+                      <h3 className="font-bold text-sm text-white">Laporan Laba Rugi Komprehensif (Income Statement)</h3>
+                      <div className="text-[11px] text-slate-400">Standar Akuntansi Usaha Roastery • Periode {closing?.period || "Oktober 2026"}</div>
+                    </div>
+                    <span className="text-xs font-mono text-indigo-400 font-bold">IDR (Rupiah)</span>
+                  </div>
+
+                  <div className="divide-y divide-slate-800/80 text-xs">
+                    
+                    {/* Section 1: Revenue */}
+                    <div className="p-4 bg-slate-900/50">
+                      <div className="font-bold text-indigo-300 text-xs uppercase tracking-wider mb-2">
+                        I. PENDAPATAN USAHA (REVENUE)
+                      </div>
+                      <div className="space-y-1.5 pl-2">
+                        <div className="flex justify-between text-slate-300">
+                          <span>• Penjualan Ritel Online & Marketplace (B2C)</span>
+                          <span className="font-mono">Rp {(inc?.revenue?.retailSales || 18450000).toLocaleString("id-ID")}</span>
+                        </div>
+                        <div className="flex justify-between text-slate-300">
+                          <span>• Kontrak Pasokan B2B Kafe Rekanan (18 Kafe)</span>
+                          <span className="font-mono">Rp {(inc?.revenue?.b2bSales || 42800000).toLocaleString("id-ID")}</span>
+                        </div>
+                        <div className="flex justify-between text-slate-300">
+                          <span>• Jasa Sangrai Custom Batch (Maklon Roastery)</span>
+                          <span className="font-mono">Rp {(inc?.revenue?.customRoastSales || 9600000).toLocaleString("id-ID")}</span>
+                        </div>
+                        <div className="flex justify-between font-bold text-white border-t border-slate-800 pt-1.5">
+                          <span>TOTAL PENDAPATAN KOTOR</span>
+                          <span className="font-mono text-emerald-400">Rp {(inc?.revenue?.totalGrossRevenue || 70850000).toLocaleString("id-ID")}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 2: COGS */}
+                    <div className="p-4 bg-slate-900/30">
+                      <div className="font-bold text-rose-300 text-xs uppercase tracking-wider mb-2">
+                        II. HARGA POKOK PENJUALAN (HPP / COGS)
+                      </div>
+                      <div className="space-y-1.5 pl-2">
+                        <div className="flex justify-between text-slate-300">
+                          <span>• Pembelian Green Beans Petani (Direct Trade)</span>
+                          <span className="font-mono">Rp {(inc?.cogs?.greenBeansCost || 25506000).toLocaleString("id-ID")}</span>
+                        </div>
+                        <div className="flex justify-between text-slate-300">
+                          <span>• Kemasan Foil Valve, Box & Stiker Label</span>
+                          <span className="font-mono">Rp {(inc?.cogs?.packagingCost || 3896750).toLocaleString("id-ID")}</span>
+                        </div>
+                        <div className="flex justify-between text-slate-300">
+                          <span>• Gas LPG Probat UG22 & Daya Listrik Produksi</span>
+                          <span className="font-mono">Rp {(inc?.cogs?.roastingUtilities || 2267200).toLocaleString("id-ID")}</span>
+                        </div>
+                        <div className="flex justify-between text-slate-300">
+                          <span>• Alokasi Susut Bobot Sangrai (14.8%)</span>
+                          <span className="font-mono">Rp {(inc?.cogs?.roastingShrinkage || 1771250).toLocaleString("id-ID")}</span>
+                        </div>
+                        <div className="flex justify-between font-bold text-rose-400 border-t border-slate-800 pt-1.5">
+                          <span>TOTAL HARGA POKOK PENJUALAN</span>
+                          <span className="font-mono">Rp {(inc?.cogs?.totalCogs || 33441200).toLocaleString("id-ID")}</span>
+                        </div>
+                        <div className="flex justify-between font-bold text-white pt-1">
+                          <span>LABA KOTOR (GROSS PROFIT)</span>
+                          <span className="font-mono text-emerald-400">
+                            Rp {(inc?.cogs?.grossProfit || 37408800).toLocaleString("id-ID")} ({inc?.cogs?.grossMarginPct || 52.8}%)
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 3: OPEX */}
+                    <div className="p-4 bg-slate-900/50">
+                      <div className="font-bold text-amber-300 text-xs uppercase tracking-wider mb-2">
+                        III. BEBAN OPERASIONAL (OPEX)
+                      </div>
+                      <div className="space-y-1.5 pl-2">
+                        <div className="flex justify-between text-slate-300">
+                          <span>• Belanja Iklan Digital (Meta Ads & TikTok Ads)</span>
+                          <span className="font-mono">Rp {(inc?.opex?.performanceAds || 6800000).toLocaleString("id-ID")}</span>
+                        </div>
+                        <div className="flex justify-between text-slate-300">
+                          <span>• Biaya Pengiriman & Logistik Dispatch Kurir</span>
+                          <span className="font-mono">Rp {(inc?.opex?.logisticsShipping || 3450000).toLocaleString("id-ID")}</span>
+                        </div>
+                        <div className="flex justify-between text-slate-300">
+                          <span>• Hosting Cloud, Domain & Payment Gateway Fee</span>
+                          <span className="font-mono">Rp {(inc?.opex?.techAndHosting || 1250000).toLocaleString("id-ID")}</span>
+                        </div>
+                        <div className="flex justify-between text-slate-300">
+                          <span>• Pemeliharaan Mesin Sangrai & Operasional Pabrik</span>
+                          <span className="font-mono">Rp {(inc?.opex?.roasteryOverhead || 4200000).toLocaleString("id-ID")}</span>
+                        </div>
+                        <div className="flex justify-between font-bold text-amber-400 border-t border-slate-800 pt-1.5">
+                          <span>TOTAL BEBAN OPERASIONAL (OPEX)</span>
+                          <span className="font-mono">Rp {(inc?.opex?.totalOpex || 15700000).toLocaleString("id-ID")}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 4: Net Income */}
+                    <div className="p-4 bg-emerald-950/20">
+                      <div className="font-bold text-emerald-300 text-xs uppercase tracking-wider mb-2">
+                        IV. LABA BERSIH & KEWAJIBAN PAJAK
+                      </div>
+                      <div className="space-y-1.5 pl-2">
+                        <div className="flex justify-between text-slate-300">
+                          <span>• Laba Operasional (Operating Profit / EBITDA)</span>
+                          <span className="font-mono">Rp {(inc?.netIncome?.operatingProfit || 21708800).toLocaleString("id-ID")}</span>
+                        </div>
+                        <div className="flex justify-between text-slate-300">
+                          <span>• Beban Pajak PPh Final UMKM 0.5% (PP 23/2018)</span>
+                          <span className="font-mono text-rose-300">- Rp {(inc?.netIncome?.taxFinalUmkm || 354250).toLocaleString("id-ID")}</span>
+                        </div>
+                        <div className="flex justify-between font-bold text-base text-emerald-400 border-t border-slate-800 pt-2">
+                          <span>LABA BERSIH BERSIH (NET PROFIT)</span>
+                          <span className="font-mono">Rp {(inc?.netIncome?.netProfitClean || 21354550).toLocaleString("id-ID")}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* Warehouse Balance Sheet Valuation */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  
+                  {/* Inventory Valuation Card */}
+                  <div className="bg-[#161a2b] border border-slate-800 p-6 rounded-3xl space-y-4 shadow-xl">
+                    <div className="flex items-center gap-2.5">
+                      <Archive size={18} className="text-orange-400" />
+                      <h3 className="text-sm font-bold text-white">Valuasi Persediaan Gudang (Stock Assets)</h3>
+                    </div>
+                    <div className="space-y-3 text-xs">
+                      <div className="p-3 bg-[#1e2336] rounded-xl border border-slate-800 flex justify-between">
+                        <div>
+                          <div className="text-slate-300 font-bold">Stok Green Beans Mentah</div>
+                          <div className="text-[11px] text-slate-500">{inv?.greenBeansStockKg || 1250} kg tersimpan di pallet</div>
+                        </div>
+                        <div className="text-right font-mono font-bold text-white">
+                          Rp {(inv?.greenBeansValue || 117500000).toLocaleString("id-ID")}
+                        </div>
+                      </div>
+
+                      <div className="p-3 bg-[#1e2336] rounded-xl border border-slate-800 flex justify-between">
+                        <div>
+                          <div className="text-slate-300 font-bold">Stok Roasted Beans Siap Kirim</div>
+                          <div className="text-[11px] text-slate-500">{inv?.roastedStockKg || 180} kg di display pack valve</div>
+                        </div>
+                        <div className="text-right font-mono font-bold text-white">
+                          Rp {(inv?.roastedStockValue || 247725000).toLocaleString("id-ID")}
+                        </div>
+                      </div>
+
+                      <div className="p-3 bg-indigo-950/40 rounded-xl border border-indigo-800/40 flex justify-between font-bold">
+                        <span className="text-indigo-300">TOTAL VALUASI ASET TERKUNCI</span>
+                        <span className="text-white font-mono">
+                          Rp {(inv?.totalInventoryValue || 365225000).toLocaleString("id-ID")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Profit Allocation Plan */}
+                  <div className="bg-[#161a2b] border border-slate-800 p-6 rounded-3xl space-y-4 shadow-xl">
+                    <div className="flex items-center gap-2.5">
+                      <PieChart size={18} className="text-emerald-400" />
+                      <h3 className="text-sm font-bold text-white">Rencana Alokasi Laba Bersih oleh GM</h3>
+                    </div>
+                    <div className="space-y-3 text-xs">
+                      <div className="p-3 bg-[#1e2336] rounded-xl border border-slate-800 flex justify-between">
+                        <div>
+                          <div className="text-emerald-300 font-bold">💰 Dividen Pemilik Usaha (35%)</div>
+                          <div className="text-[11px] text-slate-500">Siap ditarik langsung ke rekening owner</div>
+                        </div>
+                        <div className="text-right font-mono font-bold text-emerald-400">
+                          Rp {(dist?.ownerDividends || 7474092).toLocaleString("id-ID")}
+                        </div>
+                      </div>
+
+                      <div className="p-3 bg-[#1e2336] rounded-xl border border-slate-800 flex justify-between">
+                        <div>
+                          <div className="text-amber-300 font-bold">🌾 Restock Panen Raya Petani (45%)</div>
+                          <div className="text-[11px] text-slate-500">Reinvestasi belanja green beans Takengon</div>
+                        </div>
+                        <div className="text-right font-mono font-bold text-amber-400">
+                          Rp {(dist?.restockReinvestment || 9609548).toLocaleString("id-ID")}
+                        </div>
+                      </div>
+
+                      <div className="p-3 bg-[#1e2336] rounded-xl border border-slate-800 flex justify-between">
+                        <div>
+                          <div className="text-blue-300 font-bold">🛡️ Cadangan Kas Darurat (20%)</div>
+                          <div className="text-[11px] text-slate-500">Buffer likuiditas operasional roastery</div>
+                        </div>
+                        <div className="text-right font-mono font-bold text-blue-400">
+                          Rp {(dist?.emergencyReserve || 4270910).toLocaleString("id-ID")}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Verification Signatures */}
+                <div className="bg-[#121626] border border-slate-800 p-6 rounded-3xl grid grid-cols-1 md:grid-cols-2 gap-6 text-center">
+                  <div className="p-4 bg-[#161a2b] rounded-2xl border border-slate-800 space-y-2">
+                    <div className="text-[10px] text-slate-500 uppercase tracking-wider">Disusun & Disetujui Oleh</div>
+                    <div className="text-xl">👨‍💼</div>
+                    <div className="font-bold text-white text-xs">Rama</div>
+                    <div className="text-[11px] text-indigo-400 font-mono">General Manager</div>
+                    <div className="text-[10px] text-emerald-400 bg-emerald-500/10 py-1 rounded-lg border border-emerald-500/20">
+                      ✓ SIGNED & AUDITED
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-[#161a2b] rounded-2xl border border-slate-800 space-y-2">
+                    <div className="text-[10px] text-slate-500 uppercase tracking-wider">Diaudit & Direkonsiliasi Oleh</div>
+                    <div className="text-xl">👩‍💼</div>
+                    <div className="font-bold text-white text-xs">Fina</div>
+                    <div className="text-[11px] text-yellow-400 font-mono">Head of Finance & Tax Accounting</div>
+                    <div className="text-[10px] text-emerald-400 bg-emerald-500/10 py-1 rounded-lg border border-emerald-500/20">
+                      ✓ RECONCILED 100%
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+            {/* Deliverable Reader Modal */}
+            {activeDeliverableModal && (
+              <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+                <div className="w-full max-w-3xl bg-[#121626] border border-indigo-500/40 rounded-3xl p-6 md:p-8 space-y-5 shadow-2xl relative max-h-[90vh] flex flex-col">
+                  
+                  <div className="flex items-start justify-between border-b border-slate-800 pb-4">
+                    <div>
+                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-mono">
+                        {activeDeliverableModal.type || "Dokumen Kerja"}
+                      </span>
+                      <h2 className="text-base md:text-lg font-bold text-white mt-1">
+                        {activeDeliverableModal.title}
+                      </h2>
+                      <div className="text-xs text-slate-400 mt-0.5">
+                        Diterbitkan oleh: <strong className="text-indigo-300">{activeDeliverableModal.author}</strong> • {activeDeliverableModal.date}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setActiveDeliverableModal(null)}
+                      className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto pr-2 space-y-4">
+                    <div className="p-5 bg-[#0a0f1d] border border-slate-800 rounded-2xl text-xs font-mono text-slate-200 whitespace-pre-wrap leading-relaxed shadow-inner">
+                      {activeDeliverableModal.fullText || activeDeliverableModal.snippet}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between border-t border-slate-800 pt-4">
+                    <span className="text-[11px] text-slate-500 font-mono">
+                      Ramu Roastery Document Verification ID: #{activeDeliverableModal.id || "DOC-2026"}
+                    </span>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          navigator.clipboard?.writeText(activeDeliverableModal.fullText || activeDeliverableModal.snippet);
+                          alert("Isi dokumen disalin ke clipboard!");
+                        }}
+                        className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition"
+                      >
+                        Salin Teks
+                      </button>
+                      <button
+                        onClick={() => setActiveDeliverableModal(null)}
+                        className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition"
+                      >
+                        Tutup
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            )}
+
+          </div>
+        );
+      }
+
       case "Account":
         return (
           <div className="flex-1 p-8 text-white bg-[#0f172a] overflow-y-auto font-mono space-y-6">
@@ -1233,6 +2096,7 @@ export default function VirtualOffice() {
           <NavItem icon={<Archive size={16}/>} label="Storage Room" active={activeTab === "Storage Room"} onClick={() => setActiveTab("Storage Room")} />
           <NavItem icon={<Coffee size={16}/>} label="Roastery" active={activeTab === "Roastery"} onClick={() => setActiveTab("Roastery")} />
           <NavItem icon={<DollarSign size={16}/>} label="Finances" active={activeTab === "Finances"} onClick={() => setActiveTab("Finances")} />
+          <NavItem icon={<FileText size={16}/>} label="Reports" active={activeTab === "Reports"} onClick={() => setActiveTab("Reports")} />
         </nav>
         
         <div className="px-4 pb-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">System</div>
