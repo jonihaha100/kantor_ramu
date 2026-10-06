@@ -432,7 +432,7 @@ export async function POST(
       try {
         const genAI = new GoogleGenerativeAI(effectiveKey);
         const model = genAI.getGenerativeModel({
-          model: "gemini-1.5-flash",
+          model: "gemini-3.5-flash-lite",
           systemInstruction: `Kamu adalah ${agentIntel.name}, ${agentIntel.roleTitle} di Ramu Roastery (Spesialis Kopi Nusantara). Divisi: ${agentIntel.department}. Kepribadian: ${agentIntel.personality}. Gunakan Bahasa Indonesia natural dan profesional ala startup roastery modern. Berikan insight operasional nyata, tanggapi pertanyaan spesifik user dengan kontekstual, jangan kaku, dan proaktif mengajak berdiskusi atau menawarkan opsi tindakan.`,
           tools: [
             { functionDeclarations: [checkStockDeclaration, reportRevenueDeclaration, createTaskDeclaration] }

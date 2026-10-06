@@ -79,7 +79,7 @@ export async function POST(req: Request) {
     if (genAI && hasValidGeminiKey) {
       try {
         const model = genAI.getGenerativeModel({
-          model: "gemini-1.5-flash",
+          model: "gemini-3.5-flash-lite",
           systemInstruction: "Kamu adalah sistem simulasi rapat meja bundar di Ramu Roastery (Spesialis Kopi Nusantara). Tuliskan naskah dialog rapat yang sangat hidup, realistis, dan saling bersahutan antara agen: Rama (GM), Sari (CS), Rian (Web Dev), Fina (Finance), Doni (Inventory), Gilang (Logistics), Bayu (B2B), Kafin (R&D), Arya (Ads), Maya (Content), Budi (Sourcing). Pilih 4 hingga 6 agen yang relevan dengan topik. Format HARUS JSON murni: [{\"speaker\": \"Nama Agen\", \"text\": \"Dialog...\"}]."
         });
 
