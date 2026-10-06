@@ -13,6 +13,7 @@ interface ControlPanelProps {
   selectedAgent: AgentRole;
   onClose: () => void;
   theme?: "retro" | "dark";
+  onAgentSpeech?: (speaker: string, text: string) => void;
 }
 
 const AGENT_CONFIGS: Record<string, {
@@ -146,7 +147,7 @@ const RND_DATA = [
   { name: 'Batch 5', acidity: 5, body: 6, sweetness: 8 },
 ];
 
-export default function ControlPanel({ selectedAgent, onClose, theme = "retro" }: ControlPanelProps) {
+export default function ControlPanel({ selectedAgent, onClose, theme = "retro", onAgentSpeech }: ControlPanelProps) {
   const [conversations, setConversations] = useState<Record<string, ChatMessage[]>>({});
   const [isTyping, setIsTyping] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -260,6 +261,10 @@ export default function ControlPanel({ selectedAgent, onClose, theme = "retro" }
         replyText = `Maaf, terjadi kendala: ${responseJson.error || "Gagal menghubungi agen."}`;
       } else {
         replyText = responseJson.data.reply;
+      }
+
+      if (onAgentSpeech) {
+        onAgentSpeech(currentAgent, replyText);
       }
 
       setConversations(prev => ({

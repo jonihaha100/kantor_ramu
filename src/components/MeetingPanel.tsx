@@ -18,6 +18,7 @@ const TOPIC_SUGGESTIONS = [
 
 export default function MeetingPanel({ onClose, onSpeakerChange, onViewProjects, theme = "retro" }: MeetingPanelProps) {
   const [topic, setTopic] = useState("");
+  const [targetRecipient, setTargetRecipient] = useState<string>("ALL");
   const [discussion, setDiscussion] = useState<{ speaker: string; text: string }[]>([]);
   const [activeTurn, setActiveTurn] = useState<number>(-1);
   const [isLoading, setIsLoading] = useState(false);
@@ -67,6 +68,7 @@ export default function MeetingPanel({ onClose, onSpeakerChange, onViewProjects,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           topic: finalTopic,
+          targetRecipient,
           clientTime: new Date().toISOString(),
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Jakarta"
         })
@@ -217,24 +219,70 @@ export default function MeetingPanel({ onClose, onSpeakerChange, onViewProjects,
         <div ref={chatBottomRef} />
       </div>
 
-      {/* Input Area */}
-      <div className={`p-3 border-t ${theme === "retro" ? "bg-[#c9865f] border-t-2 border-[#ad6e49]" : "bg-[#121624] border-slate-800"}`}>
+      {/* Input Area with Recipient Targeting */}
+      <div className={`p-2.5 sm:p-3 border-t space-y-2 ${theme === "retro" ? "bg-[#c9865f] border-t-2 border-[#ad6e49]" : "bg-[#121624] border-slate-800"}`}>
+        {/* Recipient Selection Strip */}
+        <div className="flex items-center gap-1 overflow-x-auto pb-1 text-[10px] font-mono scrollbar-none select-none">
+          <span className={`shrink-0 font-bold ${theme === "retro" ? "text-[#3e2208]" : "text-slate-400"}`}>Tanya ke:</span>
+          <button
+            type="button"
+            onClick={() => setTargetRecipient("ALL")}
+            className={`px-2 py-0.5 rounded transition-all shrink-0 ${
+              targetRecipient === "ALL" 
+                ? (theme === "retro" ? "bg-[#3e2208] text-[#fff8ea] font-bold" : "bg-indigo-600 text-white font-bold") 
+                : (theme === "retro" ? "bg-[#fff8ea]/60 text-[#3e2208] hover:bg-[#fff8ea]" : "bg-slate-800 text-slate-300 hover:bg-slate-700")
+            }`}
+          >
+            👥 Semua
+          </button>
+          {[
+            { id: "Budi", name: "Budi (Sourcing)" },
+            { id: "Kafin", name: "Kafin (R&D)" },
+            { id: "Doni", name: "Doni (Gudang)" },
+            { id: "Rian", name: "Rian (Web Dev)" },
+            { id: "Fina", name: "Fina (Finance)" },
+            { id: "Sari", name: "Sari (CS)" },
+            { id: "Gilang", name: "Gilang (Logistik)" },
+            { id: "Bayu", name: "Bayu (B2B)" },
+            { id: "Arya", name: "Arya (Ads)" },
+            { id: "Maya", name: "Maya (Konten)" },
+            { id: "Rama", name: "Rama (GM)" },
+          ].map(agent => (
+            <button
+              key={agent.id}
+              type="button"
+              onClick={() => setTargetRecipient(agent.id)}
+              className={`px-2 py-0.5 rounded transition-all shrink-0 ${
+                targetRecipient === agent.id 
+                  ? (theme === "retro" ? "bg-[#3e2208] text-[#fff8ea] font-bold ring-1 ring-amber-300" : "bg-indigo-600 text-white font-bold ring-1 ring-indigo-400") 
+                  : (theme === "retro" ? "bg-[#fff8ea]/60 text-[#3e2208] hover:bg-[#fff8ea]" : "bg-slate-800 text-slate-300 hover:bg-slate-700")
+              }`}
+            >
+              {agent.name.split(" ")[0]}
+            </button>
+          ))}
+        </div>
+
         <form onSubmit={(e) => { e.preventDefault(); startMeeting(); }} className="flex gap-2">
           <input
             type="text"
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
-            placeholder="Ketik topik rapat..."
+            placeholder={
+              targetRecipient === "ALL" 
+                ? "Tanya tim (atau ketik: 'Budi, harga berapa?')..." 
+                : `Tanya langsung ke ${targetRecipient} saja...`
+            }
             disabled={isLoading || (activeTurn >= 0 && !isCompleted)}
             className={`flex-1 px-3 py-2 rounded-lg text-xs font-mono disabled:opacity-50 ${theme === "retro" ? "bg-[#fff8ea] border-2 border-[#ad6e49] text-[#3e2208] placeholder-[#8d5b38]" : "bg-[#1e2336] border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500"}`}
           />
           <button
             type="submit"
             disabled={isLoading || !topic.trim() || (activeTurn >= 0 && !isCompleted)}
-            className={`px-4 py-2 font-bold rounded-lg transition-colors text-xs disabled:opacity-50 flex items-center gap-1.5 shadow ${theme === "retro" ? "bg-[#3e2208] hover:bg-[#201003] text-[#fff8ea]" : "bg-indigo-600 hover:bg-indigo-500 text-white"}`}
+            className={`px-3.5 py-2 font-bold rounded-lg transition-colors text-xs disabled:opacity-50 flex items-center gap-1.5 shadow shrink-0 ${theme === "retro" ? "bg-[#3e2208] hover:bg-[#201003] text-[#fff8ea]" : "bg-indigo-600 hover:bg-indigo-500 text-white"}`}
           >
             <Send size={13} />
-            <span>Mulai</span>
+            <span>Kirim</span>
           </button>
         </form>
       </div>

@@ -83,6 +83,7 @@ export default function VirtualOffice() {
   const [activeTab, setActiveTab] = useState<MenuTab>("Office HQ");
   const [isMeetingActive, setIsMeetingActive] = useState(false);
   const [meetingSpeaker, setMeetingSpeaker] = useState<{ speaker: string; text: string } | null>(null);
+  const [directAgentSpeech, setDirectAgentSpeech] = useState<{ speaker: string; text: string } | null>(null);
 
   // 1. Owner PIN Security Gate
   const [isOwnerLoggedIn, setIsOwnerLoggedIn] = useState(true);
@@ -480,9 +481,10 @@ export default function VirtualOffice() {
                           onSelectAgent={(agent) => {
                             setSelectedAgent(agent);
                             setIsMeetingActive(false);
+                            setDirectAgentSpeech(null);
                           }}
                           isMeetingActive={isMeetingActive}
-                          meetingSpeaker={meetingSpeaker}
+                          meetingSpeaker={meetingSpeaker || directAgentSpeech}
                           onOfficeEvent={handleOfficeEvent}
                         />
                       </div>
@@ -504,6 +506,10 @@ export default function VirtualOffice() {
                             theme="retro"
                             selectedAgent={selectedAgent} 
                             onClose={() => setSelectedAgent(null)} 
+                            onAgentSpeech={(speaker, text) => {
+                              setDirectAgentSpeech({ speaker, text });
+                              setTimeout(() => setDirectAgentSpeech(null), 5000);
+                            }}
                           />
                         )}
                       </div>

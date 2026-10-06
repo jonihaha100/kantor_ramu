@@ -53,8 +53,180 @@ function getTimeContext(clientTime?: string, timezone?: string) {
   return { greeting, hour, formattedDate, targetTz };
 }
 
+interface AgentProfile {
+  name: string;
+  fullName: string;
+  role: string;
+  keywords: string[];
+  generateAnswer: (topic: string, greeting: string) => string;
+}
+
+const AGENTS_LIST: AgentProfile[] = [
+  {
+    name: "Budi",
+    fullName: "Budi (Sourcing)",
+    role: "Green Bean Sourcing & Farmer Relations",
+    keywords: ["budi", "sourcing", "petani", "kebun", "green bean", "green beans", "gabah", "gayo", "takengon", "pangalengan", "bajawa", "panen", "beli biji", "harga biji", "tani", "koperasi"],
+    generateAnswer: (topic, greeting) => {
+      const t = topic.toLowerCase();
+      if (t.includes("harga") || t.includes("nego") || t.includes("tawar") || t.includes("biaya") || t.includes("per kilo")) {
+        return `${greeting} bos! Mengenai harga green beans Gayo Grade 1, koperasi petani Takengon buka harga Rp 92.000/kg. Mereka bersedia kita kunci di Rp 86.000/kg asalkan ambil minimal 1.5 ton dengan DP 30%. Typica Pangalengan skor 88+ di Rp 105.000/kg. Pasokan kita aman dan margin roastery tetap terlindungi.`;
+      }
+      if (t.includes("sampel") || t.includes("sample") || t.includes("uji")) {
+        return `${greeting} bos! Sampel fisik 2kg biji kopi Gayo Anaerobic & Typica Pangalengan sudah saya kirimkan ke lab R&D Kafin untuk uji sensorik. Besok pagi datanya siap kita review bersama.`;
+      }
+      if (t.includes("kapan") || t.includes("jadwal") || t.includes("panen")) {
+        return `${greeting} bos! Di Takengon saat ini sedang masuk fly crop kedua dengan kualitas petik merah sangat optimal karena curah matahari ideal. Flores Bajawa panen berikutnya sekitar bulan Juli-Agustus.`;
+      }
+      return `${greeting} bos! Hubungan kemitraan direct-trade dengan kelompok tani kopi di Gayo dan Pangalengan berjalan sangat solid. Pasokan green beans di gudang aman untuk kebutuhan 3 bulan ke depan tanpa risiko putus stok.`;
+    }
+  },
+  {
+    name: "Kafin",
+    fullName: "Kafin (R&D)",
+    role: "R&D & Sensory Cupping Lead",
+    keywords: ["kafin", "r&d", "rnd", "cupping", "rasa", "skor", "score", "notes", "acidity", "body", "roasting profile", "sangrai", "profil", "dtr", "ror", "v60", "espresso", "formula", "resep"],
+    generateAnswer: (topic, greeting) => {
+      const t = topic.toLowerCase();
+      if (t.includes("skor") || t.includes("score") || t.includes("batch") || t.includes("rasa") || t.includes("cupping")) {
+        return `${greeting} bos! Hasil cupping sensorik Batch #14 Gayo Anaerobic kemarin meraih skor 87.5 poin (Specialty Grade). Tasting notes dominan peach, brown sugar, dan lingering jasmine yang sangat clean. Profil RoR saya kunci di DTR 14.2% agar crema di mesin espresso tebal dan acidity-nya balance.`;
+      }
+      if (t.includes("sample") || t.includes("sampel") || t.includes("uji")) {
+        return `${greeting} bos! Sampel green beans baru dari mas Budi sudah masuk tahap sample roasting di mesin IKAWA. Parameter moisture 11.2% sangat ideal. Besok pagi saya jadwalkan sesi cupping internal di meja Cupping Table.`;
+      }
+      return `${greeting} bos! Seluruh batch specialty coffee Ramu lolos standar quality control sensorik. Kalibrasi rasa untuk racikan espresso bar maupun filter V60 terjaga konsisten di skor 86+ poin.`;
+    }
+  },
+  {
+    name: "Doni",
+    fullName: "Doni (Inventory)",
+    role: "Warehouse & Roastery Lead",
+    keywords: ["doni", "gudang", "inventory", "stok", "warehouse", "probat", "mesin sangrai", "mesin roasting", "suhu", "packing", "kemasan", "karung", "stok kopi"],
+    generateAnswer: (topic, greeting) => {
+      return `${greeting} bos! Laporan gudang operasional: Suhu drum mesin Probat UG22 stabil di 205°C, kelembapan gudang 60% RH beroperasi normal. Stok green beans di pallet aman 1.3 ton, dan stok kemasan 200g Ramu Blend siap 120 pack di rak display. Siap sangrai batch berikutnya!`;
+    }
+  },
+  {
+    name: "Rian",
+    fullName: "Rian (Web Dev)",
+    role: "Full-Stack Web Dev & Infrastructure",
+    keywords: ["rian", "web", "website", "dev", "server", "store", "midtrans", "qris", "checkout", "bug", "it", "nextjs", "online", "loading"],
+    generateAnswer: (topic, greeting) => {
+      return `${greeting} bos! Status teknologi web store Ramu: Server edge Next.js 15 berjalan stabil dengan latency 9ms dan uptime 99.98%. Transaksi pembayaran otomatis QRIS Midtrans lancar tanpa kendala. Katalog belanja siap menampung lonjakan pesanan pelanggan kapan saja.`;
+    }
+  },
+  {
+    name: "Fina",
+    fullName: "Fina (Finance)",
+    role: "Financial & Revenue Lead",
+    keywords: ["fina", "finance", "keuangan", "omzet", "pendapatan", "kas", "cashflow", "uang", "laba", "rugi", "margin", "invoice", "tagihan", "piutang", "budget"],
+    generateAnswer: (topic, greeting) => {
+      return `${greeting} bos! Rekapitulasi keuangan harian: Total omzet hari ini tembus Rp 14.225.000 dari kombinasi pesanan online web store dan invoice suplai kafe B2B. Margin laba kotor terjaga di 42%, piutang B2B term of payment aman maksimal 14 hari, dan arus kas roastery dalam kondisi sangat sehat.`;
+    }
+  },
+  {
+    name: "Sari",
+    fullName: "Sari (CS)",
+    role: "Customer Service & Experience Lead",
+    keywords: ["sari", "cs", "customer service", "pelanggan", "pembeli", "komplain", "chat", "wa", "whatsapp", "tanya", "grind size", "gilingan", "tiket"],
+    generateAnswer: (topic, greeting) => {
+      return `${greeting} bos! Update customer service WhatsApp & marketplace: Waktu respon rata-rata kita di 2 menit dengan CSAT 98%. Pertanyaan terbanyak hari ini mengenai panduan grind size untuk seduh V60 di rumah dan promo bundle biji kopi. Semua komplain tertangani tuntas tanpa eskalasi.`;
+    }
+  },
+  {
+    name: "Gilang",
+    fullName: "Gilang (Logistics)",
+    role: "Logistics & Dispatch Lead",
+    keywords: ["gilang", "logistik", "kurir", "ekspedisi", "kargo", "resi", "kirim", "pengiriman", "j&t", "paxel", "jne", "paket", "pickup"],
+    generateAnswer: (topic, greeting) => {
+      return `${greeting} bos! Update logistik pengiriman: Seluruh paket pesanan hari ini sudah di-packing rapi dan di-pickup oleh kurir kargo J&T dan Paxel tepat jam 15:30 sore. Nomor resi otomatis terbit dan langsung di-blast ke WhatsApp pemesan. Rute Jakarta dan Jawa Barat estimasi 1 hari sampai.`;
+    }
+  },
+  {
+    name: "Bayu",
+    fullName: "Bayu (B2B)",
+    role: "B2B Sales & Commercial Lead",
+    keywords: ["bayu", "b2b", "sales", "kafe", "kedai", "kemitraan", "franchise", "horeca", "grosir", "kontrak", "klien"],
+    generateAnswer: (topic, greeting) => {
+      return `${greeting} bos! Perkembangan kemitraan B2B: Kafe Sudut Temu resmi tanda tangan kontrak suplai 20kg per minggu. Selain itu ada 2 prospek franchise kafe di Jakarta Selatan berminat kontrak 100kg/bulan. Profil rasa yang diminta medium-roast seimbang. Draft kontrak siap diajukan untuk bos tandatangani.`;
+    }
+  },
+  {
+    name: "Arya",
+    fullName: "Arya (Ads)",
+    role: "Performance Marketing & Ads",
+    keywords: ["arya", "ads", "iklan", "meta ads", "facebook ads", "instagram ads", "roas", "cpc", "budget iklan", "campaign", "marketing"],
+    generateAnswer: (topic, greeting) => {
+      return `${greeting} bos! Laporan performa iklan digital: Kampanye Meta Ads kita menghasilkan ROAS 3.8x hari ini dengan CTR 2.4%. Alokasi budget optimal menyasar pecinta specialty coffee Nusantara di wilayah Jabodetabek dan kota-kota besar. Biaya per akuisisi pelanggan (CPA) sangat efisien.`;
+    }
+  },
+  {
+    name: "Maya",
+    fullName: "Maya (Content)",
+    role: "Content Creator & Storyteller",
+    keywords: ["maya", "konten", "content", "tiktok", "reels", "video", "sosmed", "instagram", "ig", "visual", "edukasi kopi", "branding"],
+    generateAnswer: (topic, greeting) => {
+      return `${greeting} bos! Kabar dari tim kreatif: Video Reels & TikTok 'Sensasi Tasting Notes Kopi Susu vs Manual Brew' sudah selesai tahap editing dengan hook visual pour over estetik. Konten ini diproyeksikan menggaet ribuan views organik dan mengarahkan calon pembeli langsung ke web store Ramu.`;
+    }
+  },
+  {
+    name: "Rama",
+    fullName: "Rama (GM)",
+    role: "General Manager & Operations Lead",
+    keywords: ["rama", "gm", "general manager", "manajer", "arahan", "kpi", "evaluasi", "strategi", "koordinasi"],
+    generateAnswer: (topic, greeting) => {
+      return `${greeting} bos! Seluruh 11 divisi roastery beroperasi penuh sesuai standar mutu Ramu. Sinergi antara tim sourcing petani, lab sangrai, tim e-commerce, hingga pengiriman berjalan sangat rapi. Saya siap mengawal eksekusi instruksi dan target prioritas berikutnya dari bos.`;
+    }
+  }
+];
+
+function detectTargetAgent(topic: string, explicitRecipient?: string): AgentProfile | null {
+  if (explicitRecipient && explicitRecipient !== "ALL" && explicitRecipient !== "SEMUA") {
+    const found = AGENTS_LIST.find(a => 
+      a.fullName.toLowerCase().includes(explicitRecipient.toLowerCase()) ||
+      a.name.toLowerCase() === explicitRecipient.toLowerCase()
+    );
+    if (found) return found;
+  }
+
+  const t = topic.toLowerCase();
+
+  // 1. Direct name match in topic text (e.g. "Budi, berapa harga?" or "Tanya Kafin")
+  for (const agent of AGENTS_LIST) {
+    const nameRegex = new RegExp(`\\b${agent.name.toLowerCase()}\\b`, "i");
+    if (nameRegex.test(t)) {
+      return agent;
+    }
+  }
+
+  // 2. Keyword domain matching (only if topic is not an explicit whole-team plenary)
+  const isPlenaryMeeting = t.includes("rapat pleno") || t.includes("seluruh tim") || t.includes("semua divisi") || t.includes("kumpul semua") || t.includes("evaluasi bersama");
+  if (!isPlenaryMeeting) {
+    for (const agent of AGENTS_LIST) {
+      for (const kw of agent.keywords) {
+        if (kw !== agent.name.toLowerCase() && t.includes(kw)) {
+          return agent;
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
 // Helper to generate dynamic, tailored multi-agent debate based on topic & real-time greeting
-function generateTailoredMeetingDiscussion(topic: string, greeting: string = "Selamat siang") {
+function generateTailoredMeetingDiscussion(topic: string, greeting: string = "Selamat siang", explicitRecipient?: string) {
+  // RULE: If a specific person is asked or targeted, ONLY THAT PERSON RESPONDS!
+  const targetAgent = detectTargetAgent(topic, explicitRecipient);
+  if (targetAgent) {
+    return [
+      {
+        speaker: targetAgent.fullName,
+        text: targetAgent.generateAnswer(topic, greeting)
+      }
+    ];
+  }
+
   const t = topic.toLowerCase();
 
   if (t.includes("marketing") || t.includes("iklan") || t.includes("konten") || t.includes("sosmed") || t.includes("promo") || t.includes("reels")) {
@@ -103,7 +275,7 @@ function generateTailoredMeetingDiscussion(topic: string, greeting: string = "Se
     ];
   }
 
-  // General Operational Discussion
+  // General Operational Discussion (Plenary)
   return [
     { speaker: "Rama (GM)", text: `${greeting} rekan-rekan Ramu Roastery. Rapat koordinasi roastery dibuka. Topik yang kita diskusikan: "${topic}". Mari kita review dari masing-masing departemen.` },
     { speaker: "Sari (CS)", text: "Dari sisi pelanggan, sentimen sangat positif hari ini. Permintaan repeat order produk filter coffee meningkat 25%." },
@@ -119,7 +291,11 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const topic = body.topic || "Evaluasi Operasional Roastery";
+    const explicitRecipient = body.targetRecipient || "";
     const { greeting, formattedDate } = getTimeContext(body.clientTime, body.timezone);
+
+    // Check if question targets a single person
+    const targetAgent = detectTargetAgent(topic, explicitRecipient);
 
     // Dynamic API key resolution (header priority or env)
     const headerKey = req.headers.get("x-gemini-key") || "";
@@ -131,31 +307,52 @@ export async function POST(req: Request) {
 
     if (clientGenAI && hasValidKey) {
       try {
-        const model = clientGenAI.getGenerativeModel({
-          model: "gemini-3.5-flash-lite",
-          systemInstruction: `Kamu adalah sistem simulasi rapat meja bundar di Ramu Roastery (Spesialis Kopi Nusantara).
+        let systemInstruction = "";
+        let promptText = "";
+
+        if (targetAgent) {
+          // STRICT SINGLE-AGENT MODE: Only the queried agent speaks!
+          systemInstruction = `Kamu adalah ${targetAgent.fullName} di Ramu Roastery (Spesialis Kopi Nusantara).
+WAKTU OPERASIONAL SAAT INI: ${formattedDate} (${greeting}).
+ATURAN UTAMA DARI PEMILIK USAHA:
+1. Pemilik usaha menanyakan pertanyaan KHUSUS KEPADAMU (${targetAgent.fullName}).
+2. DILARANG KERAS SEMUA AGEN IKUT MENJAWAB! HANYA kamu (${targetAgent.fullName}) yang boleh menjawab!
+3. Jawab pertanyaan pemilik usaha dengan sangat jelas, lugas, ramah, dan tuntas sesuai peranmu (${targetAgent.role}).
+4. Awali jawabanmu dengan sapaan "${greeting} bos!".
+5. Format output HARUS JSON murni tanpa markdown: [{"speaker": "${targetAgent.fullName}", "text": "Jawaban lengkap..."}].`;
+
+          promptText = `Pertanyaan dari bos: "${topic}". Jawab langsung HANYA sebagai ${targetAgent.fullName}.`;
+        } else {
+          // Plenary team meeting
+          systemInstruction = `Kamu adalah sistem simulasi rapat meja bundar di Ramu Roastery (Spesialis Kopi Nusantara).
 WAKTU OPERASIONAL SAAT INI: ${formattedDate} (${greeting}).
 ATURAN RAPAT:
-1. Rapat SELALU dibuka oleh Rama (GM) sebagai pembicara pertama.
-2. Rama (GM) WAJIB menyapa peserta rapat menyesuaikan waktu nyata saat ini, yaitu dengan sapaan "${greeting}" (misalnya: "${greeting} rekan-rekan Ramu Roastery...", "${greeting} semuanya...", dsb). DILARANG menggunakan sapaan waktu yang keliru seperti "Selamat pagi" jika saat ini ${greeting}.
-3. Tuliskan naskah dialog rapat yang sangat hidup, realistis, dan saling bersahutan antar agen: Rama (GM), Sari (CS), Rian (Web Dev), Fina (Finance), Doni (Inventory), Gilang (Logistics), Bayu (B2B), Kafin (R&D), Arya (Ads), Maya (Content), Budi (Sourcing).
-4. Pilih 4 hingga 6 agen yang relevan dengan topik.
-5. Format HARUS JSON murni tanpa markdown pembungkus: [{"speaker": "Nama Agen", "text": "Dialog..."}].`
+1. Rapat SELALU dibuka oleh Rama (GM) sebagai pembicara pertama dengan sapaan "${greeting}".
+2. Tuliskan naskah dialog rapat yang hidup dan terfokus pada topik.
+3. Pilih 3 hingga 5 agen yang relevan dengan topik.
+4. Format HARUS JSON murni tanpa markdown pembungkus: [{"speaker": "Nama Agen", "text": "Dialog..."}].`;
+
+          promptText = `Topik rapat pleno: "${topic}". Waktu nyata: ${formattedDate} (${greeting}). Mulai rapat dengan sapaan "${greeting}" oleh Rama (GM).`;
+        }
+
+        const model = clientGenAI.getGenerativeModel({
+          model: "gemini-3.5-flash-lite",
+          systemInstruction
         });
 
-        const result = await model.generateContent(`Topik rapat hari ini: "${topic}". Waktu nyata saat ini: ${formattedDate} (${greeting}). Mulai rapat dengan sapaan "${greeting}" oleh Rama (GM).`);
+        const result = await model.generateContent(promptText);
         const rawText = result.response.text();
         const jsonMatch = rawText.match(/\[[\s\S]*\]/);
         discussion = JSON.parse(jsonMatch ? jsonMatch[0] : rawText);
       } catch (geminiError) {
         console.warn("Gemini meeting generation failed, using dynamic local engine:", geminiError);
-        discussion = generateTailoredMeetingDiscussion(topic, greeting);
+        discussion = generateTailoredMeetingDiscussion(topic, greeting, explicitRecipient);
       }
     } else {
-      discussion = generateTailoredMeetingDiscussion(topic, greeting);
+      discussion = generateTailoredMeetingDiscussion(topic, greeting, explicitRecipient);
     }
 
-    // Post-processing safeguard: ensure first speaker (Rama) matches real-time greeting
+    // Post-processing safeguard: ensure greeting matches real-time
     if (Array.isArray(discussion) && discussion.length > 0) {
       const first = discussion[0];
       if (first && (first.speaker.includes("Rama") || first.speaker.includes("GM"))) {

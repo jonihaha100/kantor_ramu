@@ -1038,7 +1038,7 @@ export default function OfficeCanvas({
       }
 
       // --- 16. Autonomous Peer Collaboration State Machine ---
-      if (!meetingActiveRef.current) {
+      if (!meetingActiveRef.current && !selectedAgent) {
         if (!activeCollabRef.current) {
           nextCollabDelayRef.current -= deltaTime;
           if (nextCollabDelayRef.current <= 0) {
@@ -1167,6 +1167,10 @@ export default function OfficeCanvas({
           if (meetingSpeaker && meetingSpeaker.speaker.toLowerCase().includes(agent.label.toLowerCase())) {
             agent.message = meetingSpeaker.text.length > 50 ? meetingSpeaker.text.slice(0, 48) + "..." : meetingSpeaker.text;
             agent.messageTimer = 4.0;
+          } else if (meetingSpeaker) {
+            // STRICT RULE: When someone is speaking, everyone else must stay silent!
+            agent.message = null;
+            agent.messageTimer = 0;
           }
         } else if (!meetingActiveRef.current && agent.activity === "meeting") {
           agent.activity = "walking";
@@ -1176,15 +1180,21 @@ export default function OfficeCanvas({
           agent.messageTimer = 2.5;
         }
 
-        // Selected Agent Priority
-        if (isSelected && !meetingActiveRef.current) {
-          agent.activity = "working";
-          agent.targetX = agent.deskX;
-          agent.targetY = agent.deskY;
-          agent.x += (agent.deskX - agent.x) * 0.12;
-          agent.y += (agent.deskY - agent.y) * 0.12;
-          if (!agent.message) {
-            agent.message = "Standby bos";
+        // Selected Agent Priority - SILENCE ALL OTHER AGENTS!
+        if (selectedAgent && !meetingActiveRef.current) {
+          if (isSelected) {
+            agent.activity = "working";
+            agent.targetX = agent.deskX;
+            agent.targetY = agent.deskY;
+            agent.x += (agent.deskX - agent.x) * 0.12;
+            agent.y += (agent.deskY - agent.y) * 0.12;
+            if (!agent.message) {
+              agent.message = "Standby bos";
+            }
+          } else {
+            // Silence all other agents completely so only the queried person talks
+            agent.message = null;
+            agent.messageTimer = 0;
           }
         }
 
@@ -1543,20 +1553,32 @@ export default function OfficeCanvas({
         "Kopi seduh botolan teman kurir kargo! 📦",
         "Kopi petik merah asli Takengon Gayo! 🌿"
       ];
-      agentsRef.current.forEach((a, idx) => {
-        a.activity = "drinking";
-        a.waitTimer = 5.5;
-        a.sipTimer = 5.5;
-        a.message = coffeeQuotes[idx % coffeeQuotes.length];
-        a.messageTimer = 4.5;
-      });
+      if (selectedAgent) {
+        // If an agent is selected, ONLY the selected agent drinks and says coffee quote!
+        const target = agentsRef.current.find(a => a.id === selectedAgent);
+        if (target) {
+          target.activity = "drinking";
+          target.waitTimer = 5.5;
+          target.sipTimer = 5.5;
+          target.message = "Ngopi dulu sebentar ya bos! ☕";
+          target.messageTimer = 4.5;
+        }
+      } else {
+        agentsRef.current.forEach((a, idx) => {
+          a.activity = "drinking";
+          a.waitTimer = 5.5;
+          a.sipTimer = 5.5;
+          a.message = coffeeQuotes[idx % coffeeQuotes.length];
+          a.messageTimer = 4.5;
+        });
+      }
 
       if (onOfficeEvent) {
         onOfficeEvent({
           id: Math.random().toString(),
           time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
-          speaker: "Ramu HQ ☕",
-          message: "Coffee break serentak! Seluruh 11 agen menikmati seduhan kopi Nusantara bersama.",
+          speaker: selectedAgent ? (selectedAgent.split(" ")[0] + " ☕") : "Ramu HQ ☕",
+          message: selectedAgent ? "Rehat ngopi specialty sejenak." : "Coffee break serentak! Seluruh 11 agen menikmati seduhan kopi Nusantara bersama.",
           type: "system"
         });
       }
@@ -1675,7 +1697,7 @@ export default function OfficeCanvas({
       const dy = y - agent.y;
       if (Math.sqrt(dx * dx + dy * dy) < 28) {
         clickedAgent = agent.id as AgentRole;
-        // Trigger live coffee sip, happy eyes & greetings
+        // Trigger live coffee sip, happy eyes & greetings ONLY for this agent
         agent.sipTimer = 3.8;
         const agentGreetings = [
           "Halo bos! Mau ngopi atau ada task baru? ☕",
@@ -1685,6 +1707,10 @@ export default function OfficeCanvas({
         ];
         agent.message = agentGreetings[Math.floor(Math.random() * agentGreetings.length)];
         agent.messageTimer = 3.5;
+      } else {
+        // Clear speech message on all other agents
+        agent.message = null;
+        agent.messageTimer = 0;
       }
     });
 
