@@ -146,7 +146,7 @@ const RND_DATA = [
 ];
 
 export default function ControlPanel({ selectedAgent, onClose }: ControlPanelProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [conversations, setConversations] = useState<Record<string, ChatMessage[]>>({});
   const [isTyping, setIsTyping] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -154,9 +154,19 @@ export default function ControlPanel({ selectedAgent, onClose }: ControlPanelPro
   useEffect(() => {
     if (selectedAgent) {
       const config = AGENT_CONFIGS[selectedAgent as keyof typeof AGENT_CONFIGS];
-      setMessages([{ sender: "agent", text: config?.greeting || "Halo bos! Saya siap berdiskusi seputar pekerjaan hari ini." }]);
+      setConversations(prev => {
+        if (!prev[selectedAgent] || prev[selectedAgent].length === 0) {
+          return {
+            ...prev,
+            [selectedAgent]: [{ sender: "agent", text: config?.greeting || "Halo bos! Saya siap berdiskusi seputar pekerjaan hari ini." }]
+          };
+        }
+        return prev;
+      });
     }
   }, [selectedAgent]);
+
+  const messages = (selectedAgent && conversations[selectedAgent]) ? conversations[selectedAgent] : [];
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -228,9 +238,14 @@ export default function ControlPanel({ selectedAgent, onClose }: ControlPanelPro
   };
 
   const handleAction = async (action: string, label: string) => {
+    if (!selectedAgent) return;
+    const currentAgent = selectedAgent;
     const historyPayload = messages.map(m => ({ sender: m.sender, text: m.text }));
     
-    setMessages(prev => [...prev, { sender: "user", text: label }]);
+    setConversations(prev => ({
+      ...prev,
+      [currentAgent]: [...(prev[currentAgent] || []), { sender: "user", text: label }]
+    }));
     setIsTyping(true);
 
     try {
@@ -255,9 +270,15 @@ export default function ControlPanel({ selectedAgent, onClose }: ControlPanelPro
         replyText = responseJson.data.reply;
       }
 
-      setMessages(prev => [...prev, { sender: "agent", text: replyText }]);
+      setConversations(prev => ({
+        ...prev,
+        [currentAgent]: [...(prev[currentAgent] || []), { sender: "agent", text: replyText }]
+      }));
     } catch (err) {
-      setMessages(prev => [...prev, { sender: "agent", text: "Koneksi ke backend terputus. Mohon periksa jaringan server." }]);
+      setConversations(prev => ({
+        ...prev,
+        [currentAgent]: [...(prev[currentAgent] || []), { sender: "agent", text: "Koneksi ke backend terputus. Mohon periksa jaringan server." }]
+      }));
     } finally {
       setIsTyping(false);
     }

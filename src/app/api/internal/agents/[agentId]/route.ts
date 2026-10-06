@@ -474,6 +474,26 @@ export async function POST(
 
     const agentIntel = AGENT_INTELLIGENCE[agentId.toLowerCase()] || AGENT_INTELLIGENCE["rama"];
 
+    // Retrieve live working memory from database (active tasks & latest meeting)
+    const [recentTasks, latestMeeting] = await Promise.all([
+      prisma.agentTask.findMany({
+        where: { status: { in: ["PENDING", "IN_PROGRESS"] } },
+        take: 4,
+        orderBy: { createdAt: "desc" }
+      }).catch(() => []),
+      prisma.meetingSession.findFirst({
+        orderBy: { createdAt: "desc" }
+      }).catch(() => null)
+    ]);
+
+    const taskMemorySummary = recentTasks.length > 0
+      ? recentTasks.map(t => `- [${t.status}] ${t.title} (Divisi: ${t.role})`).join("\n")
+      : "Tidak ada tugas tertunda, semua operasional lancar.";
+
+    const meetingMemorySummary = latestMeeting
+      ? `Topik: "${latestMeeting.topic}" - Ringkasan: ${latestMeeting.summary || "Kesepakatan tercapai."}`
+      : "Belum ada rapat baru.";
+
     // 1. Try real Gemini API if valid key is available
     if (hasValidGeminiKey) {
       try {
@@ -482,7 +502,13 @@ export async function POST(
           model: "gemini-3.5-flash-lite",
           systemInstruction: `Kamu adalah ${agentIntel.name}, ${agentIntel.roleTitle} di Ramu Roastery (Spesialis Kopi Nusantara). Divisi: ${agentIntel.department}. Kepribadian: ${agentIntel.personality}.
 Waktu operasional saat ini: ${formattedDate} (${greeting}).
-Gunakan Bahasa Indonesia natural dan profesional ala startup roastery modern. Jika menyapa waktu, selalu gunakan sapaan waktu nyata saat ini (${greeting}). Berikan insight operasional nyata, tanggapi pertanyaan spesifik user dengan kontekstual, jangan kaku, dan proaktif mengajak berdiskusi atau menawarkan opsi tindakan.`,
+
+MEMORI KERJA OPERASIONAL TERBARU:
+- Rapat Terakhir: ${meetingMemorySummary}
+- Tugas Aktif yang Sedang Dikerjakan Tim:
+${taskMemorySummary}
+
+Gunakan Bahasa Indonesia natural dan profesional ala startup roastery modern. Jika menyapa waktu, selalu gunakan sapaan waktu nyata saat ini (${greeting}). Kamu mengingat tugas dan hasil rapat di atas. Jika user/owner bertanya tentang apa yang sedang kamu/tim kerjakan atau menindaklanjuti rapat, gunakan memori kerja tersebut secara cerdas. Berikan insight operasional nyata, tanggapi pertanyaan spesifik user dengan kontekstual, jangan kaku, dan proaktif mengajak berdiskusi atau menawarkan opsi tindakan.`,
           tools: [
             { functionDeclarations: [checkStockDeclaration, reportRevenueDeclaration, createTaskDeclaration] }
           ]
@@ -549,6 +575,25 @@ Gunakan Bahasa Indonesia natural dan profesional ala startup roastery modern. Ji
     }
 
     // 2. High-Fidelity Contextual Local Cognitive Engine
+    const lowerUser = userMessage.toLowerCase();
+    if (lowerUser.includes("kerja") || lowerUser.includes("tugas") || lowerUser.includes("meeting") || lowerUser.includes("rapat") || lowerUser.includes("lagi apa") || lowerUser.includes("sedang apa")) {
+      if (recentTasks.length > 0) {
+        const relevantTasks = recentTasks.filter(t => 
+          t.role === "CROSS_DEPARTMENT" || 
+          t.role.toLowerCase().includes(agentIntel.department.toLowerCase()) ||
+          t.role.toLowerCase().includes(agentIntel.name.toLowerCase())
+        );
+        const displayTasks = relevantTasks.length > 0 ? relevantTasks : recentTasks;
+        const taskList = displayTasks.map(t => `• ${t.title} [Status: ${t.status}]`).join("\n");
+        return NextResponse.json({
+          success: true,
+          data: {
+            reply: `Siap bos! Dari memori kerja operasional saya saat ini, ada tugas aktif yang sedang dikerjakan tim:\n\n${taskList}\n\n${latestMeeting ? `📌 Terkait rapat terakhir: "${latestMeeting.topic}"\n\n` : ""}Apakah ada arahan atau penyesuaian prioritas untuk tugas ini, bos?`
+          }
+        });
+      }
+    }
+
     const reply = await agentIntel.handleLocalReply(userMessage, history);
 
     // Save log to database
