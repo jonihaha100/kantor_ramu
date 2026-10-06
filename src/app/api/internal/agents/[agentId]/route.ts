@@ -410,6 +410,52 @@ Visual estetik dan storytelling proses roasting artisanal kita terbukti ampuh me
   }
 };
 
+// Helper to calculate Indonesian greeting and formatted time based on client or WIB
+function getTimeContext(clientTime?: string, timezone?: string) {
+  const targetTz = timezone || "Asia/Jakarta";
+  const date = clientTime ? new Date(clientTime) : new Date();
+
+  let hour = 12;
+  try {
+    const hourStr = new Intl.DateTimeFormat("id-ID", {
+      timeZone: targetTz,
+      hour: "numeric",
+      hour12: false
+    }).format(date);
+    hour = parseInt(hourStr, 10);
+  } catch {
+    hour = (date.getUTCHours() + 7) % 24;
+  }
+
+  let greeting = "Selamat siang";
+  if (hour >= 4 && hour < 11) {
+    greeting = "Selamat pagi";
+  } else if (hour >= 11 && hour < 15) {
+    greeting = "Selamat siang";
+  } else if (hour >= 15 && hour < 18) {
+    greeting = "Selamat sore";
+  } else {
+    greeting = "Selamat malam";
+  }
+
+  let formattedDate = "";
+  try {
+    formattedDate = new Intl.DateTimeFormat("id-ID", {
+      timeZone: targetTz,
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    }).format(date);
+  } catch {
+    formattedDate = date.toISOString();
+  }
+
+  return { greeting, hour, formattedDate, targetTz };
+}
+
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ agentId: string }> }
@@ -419,6 +465,7 @@ export async function POST(
     const body = await req.json();
     const userMessage = body.message || "Halo.";
     const history = body.history || [];
+    const { greeting, formattedDate } = getTimeContext(body.clientTime, body.timezone);
 
     // Optional dynamic key sent via header or body
     const headerKey = req.headers.get("x-gemini-key") || "";
@@ -433,7 +480,9 @@ export async function POST(
         const genAI = new GoogleGenerativeAI(effectiveKey);
         const model = genAI.getGenerativeModel({
           model: "gemini-3.5-flash-lite",
-          systemInstruction: `Kamu adalah ${agentIntel.name}, ${agentIntel.roleTitle} di Ramu Roastery (Spesialis Kopi Nusantara). Divisi: ${agentIntel.department}. Kepribadian: ${agentIntel.personality}. Gunakan Bahasa Indonesia natural dan profesional ala startup roastery modern. Berikan insight operasional nyata, tanggapi pertanyaan spesifik user dengan kontekstual, jangan kaku, dan proaktif mengajak berdiskusi atau menawarkan opsi tindakan.`,
+          systemInstruction: `Kamu adalah ${agentIntel.name}, ${agentIntel.roleTitle} di Ramu Roastery (Spesialis Kopi Nusantara). Divisi: ${agentIntel.department}. Kepribadian: ${agentIntel.personality}.
+Waktu operasional saat ini: ${formattedDate} (${greeting}).
+Gunakan Bahasa Indonesia natural dan profesional ala startup roastery modern. Jika menyapa waktu, selalu gunakan sapaan waktu nyata saat ini (${greeting}). Berikan insight operasional nyata, tanggapi pertanyaan spesifik user dengan kontekstual, jangan kaku, dan proaktif mengajak berdiskusi atau menawarkan opsi tindakan.`,
           tools: [
             { functionDeclarations: [checkStockDeclaration, reportRevenueDeclaration, createTaskDeclaration] }
           ]

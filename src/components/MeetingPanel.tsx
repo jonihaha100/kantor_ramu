@@ -63,7 +63,11 @@ export default function MeetingPanel({ onClose, onSpeakerChange }: MeetingPanelP
       const res = await fetch("/api/internal/meeting", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic: finalTopic })
+        body: JSON.stringify({ 
+          topic: finalTopic,
+          clientTime: new Date().toISOString(),
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Jakarta"
+        })
       });
       const json = await res.json();
       if (json.success && json.data.discussion) {

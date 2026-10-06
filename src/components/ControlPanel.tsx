@@ -238,7 +238,12 @@ export default function ControlPanel({ selectedAgent, onClose }: ControlPanelPro
       const res = await fetch(`/api/internal/agents/${apiId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: label, history: historyPayload })
+        body: JSON.stringify({ 
+          message: label, 
+          history: historyPayload,
+          clientTime: new Date().toISOString(),
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Jakarta"
+        })
       });
       
       const responseJson = await res.json();
