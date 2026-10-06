@@ -46,6 +46,7 @@ interface AgentData {
   message: string | null;
   messageTimer: number;
   isOfficeWorker: boolean;
+  sipTimer?: number;
 }
 
 export interface HoveredPropInfo {
@@ -1187,10 +1188,19 @@ export default function OfficeCanvas({
 
         // Normal Activity State Machine
         if (agent.activity === "working") {
+          // Subtle desk movement
           if (Math.random() < 0.03) {
             agent.y = agent.deskY - Math.random() * 2;
           } else {
             agent.y += (agent.deskY - agent.y) * 0.1;
+          }
+
+          // Periodic desk coffee sip (every ~16 seconds for 3.2s)
+          if (!agent.sipTimer) agent.sipTimer = 0;
+          if (agent.sipTimer > 0) {
+            agent.sipTimer -= deltaTime;
+          } else if (Math.random() < 0.0035 && !meetingActiveRef.current) {
+            agent.sipTimer = 3.2; // Take coffee sip!
           }
 
           // Occasional individual break
@@ -1243,18 +1253,47 @@ export default function OfficeCanvas({
           agent.y += Math.sin(timeSec * 2 + agent.x) * 0.15;
         }
 
-        // --- 18. Render Agent Sprite (Stardew Valley Style) ---
-        const px = agent.x - 18; 
-        const py = agent.y - 24; 
-        
+        // Check if agent is currently drinking coffee or in discussion
+        const isDrinking = agent.activity === "drinking" || (agent.sipTimer !== undefined && agent.sipTimer > 0);
+        const isCollaborating = agent.activity === "collaborating_talk" || (meetingActiveRef.current && meetingSpeaker && meetingSpeaker.speaker.toLowerCase().includes(agent.label.toLowerCase()));
+
+        // --- 18. Render Agent Sprite (Stardew Valley Style with Living Eyes & Gestures) ---
+        let px = agent.x - 18; 
+        let py = agent.y - 24; 
+
+        // Dynamic head bobbing & expressive gestures
+        if (isCollaborating) {
+          py += Math.sin(timeSec * 7 + i) * 1.5; // Head nods & expressive gesture cadence
+        } else if (isDrinking) {
+          py -= (Math.sin(timeSec * 6) > 0 ? 1.5 : 0); // Head tilts back when taking sip
+        }
+
         const _ = null;
         const H = agent.hair;
         const S = "#ffc8b4"; 
         const C = agent.color; 
         const P = "#1e293b"; 
         const B = "#3f2b1d"; 
-        const E = "#000000"; 
-        
+        const E = "#0f172a"; 
+        const EYE_SHINE = "#ffffff";
+        const MUG = "#ffffff";
+        const COF = "#78350f";
+
+        // Living Eyes & Natural Blinking Calculation
+        const blinkCycle = (timeSec * 1.8 + i * 1.3) % 4.2;
+        const isBlinking = blinkCycle < 0.16;
+
+        // Eye looking direction (toward conversation partner if collaborating)
+        let eyeOffset = 0; // -1 = left, 0 = forward, +1 = right
+        if (agent.activity === "collaborating_talk" && activeCollabRef.current) {
+          const collab = activeCollabRef.current;
+          const isVisitor = agent.id === collab.visitorId;
+          const otherAgent = agentsRef.current.find(a => a.id === (isVisitor ? collab.targetId : collab.visitorId));
+          if (otherAgent) {
+            eyeOffset = otherAgent.x > agent.x ? 1 : -1;
+          }
+        }
+
         let charGrid = [
           [_, _, H, H, H, H, H, H, H, H, _, _],
           [_, H, H, H, H, H, H, H, H, H, H, _],
@@ -1274,6 +1313,57 @@ export default function OfficeCanvas({
           [_, _, _, B, B, _, _, B, B, _, _, _], 
         ];
 
+        // 1. Living Eye States (Blinking, Looking Direction, Happy Eyes)
+        if (isDrinking) {
+          // Closed smiling crescent eyes ^ ^ while enjoying coffee
+          charGrid[2][4] = "#854d0e"; charGrid[2][7] = "#854d0e";
+          charGrid[3] = [_, H, S, "#854d0e", S, S, S, "#854d0e", S, S, H, _];
+        } else if (isBlinking) {
+          // Natural eyelid blink
+          charGrid[3] = [_, H, S, S, "#854d0e", S, S, "#854d0e", S, S, H, _];
+        } else if (eyeOffset === -1) {
+          // Looking left with shiny pupil glint
+          charGrid[3] = [_, H, S, E, EYE_SHINE, S, E, EYE_SHINE, S, S, H, _];
+        } else if (eyeOffset === 1) {
+          // Looking right with shiny pupil glint
+          charGrid[3] = [_, H, S, S, EYE_SHINE, E, S, EYE_SHINE, E, S, H, _];
+        } else {
+          // Looking forward with bright pupil sparkle
+          charGrid[3] = [_, H, S, S, E, EYE_SHINE, S, E, EYE_SHINE, S, H, _];
+        }
+
+        // 2. Animated Coffee Drinking Gestures (Arms lifted, mug to mouth)
+        if (isDrinking) {
+          // Mug lifted up in front of chest/mouth
+          charGrid[4][4] = MUG; charGrid[4][5] = COF; charGrid[4][6] = COF; charGrid[4][7] = MUG;
+          charGrid[5][4] = S; charGrid[5][5] = MUG; charGrid[5][6] = MUG; charGrid[5][7] = S;
+          // Arms bent inward holding the cup
+          charGrid[6] = [_, _, _, S, C, C, C, C, S, _, _, _];
+          charGrid[7] = [_, _, S, S, C, C, C, C, S, S, _, _];
+          charGrid[8] = [_, _, _, _, S, S, S, S, _, _, _, _];
+        }
+
+        // 3. Discussion Hand Gestures (Dynamic pointing & explaining)
+        if (isCollaborating && !isDrinking) {
+          const gesturePhase = Math.floor(timeSec * 2.8 + i) % 3;
+          if (gesturePhase === 0) {
+            // Left hand raised explaining with open palm
+            charGrid[5][1] = S; charGrid[5][2] = S;
+            charGrid[6][1] = S; charGrid[6][2] = S;
+            charGrid[7] = [_, S, S, C, C, C, C, C, C, S, _, _];
+          } else if (gesturePhase === 1) {
+            // Right hand pointing & emphasizing
+            charGrid[5][9] = S; charGrid[5][10] = S;
+            charGrid[6][9] = S; charGrid[6][10] = S;
+            charGrid[7] = [_, _, S, C, C, C, C, C, C, S, S, _];
+          } else {
+            // Both hands open gesturing enthusiastically
+            charGrid[6][1] = S; charGrid[6][10] = S;
+            charGrid[7] = [S, S, S, C, C, C, C, C, C, S, S, S];
+          }
+        }
+
+        // Walking frame animation
         if (agent.activity === "walking" || agent.activity === "collaborating_walk") {
           const step = Math.floor(timeSec * 8) % 2;
           if (step === 0) {
@@ -1313,6 +1403,35 @@ export default function OfficeCanvas({
 
         drawPixels(px, py, 3, charGrid);
 
+        // Coffee Steam & Slurp Particles when Drinking
+        if (isDrinking) {
+          for (let s = 0; s < 2; s++) {
+            const stY = py + 2 - ((timeSec * 16 + s * 8) % 18);
+            const stX = agent.x + Math.sin(timeSec * 4 + s * 2) * 3;
+            ctx.fillStyle = "rgba(255, 255, 255, 0.65)";
+            ctx.beginPath();
+            ctx.arc(stX, stY, 2, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          if (Math.sin(timeSec * 6) > 0.25) {
+            ctx.fillStyle = "#fef08a";
+            ctx.font = "bold 8px monospace";
+            ctx.textAlign = "center";
+            ctx.fillText("☕ *slurp*", agent.x + 20, py + 6);
+          }
+        }
+
+        // Discussion Sparkle & Idea Accent when Collaborating
+        if (isCollaborating && !isDrinking) {
+          if (Math.sin(timeSec * 8 + i) > 0.4) {
+            ctx.fillStyle = "#38bdf8";
+            ctx.font = "bold 8px monospace";
+            ctx.textAlign = "center";
+            ctx.fillText("💡", agent.x + (Math.sin(timeSec * 4) > 0 ? 20 : -20), py + 2);
+          }
+        }
+
         // Name & Status Badge
         ctx.font = "bold 9px monospace";
         const nameW = ctx.measureText(agent.label).width;
@@ -1333,9 +1452,10 @@ export default function OfficeCanvas({
         ctx.fillText(agent.label, agent.x, tagY + 7);
 
         // Role/Task Pill beneath name
-        if (agent.activity === "working" || agent.activity === "collaborating_talk") {
+        if (agent.activity === "working" || agent.activity === "collaborating_talk" || isDrinking) {
           ctx.font = "bold 7.5px monospace";
-          const badgeW = ctx.measureText(agent.roleBadge).width;
+          const badgeText = isDrinking ? "☕ Coffee Break" : (agent.activity === "collaborating_talk" ? "💬 Collab" : agent.roleBadge);
+          const badgeW = ctx.measureText(badgeText).width;
           const bX = agent.x - badgeW / 2 - 4;
           const bY = tagY + 16;
 
@@ -1344,8 +1464,8 @@ export default function OfficeCanvas({
           ctx.roundRect(bX, bY, badgeW + 8, 12, 3);
           ctx.fill();
 
-          ctx.fillStyle = agent.activity === "collaborating_talk" ? "#38bdf8" : "#86efac";
-          ctx.fillText(agent.activity === "collaborating_talk" ? "💬 Collab" : agent.roleBadge, agent.x, bY + 6);
+          ctx.fillStyle = isDrinking ? "#fef08a" : (agent.activity === "collaborating_talk" ? "#38bdf8" : "#86efac");
+          ctx.fillText(badgeText, agent.x, bY + 6);
         }
 
         // Agent Speech Bubble
@@ -1354,8 +1474,25 @@ export default function OfficeCanvas({
         }
       });
 
-      // --- 19. Interactive Meeting Call Button on Canvas ---
-      const btnX = 340; const btnY = 535; const btnW = 120; const btnH = 32;
+      // --- 19. Interactive Canvas Control Buttons ---
+      // 1. Coffee Break Button
+      const cbX = 205; const cbY = 535; const cbW = 125; const cbH = 32;
+      ctx.fillStyle = "#b45309";
+      ctx.beginPath();
+      ctx.roundRect(cbX, cbY, cbW, cbH, 8);
+      ctx.fill();
+      ctx.strokeStyle = "#fbbf24";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 11px monospace";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("☕ Coffee Break", cbX + cbW/2, cbY + cbH/2);
+
+      // 2. Call Meeting Button
+      const btnX = 345; const btnY = 535; const btnW = 125; const btnH = 32;
       ctx.fillStyle = meetingActiveRef.current ? "#ef4444" : "#4f46e5";
       ctx.beginPath();
       ctx.roundRect(btnX, btnY, btnW, btnH, 8);
@@ -1368,7 +1505,7 @@ export default function OfficeCanvas({
       ctx.font = "bold 11px monospace";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(meetingActiveRef.current ? "🔴 End Meeting" : "☕ Call Meeting", btnX + btnW/2, btnY + btnH/2);
+      ctx.fillText(meetingActiveRef.current ? "🔴 End Meeting" : "📢 Call Meeting", btnX + btnW/2, btnY + btnH/2);
 
       animationFrameId = requestAnimationFrame(render);
     };
@@ -1389,8 +1526,43 @@ export default function OfficeCanvas({
     const x = (e.clientX - rect.left) * (canvas.width / rect.width);
     const y = (e.clientY - rect.top) * (canvas.height / rect.height);
 
-    // 1. Meeting Button click (340 to 460, 535 to 567)
-    if (x >= 340 && x <= 460 && y >= 535 && y <= 567) {
+    // 1. Coffee Break Button click (205 to 330, 535 to 567)
+    if (x >= 205 && x <= 330 && y >= 535 && y <= 567) {
+      const coffeeQuotes = [
+        "Espresso double shot biar fokus! ☕",
+        "Americano panas pas buat rekap margin! ☕",
+        "Caramel latte dingin pelepas penat chat CS ☕",
+        "Kopi hitam tubruk teman ngoding Next.js 💻",
+        "Cupping Bajawa Honey 87.5 poin! 🍯",
+        "Es kopi susu buat ide konten viral TikTok! ✨",
+        "Cold brew nitro penambah energi scale-up ads! 🚀",
+        "Filter V60 buat meeting deal kafe B2B! ☕",
+        "Fresh roasted langsung dari drum Probat! 🔥",
+        "Kopi seduh botolan teman kurir kargo! 📦",
+        "Kopi petik merah asli Takengon Gayo! 🌿"
+      ];
+      agentsRef.current.forEach((a, idx) => {
+        a.activity = "drinking";
+        a.waitTimer = 5.5;
+        a.sipTimer = 5.5;
+        a.message = coffeeQuotes[idx % coffeeQuotes.length];
+        a.messageTimer = 4.5;
+      });
+
+      if (onOfficeEvent) {
+        onOfficeEvent({
+          id: Math.random().toString(),
+          time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+          speaker: "Ramu HQ ☕",
+          message: "Coffee break serentak! Seluruh 11 agen menikmati seduhan kopi Nusantara bersama.",
+          type: "system"
+        });
+      }
+      return;
+    }
+
+    // 2. Meeting Button click (345 to 470, 535 to 567)
+    if (x >= 345 && x <= 470 && y >= 535 && y <= 567) {
       meetingActiveRef.current = !meetingActiveRef.current;
       if (onMeetingStart) {
         onMeetingStart();
@@ -1398,7 +1570,7 @@ export default function OfficeCanvas({
       return;
     }
 
-    // 2. Interactive Mochi the Cat click
+    // 3. Interactive Mochi the Cat click
     const cat = catRef.current;
     const catDist = Math.sqrt((x - cat.x) ** 2 + (y - cat.y) ** 2);
     if (catDist < 24) {
@@ -1426,7 +1598,7 @@ export default function OfficeCanvas({
       return;
     }
 
-    // 3. Interactive RamuBot the Roomba click
+    // 4. Interactive RamuBot the Roomba click
     const rb = roombaRef.current;
     const rbDist = Math.sqrt((x - rb.x) ** 2 + (y - rb.y) ** 2);
     if (rbDist < 24) {
@@ -1449,7 +1621,7 @@ export default function OfficeCanvas({
       return;
     }
 
-    // 4. Interactive Piko the Mouse click
+    // 5. Interactive Piko the Mouse click
     const ms = mouseRef.current;
     const msDist = Math.sqrt((x - ms.x) ** 2 + (y - ms.y) ** 2);
     if (msDist < 20) {
@@ -1458,7 +1630,7 @@ export default function OfficeCanvas({
       return;
     }
 
-    // 5. Interactive Roaster Machine click
+    // 6. Interactive Roaster Machine click
     if (Math.abs(x - ROASTER_MACHINE.x) < 40 && Math.abs(y - ROASTER_MACHINE.y) < 40) {
       propBubblesRef.current.roaster = {
         message: "♨️ Drum Probat di 205°C! Batch #15 siap first crack!",
@@ -1467,7 +1639,7 @@ export default function OfficeCanvas({
       return;
     }
 
-    // 6. Interactive Espresso Bar click
+    // 7. Interactive Espresso Bar click
     if (Math.abs(x - ESPRESSO_BAR.x) < 45 && Math.abs(y - ESPRESSO_BAR.y) < 30) {
       propBubblesRef.current.bar = {
         message: "☕ *Ssshh* Ekstraksi espresso 9 bar sempurna! Crema tebal keemasan.",
@@ -1476,7 +1648,7 @@ export default function OfficeCanvas({
       return;
     }
 
-    // 7. Interactive Pallet Jack click
+    // 8. Interactive Pallet Jack click
     if (Math.abs(x - PALLET_JACK.x) < 35 && Math.abs(y - PALLET_JACK.y) < 25) {
       propBubblesRef.current.pallet = {
         message: "🚜 180kg biji sangrai siap dikirim ke mitra kafe Jabodetabek!",
@@ -1485,7 +1657,7 @@ export default function OfficeCanvas({
       return;
     }
 
-    // 8. Interactive Server Rack click
+    // 9. Interactive Server Rack click
     if (Math.abs(x - SERVER_RACK.x) < 25 && Math.abs(y - SERVER_RACK.y) < 30) {
       propBubblesRef.current.server = {
         message: "🟢 Server Ramu Store online! Uptime 99.98%, load average 0.08.",
@@ -1494,13 +1666,23 @@ export default function OfficeCanvas({
       return;
     }
 
-    // 9. Agent selection
+    // 10. Agent selection with interactive coffee sip & living greeting
     let clickedAgent: AgentRole | null = null;
     agentsRef.current.forEach((agent) => {
       const dx = x - agent.x;
       const dy = y - agent.y;
       if (Math.sqrt(dx * dx + dy * dy) < 28) {
         clickedAgent = agent.id as AgentRole;
+        // Trigger live coffee sip, happy eyes & greetings
+        agent.sipTimer = 3.8;
+        const agentGreetings = [
+          "Halo bos! Mau ngopi atau ada task baru? ☕",
+          "Standby bos! Sambil seruput kopi fresh. ☕",
+          "Kopi Ramu emang paling nikmat nemenin kerja! ☕",
+          "Siap laksanakan arahan! Ngopi dulu sebentar. ☕"
+        ];
+        agent.message = agentGreetings[Math.floor(Math.random() * agentGreetings.length)];
+        agent.messageTimer = 3.5;
       }
     });
 
