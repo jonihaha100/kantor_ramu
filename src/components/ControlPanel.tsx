@@ -148,10 +148,29 @@ const RND_DATA = [
 ];
 
 export default function ControlPanel({ selectedAgent, onClose, theme = "retro", onAgentSpeech }: ControlPanelProps) {
-  const [conversations, setConversations] = useState<Record<string, ChatMessage[]>>({});
+  const [conversations, setConversations] = useState<Record<string, ChatMessage[]>>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("ramu_agent_conversations");
+        if (saved) return JSON.parse(saved);
+      } catch (e) {
+        console.warn("Failed to load saved agent conversations:", e);
+      }
+    }
+    return {};
+  });
   const [isTyping, setIsTyping] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-persist conversations to localStorage whenever updated
+  useEffect(() => {
+    if (typeof window !== "undefined" && Object.keys(conversations).length > 0) {
+      try {
+        localStorage.setItem("ramu_agent_conversations", JSON.stringify(conversations));
+      } catch (e) {}
+    }
+  }, [conversations]);
 
   useEffect(() => {
     if (selectedAgent) {
@@ -167,6 +186,22 @@ export default function ControlPanel({ selectedAgent, onClose, theme = "retro", 
       });
     }
   }, [selectedAgent]);
+
+  const handleClearCurrentChat = () => {
+    if (!selectedAgent) return;
+    if (confirm(`Hapus riwayat chat dengan ${selectedAgent}?`)) {
+      setConversations(prev => {
+        const updated = { ...prev };
+        delete updated[selectedAgent];
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.setItem("ramu_agent_conversations", JSON.stringify(updated));
+          } catch (e) {}
+        }
+        return updated;
+      });
+    }
+  };
 
   const messages = (selectedAgent && conversations[selectedAgent]) ? conversations[selectedAgent] : [];
 
@@ -308,18 +343,30 @@ export default function ControlPanel({ selectedAgent, onClose, theme = "retro", 
             </div>
           </div>
 
-          <button 
-            onClick={onClose} 
-            className="p-1 text-[#4a260c] hover:text-[#1f0e03] hover:bg-[#b8754e] rounded-md transition-colors"
-            title="Tutup Panel"
-          >
-            <X size={16} />
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button 
+              onClick={handleClearCurrentChat}
+              className="px-2 py-0.5 text-[9px] font-bold text-[#4a260c] hover:text-[#1f0e03] bg-[#ba7750] hover:bg-[#a96640] rounded border border-[#945633] transition-colors font-mono shadow-sm"
+              title="Hapus riwayat chat dengan agen ini"
+            >
+              🔄 Reset Chat
+            </button>
+            <button 
+              onClick={onClose} 
+              className="p-1 text-[#4a260c] hover:text-[#1f0e03] hover:bg-[#b8754e] rounded-md transition-colors"
+              title="Tutup Panel"
+            >
+              <X size={16} />
+            </button>
+          </div>
         </div>
 
-        {/* Role Sub-bar */}
-        <div className="px-3 py-1.5 bg-[#d38e65] border-b border-[#ad6e49] text-[10px] text-[#4a260c] truncate">
-          {config?.roleDescription || "Spesialis operasional roastery Ramu."}
+        {/* Role Sub-bar with Memory Status */}
+        <div className="px-3 py-1 bg-[#d38e65] border-b border-[#ad6e49] text-[9.5px] text-[#4a260c] flex items-center justify-between gap-1">
+          <span className="truncate max-w-[210px]">{config?.roleDescription || "Spesialis operasional roastery Ramu."}</span>
+          <span className="text-[8.5px] bg-[#c37e55] px-1.5 py-0.5 rounded text-[#2c1505] font-bold font-mono shrink-0 shadow-sm">
+            💾 Memori Aktif
+          </span>
         </div>
 
         {/* Chat Messages */}
@@ -409,9 +456,14 @@ export default function ControlPanel({ selectedAgent, onClose, theme = "retro", 
             <div className="text-[11px] text-indigo-400">{role}</div>
           </div>
         </div>
-        <button onClick={onClose} className="p-1.5 hover:text-white hover:bg-slate-800 rounded-lg">
-          <X size={18}/>
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={handleClearCurrentChat} className="px-2 py-1 text-[10px] text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded transition-colors" title="Reset Chat">
+            🔄 Reset
+          </button>
+          <button onClick={onClose} className="p-1.5 hover:text-white hover:bg-slate-800 rounded-lg">
+            <X size={18}/>
+          </button>
+        </div>
       </div>
       <div className="flex-1 p-4 overflow-y-auto space-y-4 text-xs">
         {messages.map((msg, i) => (
