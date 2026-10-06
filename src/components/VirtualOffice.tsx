@@ -153,26 +153,6 @@ export default function VirtualOffice() {
 
   const latestEvent = officeEvents[0] || null;
 
-  // Initialize Owner Auth from localStorage & fetch initial data
-  useEffect(() => {
-    const savedAuth = localStorage.getItem("ramu_owner_auth");
-    if (savedAuth === "false") {
-      setIsOwnerLoggedIn(false);
-    }
-    const savedPin = localStorage.getItem("ramu_owner_pin");
-    if (savedPin) setOwnerPin(savedPin);
-
-    const savedTgToken = localStorage.getItem("ramu_tg_token");
-    if (savedTgToken) setTelegramToken(savedTgToken);
-    const savedTgChat = localStorage.getItem("ramu_tg_chat");
-    if (savedTgChat) setTelegramChatId(savedTgChat);
-
-    fetchProducts();
-    fetchOrders();
-    fetchReports();
-    fetchWaChats();
-  }, []);
-
   const fetchProducts = async () => {
     setIsProductsLoading(true);
     try {
@@ -225,6 +205,41 @@ export default function VirtualOffice() {
     }
   };
 
+  const fetchWaChats = async () => {
+    setIsWaLoading(true);
+    try {
+      const res = await fetch("/api/internal/whatsapp");
+      const json = await res.json();
+      if (json.success && json.data) {
+        setWaChats(json.data.recentChats || []);
+      }
+    } catch (err) {
+      console.error("Fetch WhatsApp failed:", err);
+    } finally {
+      setIsWaLoading(false);
+    }
+  };
+
+  // Initialize Owner Auth from localStorage & fetch initial data
+  useEffect(() => {
+    const savedAuth = localStorage.getItem("ramu_owner_auth");
+    if (savedAuth === "false") {
+      setIsOwnerLoggedIn(false);
+    }
+    const savedPin = localStorage.getItem("ramu_owner_pin");
+    if (savedPin) setOwnerPin(savedPin);
+
+    const savedTgToken = localStorage.getItem("ramu_tg_token");
+    if (savedTgToken) setTelegramToken(savedTgToken);
+    const savedTgChat = localStorage.getItem("ramu_tg_chat");
+    if (savedTgChat) setTelegramChatId(savedTgChat);
+
+    fetchProducts();
+    fetchOrders();
+    fetchReports();
+    fetchWaChats();
+  }, []);
+
   const handleExecuteClosing = async () => {
     if (!confirm(`Konfirmasi Tutup Buku Bulanan Periode ${selectedClosingMonth}?\n\nRekonsiliasi omzet, HPP, OPEX, dan persediaan akan diverifikasi dan dikunci secara resmi oleh GM Rama & Fina (Finance Lead).`)) {
       return;
@@ -271,21 +286,6 @@ export default function VirtualOffice() {
       setCronResultMsg(`❌ Error: ${err.message}`);
     } finally {
       setIsTestingCron(false);
-    }
-  };
-
-  const fetchWaChats = async () => {
-    setIsWaLoading(true);
-    try {
-      const res = await fetch("/api/internal/whatsapp");
-      const json = await res.json();
-      if (json.success && json.data) {
-        setWaChats(json.data.recentChats || []);
-      }
-    } catch (err) {
-      console.error("Fetch WhatsApp failed:", err);
-    } finally {
-      setIsWaLoading(false);
     }
   };
 
