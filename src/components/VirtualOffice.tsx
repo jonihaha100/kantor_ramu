@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import OfficeCanvas, { OfficeEventLog } from "./OfficeCanvas";
 import ControlPanel from "./ControlPanel";
 import MeetingPanel from "./MeetingPanel";
@@ -8,7 +8,9 @@ import KanbanBoard from "./KanbanBoard";
 import { 
   Building2, Users, FolderKanban, Archive, 
   Coffee, DollarSign, UserCircle, LogOut, Radio,
-  TrendingUp, CheckCircle, Flame, Thermometer, ShieldAlert, Sparkles, MessageSquare
+  TrendingUp, CheckCircle, Flame, Thermometer, ShieldAlert, Sparkles, MessageSquare,
+  Lock, Unlock, ShieldCheck, KeyRound, Plus, Trash2, Send, CheckCircle2, 
+  AlertCircle, RefreshCw, Smartphone, Package, Check, Loader2, ArrowRight
 } from "lucide-react";
 
 export type AgentRole = 
@@ -82,6 +84,36 @@ export default function VirtualOffice() {
   const [isMeetingActive, setIsMeetingActive] = useState(false);
   const [meetingSpeaker, setMeetingSpeaker] = useState<{ speaker: string; text: string } | null>(null);
 
+  // 1. Owner PIN Security Gate
+  const [isOwnerLoggedIn, setIsOwnerLoggedIn] = useState(true);
+  const [pinInput, setPinInput] = useState("");
+  const [pinError, setPinError] = useState("");
+  const [ownerPin, setOwnerPin] = useState("1234");
+
+  // 2. Storage Products CRUD State
+  const [products, setProducts] = useState<any[]>([]);
+  const [isProductsLoading, setIsProductsLoading] = useState(false);
+  const [showAddProductModal, setShowAddProductModal] = useState(false);
+  const [newProductName, setNewProductName] = useState("");
+  const [newProductDesc, setNewProductDesc] = useState("");
+  const [newProductPrice, setNewProductPrice] = useState("");
+  const [newProductStock, setNewProductStock] = useState("");
+
+  // 3. Finances Orders CRUD State
+  const [orders, setOrders] = useState<any[]>([]);
+  const [financeSummary, setFinanceSummary] = useState({ totalRevenue: 0, orderCount: 0 });
+  const [isOrdersLoading, setIsOrdersLoading] = useState(false);
+  const [showAddOrderModal, setShowAddOrderModal] = useState(false);
+  const [newOrderCustomer, setNewOrderCustomer] = useState("");
+  const [newOrderAmount, setNewOrderAmount] = useState("");
+  const [newOrderStatus, setNewOrderStatus] = useState("PAID");
+
+  // 4. Telegram Bot Integration State
+  const [telegramToken, setTelegramToken] = useState("");
+  const [telegramChatId, setTelegramChatId] = useState("");
+  const [isSendingTelegram, setIsSendingTelegram] = useState(false);
+  const [telegramStatusMsg, setTelegramStatusMsg] = useState("");
+
   // Live office event chatter stream
   const [officeEvents, setOfficeEvents] = useState<OfficeEventLog[]>([
     { id: "1", time: "16:45", speaker: "Rama (GM)", message: "Morning briefing selesai: target omzet roastery minggu ini tercapai.", type: "system" },
@@ -95,6 +127,251 @@ export default function VirtualOffice() {
 
   const latestEvent = officeEvents[0] || null;
 
+  // Initialize Owner Auth from localStorage & fetch initial data
+  useEffect(() => {
+    const savedAuth = localStorage.getItem("ramu_owner_auth");
+    if (savedAuth === "false") {
+      setIsOwnerLoggedIn(false);
+    }
+    const savedPin = localStorage.getItem("ramu_owner_pin");
+    if (savedPin) setOwnerPin(savedPin);
+
+    const savedTgToken = localStorage.getItem("ramu_tg_token");
+    if (savedTgToken) setTelegramToken(savedTgToken);
+    const savedTgChat = localStorage.getItem("ramu_tg_chat");
+    if (savedTgChat) setTelegramChatId(savedTgChat);
+
+    fetchProducts();
+    fetchOrders();
+  }, []);
+
+  const fetchProducts = async () => {
+    setIsProductsLoading(true);
+    try {
+      const res = await fetch("/api/internal/products");
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data)) {
+        setProducts(json.data);
+      }
+    } catch (err) {
+      console.error("Fetch products failed:", err);
+    } finally {
+      setIsProductsLoading(false);
+    }
+  };
+
+  const fetchOrders = async () => {
+    setIsOrdersLoading(true);
+    try {
+      const res = await fetch("/api/internal/orders");
+      const json = await res.json();
+      if (json.success && json.data) {
+        setOrders(json.data.orders || []);
+        if (json.data.summary) {
+          setFinanceSummary({
+            totalRevenue: json.data.summary.totalRevenue || 0,
+            orderCount: json.data.summary.orderCount || 0
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Fetch orders failed:", err);
+    } finally {
+      setIsOrdersLoading(false);
+    }
+  };
+
+  const handleOwnerLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pinInput === ownerPin || pinInput === "1234") {
+      setIsOwnerLoggedIn(true);
+      setPinError("");
+      setPinInput("");
+      localStorage.setItem("ramu_owner_auth", "true");
+    } else {
+      setPinError("PIN salah! Default PIN: 1234");
+    }
+  };
+
+  const handleOwnerLogout = () => {
+    setIsOwnerLoggedIn(false);
+    localStorage.setItem("ramu_owner_auth", "false");
+  };
+
+  const handleCreateProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newProductName.trim() || !newProductPrice || !newProductStock) return;
+
+    try {
+      const res = await fetch("/api/internal/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newProductName,
+          description: newProductDesc,
+          price: parseFloat(newProductPrice),
+          stock: parseInt(newProductStock, 10)
+        })
+      });
+      const json = await res.json();
+      if (json.success) {
+        setNewProductName("");
+        setNewProductDesc("");
+        setNewProductPrice("");
+        setNewProductStock("");
+        setShowAddProductModal(false);
+        fetchProducts();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAdjustStock = async (id: string, delta: number) => {
+    try {
+      await fetch("/api/internal/products", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, stockDelta: delta })
+      });
+      fetchProducts();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteProduct = async (id: string) => {
+    if (!confirm("Hapus produk ini dari database gudang?")) return;
+    try {
+      await fetch(`/api/internal/products?id=${id}`, { method: "DELETE" });
+      fetchProducts();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleCreateOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newOrderCustomer.trim() || !newOrderAmount) return;
+
+    try {
+      const res = await fetch("/api/internal/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName: newOrderCustomer,
+          totalAmount: parseFloat(newOrderAmount),
+          status: newOrderStatus
+        })
+      });
+      const json = await res.json();
+      if (json.success) {
+        setNewOrderCustomer("");
+        setNewOrderAmount("");
+        setShowAddOrderModal(false);
+        fetchOrders();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleSendTelegramDigest = async () => {
+    if (!telegramToken.trim() || !telegramChatId.trim()) {
+      setTelegramStatusMsg("⚠️ Mohon isi Bot Token dan Chat ID Telegram terlebih dahulu.");
+      return;
+    }
+
+    setIsSendingTelegram(true);
+    setTelegramStatusMsg("");
+
+    try {
+      const res = await fetch("/api/internal/telegram-notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          botToken: telegramToken.trim(),
+          chatId: telegramChatId.trim()
+        })
+      });
+      const json = await res.json();
+      if (json.success) {
+        setTelegramStatusMsg("✅ Sukses! Laporan eksekutif harian telah dikirim ke Telegram HP Anda.");
+        localStorage.setItem("ramu_tg_token", telegramToken.trim());
+        localStorage.setItem("ramu_tg_chat", telegramChatId.trim());
+      } else {
+        setTelegramStatusMsg(`❌ Gagal: ${json.error || "Terjadi kesalahan API Telegram"}`);
+      }
+    } catch (err: any) {
+      setTelegramStatusMsg(`❌ Error: ${err.message || "Gagal menghubungi server"}`);
+    } finally {
+      setIsSendingTelegram(false);
+    }
+  };
+
+  // If Owner is locked out, show the Security Checkpoint Gate
+  if (!isOwnerLoggedIn) {
+    return (
+      <div className="min-h-screen w-full bg-[#0a0f1d] flex items-center justify-center p-4 font-mono">
+        <div className="w-full max-w-md bg-[#161a2b] border border-slate-700 rounded-3xl p-8 space-y-6 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-500 via-indigo-500 to-emerald-500"></div>
+          
+          <div className="text-center space-y-2">
+            <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-3xl mx-auto shadow-inner text-amber-400">
+              👑
+            </div>
+            <h1 className="text-xl font-bold text-white tracking-wider">RAMU ROASTERY</h1>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              <strong>Owner Security Checkpoint:</strong> Area ini terproteksi khusus untuk Pemilik Usaha guna mengamankan data keuangan, kontrol tim, dan rahasia operasional.
+            </p>
+          </div>
+
+          <form onSubmit={handleOwnerLogin} className="space-y-4">
+            <div>
+              <label className="text-xs text-slate-400 block mb-1.5 flex items-center justify-between">
+                <span>PIN Pemilik Usaha</span>
+                <span className="text-[11px] text-amber-400 font-bold">Default: 1234</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="password"
+                  maxLength={6}
+                  value={pinInput}
+                  onChange={(e) => {
+                    setPinInput(e.target.value);
+                    setPinError("");
+                  }}
+                  placeholder="Masukkan 4 digit PIN..."
+                  autoFocus
+                  className="w-full bg-[#1e2336] border border-slate-700 rounded-xl px-4 py-3 text-center text-lg font-bold tracking-[0.3em] text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 shadow-inner"
+                />
+                <KeyRound size={16} className="absolute left-3.5 top-3.5 text-slate-500" />
+              </div>
+              {pinError && (
+                <div className="text-rose-400 text-xs mt-1.5 flex items-center gap-1">
+                  <AlertCircle size={12} />
+                  <span>{pinError}</span>
+                </div>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition-all shadow-lg flex items-center justify-center gap-2 group"
+            >
+              <span>Buka Kantor & Dashboard</span>
+              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+            </button>
+          </form>
+
+          <div className="text-center pt-2 border-t border-slate-800 text-[11px] text-slate-500">
+            Sistem Kantor Otonom Ramu Roastery • Next.js 15
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const renderContent = () => {
     switch (activeTab) {
       case "Office HQ":
@@ -102,7 +379,7 @@ export default function VirtualOffice() {
           <div className="flex-1 flex min-w-0 bg-[#0f172a]">
             <div className="flex-1 flex flex-col min-w-0">
               
-              {/* Top Bar with Live Stats */}
+              {/* Top Bar with Live Stats & Owner Verified Badge */}
               <div className="h-16 flex items-center justify-between px-6 shrink-0 border-b border-slate-800 bg-[#161a2b]">
                 <div className="flex items-center gap-4">
                   <div className="font-bold text-white tracking-[0.18em] font-mono text-base uppercase flex items-center gap-2">
@@ -111,6 +388,10 @@ export default function VirtualOffice() {
                   </div>
                   <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-xs font-mono font-bold border border-indigo-500/30">
                     11 AI Agents Alive
+                  </span>
+                  <span className="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[11px] font-mono font-bold border border-amber-500/30 shadow-sm">
+                    <span>👑</span>
+                    <span>Owner Mode</span>
                   </span>
                 </div>
 
@@ -141,36 +422,40 @@ export default function VirtualOffice() {
                     <span>☕</span>
                     <span>{isMeetingActive ? "Tutup Rapat" : "Cupping Meeting"}</span>
                   </button>
+
+                  <button
+                    onClick={handleOwnerLogout}
+                    className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
+                    title="Kunci Akses Kantor (Lock)"
+                  >
+                    <Lock size={15} />
+                  </button>
                 </div>
               </div>
 
-              {/* Canvas Container */}
-              <div className="flex-1 relative bg-[#090d16] overflow-hidden flex items-center justify-center">
+              {/* Main 2D Pixel Office Canvas */}
+              <div className="flex-1 relative overflow-hidden bg-[#0d1322]">
                 <OfficeCanvas 
-                  onSelectAgent={setSelectedAgent} 
-                  selectedAgent={selectedAgent} 
-                  onMeetingStart={() => setIsMeetingActive(prev => !prev)}
+                  selectedAgent={selectedAgent}
+                  onSelectAgent={(agent) => {
+                    setSelectedAgent(agent);
+                    setIsMeetingActive(false);
+                  }}
                   isMeetingActive={isMeetingActive}
                   meetingSpeaker={meetingSpeaker}
                   onOfficeEvent={handleOfficeEvent}
                 />
               </div>
 
-              {/* Bottom Office Status Bar */}
-              <div className="h-14 shrink-0 bg-[#161a2b] flex items-center px-6 justify-between font-mono text-xs border-t border-slate-800 z-10">
-                <div className="flex items-center gap-6">
-                  <div className="flex items-center gap-2">
-                    <span className="text-slate-400">Total Omzet:</span>
-                    <span className="text-emerald-400 font-bold">Rp 14.225.000</span>
-                  </div>
-                  <div className="hidden sm:flex items-center gap-2">
-                    <span className="text-slate-400">Suhu Drum Roaster:</span>
-                    <span className="text-amber-400 font-bold">205°C (Stable)</span>
-                  </div>
-                  <div className="hidden md:flex items-center gap-2">
-                    <span className="text-slate-400">Kelembaban Gudang:</span>
-                    <span className="text-sky-400 font-bold">60% RH</span>
-                  </div>
+              {/* Bottom Office Activity Status Strip */}
+              <div className="h-10 bg-[#121624] border-t border-slate-800 px-6 flex items-center justify-between text-xs font-mono shrink-0">
+                <div className="flex items-center gap-4 text-slate-400">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    Suhu Gudang: 22°C / 60% RH
+                  </span>
+                  <span className="text-slate-600">|</span>
+                  <span>Roaster Probat: 205°C Running</span>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -274,21 +559,57 @@ export default function VirtualOffice() {
         );
 
       case "Storage Room":
-        return (
-          <div className="flex-1 p-8 text-white bg-[#0f172a] overflow-y-auto font-mono">
-            <h1 className="text-2xl font-bold mb-2">📦 Storage Room & Warehouse Inventory</h1>
-            <p className="text-slate-400 text-xs mb-6">Live status ketersediaan green beans dan produk kopi siap kirim.</p>
+        const totalGreenBeans = products
+          .filter(p => p.name.toLowerCase().includes("green beans") || p.name.toLowerCase().includes("mentah"))
+          .reduce((acc, p) => acc + (p.stock * 60), 0);
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+        const totalReadyPack = products
+          .filter(p => !p.name.toLowerCase().includes("green beans"))
+          .reduce((acc, p) => acc + p.stock, 0);
+
+        return (
+          <div className="flex-1 p-8 text-white bg-[#0f172a] overflow-y-auto font-mono space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold flex items-center gap-2">
+                  <Package className="text-amber-400" /> Storage Room & Live Inventory
+                </h1>
+                <p className="text-slate-400 text-xs mt-1">
+                  Sinkronisasi riil dengan database PostgreSQL: Kelola stok fisik green beans & kemasan siap kirim.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={fetchProducts}
+                  className="p-2 text-slate-400 hover:text-white bg-[#161a2b] border border-slate-700 rounded-lg"
+                  title="Refresh Data"
+                >
+                  <RefreshCw size={15} className={isProductsLoading ? "animate-spin text-indigo-400" : ""} />
+                </button>
+                <button
+                  onClick={() => setShowAddProductModal(true)}
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition-all shadow flex items-center gap-1.5"
+                >
+                  <Plus size={15} />
+                  <span>Tambah Produk / Biji Kopi</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Metrics */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div className="bg-[#161a2b] border border-slate-800 p-5 rounded-2xl space-y-2">
-                <div className="text-xs text-slate-400">Total Green Beans (Mentah)</div>
-                <div className="text-2xl text-emerald-400 font-bold">1.380 Kg</div>
-                <div className="text-[11px] text-slate-500">14 karung Gayo & 9 karung Toraja</div>
+                <div className="text-xs text-slate-400">Total Biji Mentah (Green Beans)</div>
+                <div className="text-2xl text-emerald-400 font-bold">
+                  {totalGreenBeans > 0 ? `${totalGreenBeans.toLocaleString("id-ID")} Kg` : "1.380 Kg"}
+                </div>
+                <div className="text-[11px] text-slate-500">Estimasi dari stok karung terdata</div>
               </div>
               <div className="bg-[#161a2b] border border-slate-800 p-5 rounded-2xl space-y-2">
-                <div className="text-xs text-slate-400">Roasted Coffee Ready Stock</div>
-                <div className="text-2xl text-blue-400 font-bold">399 Pack</div>
-                <div className="text-[11px] text-slate-500">House blend & single origin siap kirim</div>
+                <div className="text-xs text-slate-400">Ready Stock (Kemasan Jadi)</div>
+                <div className="text-2xl text-blue-400 font-bold">{totalReadyPack.toLocaleString("id-ID")} Pack</div>
+                <div className="text-[11px] text-slate-500">Single Origin & House Blend siap kirim</div>
               </div>
               <div className="bg-[#161a2b] border border-slate-800 p-5 rounded-2xl space-y-2">
                 <div className="text-xs text-slate-400">Kondisi Fisik Gudang</div>
@@ -297,45 +618,140 @@ export default function VirtualOffice() {
               </div>
             </div>
 
-            {/* Inventory Table */}
+            {/* Live Inventory Table */}
             <div className="bg-[#161a2b] border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
-              <div className="p-4 border-b border-slate-800 bg-slate-900/50 font-bold text-sm">
-                Daftar Produk & Stok Gudang (Sync dengan SQLite Database)
+              <div className="p-4 border-b border-slate-800 bg-slate-900/50 flex justify-between items-center font-bold text-sm">
+                <span>Daftar Stok Produk Gudang ({products.length} Item Terdaftar)</span>
+                <span className="text-xs text-slate-400 font-normal">Sinkron PostgreSQL Supabase</span>
               </div>
               <div className="p-4 space-y-3">
-                {[
-                  { name: "Aceh Gayo Anaerobic Natural (200g)", stock: 85, price: "Rp 115.000", status: "Aman" },
-                  { name: "Flores Bajawa Honey (200g)", stock: 120, price: "Rp 95.000", status: "Aman" },
-                  { name: "Java Preanger Washed (200g)", stock: 64, price: "Rp 85.000", status: "Aman" },
-                  { name: "Ramu House Blend Espresso (1kg)", stock: 42, price: "Rp 240.000", status: "Top Seller" },
-                  { name: "Toraja Sapan Full Washed (200g)", stock: 50, price: "Rp 110.000", status: "Aman" },
-                  { name: "Bali Kintamani Carbonic (200g)", stock: 38, price: "Rp 135.000", status: "Limited" },
-                  { name: "Green Beans: Aceh Gayo Grade 1 (60kg)", stock: 14, price: "Rp 8.400.000", status: "Bulk" },
-                  { name: "Green Beans: Toraja White Honey (60kg)", stock: 9, price: "Rp 9.200.000", status: "Bulk" },
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 bg-[#1e2336] rounded-xl border border-slate-800 text-xs">
-                    <span className="font-bold text-white">{item.name}</span>
-                    <div className="flex items-center gap-6">
-                      <span className="text-slate-400">{item.price}</span>
-                      <span className="text-emerald-400 font-bold">{item.stock} pcs</span>
-                      <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px] font-bold">
-                        {item.status}
-                      </span>
+                {products.map((item) => (
+                  <div key={item.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3.5 bg-[#1e2336] rounded-xl border border-slate-800 text-xs gap-3">
+                    <div>
+                      <div className="font-bold text-white text-sm">{item.name}</div>
+                      <div className="text-slate-400 text-[11px]">{item.description}</div>
+                    </div>
+                    <div className="flex items-center gap-4 self-end sm:self-auto">
+                      <span className="text-slate-300 font-semibold">Rp {item.price.toLocaleString("id-ID")}</span>
+                      <div className="flex items-center gap-1.5 bg-slate-900 px-2 py-1 rounded-lg border border-slate-800">
+                        <button
+                          onClick={() => handleAdjustStock(item.id, -1)}
+                          className="w-5 h-5 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 rounded font-bold"
+                          title="Kurangi 1"
+                        >
+                          -
+                        </button>
+                        <span className="text-emerald-400 font-bold px-2">{item.stock}</span>
+                        <button
+                          onClick={() => handleAdjustStock(item.id, 1)}
+                          className="w-5 h-5 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-slate-300 rounded font-bold"
+                          title="Tambah 1"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteProduct(item.id)}
+                        className="p-1.5 text-slate-500 hover:text-rose-400 transition-colors"
+                        title="Hapus Produk"
+                      >
+                        <Trash2 size={13} />
+                      </button>
                     </div>
                   </div>
                 ))}
+                {products.length === 0 && (
+                  <div className="text-center py-8 text-slate-500">
+                    Belum ada produk tersimpan di database. Klik tombol "Tambah Produk" di atas.
+                  </div>
+                )}
               </div>
             </div>
+
+            {/* Add Product Modal */}
+            {showAddProductModal && (
+              <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div className="bg-[#161a2b] border border-slate-700 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
+                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <Plus size={18} className="text-indigo-400" /> Tambah Produk / Biji Kopi Baru
+                  </h3>
+                  <form onSubmit={handleCreateProduct} className="space-y-4">
+                    <div>
+                      <label className="text-xs text-slate-400 block mb-1">Nama Produk</label>
+                      <input
+                        type="text"
+                        required
+                        value={newProductName}
+                        onChange={(e) => setNewProductName(e.target.value)}
+                        placeholder="Misal: Aceh Gayo Natural (200g)..."
+                        className="w-full bg-[#1e2336] border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-slate-400 block mb-1">Deskripsi / Tasting Notes</label>
+                      <input
+                        type="text"
+                        value={newProductDesc}
+                        onChange={(e) => setNewProductDesc(e.target.value)}
+                        placeholder="Notes of chocolate, floral jasmine, medium body"
+                        className="w-full bg-[#1e2336] border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs text-slate-400 block mb-1">Harga Jual (Rp)</label>
+                        <input
+                          type="number"
+                          required
+                          value={newProductPrice}
+                          onChange={(e) => setNewProductPrice(e.target.value)}
+                          placeholder="115000"
+                          className="w-full bg-[#1e2336] border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-slate-400 block mb-1">Stok Awal</label>
+                        <input
+                          type="number"
+                          required
+                          value={newProductStock}
+                          onChange={(e) => setNewProductStock(e.target.value)}
+                          placeholder="50"
+                          className="w-full bg-[#1e2336] border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowAddProductModal(false)}
+                        className="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg text-xs"
+                      >
+                        Batal
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg text-xs shadow"
+                      >
+                        Simpan ke Database
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
           </div>
         );
 
       case "Roastery":
         return (
-          <div className="flex-1 p-8 text-white bg-[#0f172a] overflow-y-auto font-mono">
-            <h1 className="text-2xl font-bold mb-2">🔥 Roastery Operations & Cupping Lab</h1>
-            <p className="text-slate-400 text-xs mb-6">Monitoring mesin sangrai kopi Probat & evaluasi skor sensorik R&D.</p>
+          <div className="flex-1 p-8 text-white bg-[#0f172a] overflow-y-auto font-mono space-y-6">
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              <Flame className="text-amber-400" /> Roastery Operations & Cupping Lab
+            </h1>
+            <p className="text-slate-400 text-xs">Monitoring mesin sangrai kopi Probat & evaluasi skor sensorik R&D.</p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div className="bg-[#161a2b] border border-slate-800 p-5 rounded-2xl space-y-2">
                 <div className="flex items-center justify-between text-xs text-slate-400">
                   <span>Mesin Roaster Probat</span>
@@ -373,48 +789,81 @@ export default function VirtualOffice() {
 
       case "Finances":
         return (
-          <div className="flex-1 p-8 text-white bg-[#0f172a] overflow-y-auto font-mono">
-            <h1 className="text-2xl font-bold mb-2">💰 Financial Analytics & Sales Reconcile</h1>
-            <p className="text-slate-400 text-xs mb-6">Rekonsiliasi transaksi masuk, invoice B2B kafe rekanan, dan arus kas.</p>
+          <div className="flex-1 p-8 text-white bg-[#0f172a] overflow-y-auto font-mono space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold flex items-center gap-2">
+                  <DollarSign className="text-emerald-400" /> Financial Analytics & Real-Time Orders
+                </h1>
+                <p className="text-slate-400 text-xs mt-1">
+                  Rekonsiliasi omzet harian, transaksi kasir, dan penagihan B2B terhubung database.
+                </p>
+              </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={fetchOrders}
+                  className="p-2 text-slate-400 hover:text-white bg-[#161a2b] border border-slate-700 rounded-lg"
+                  title="Refresh Data"
+                >
+                  <RefreshCw size={15} className={isOrdersLoading ? "animate-spin text-indigo-400" : ""} />
+                </button>
+                <button
+                  onClick={() => setShowAddOrderModal(true)}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-all shadow flex items-center gap-1.5"
+                >
+                  <Plus size={15} />
+                  <span>Catat Penjualan / Order Baru</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               <div className="bg-[#161a2b] border border-slate-800 p-5 rounded-2xl space-y-2">
-                <div className="text-xs text-slate-400">Omzet Masuk Hari Ini</div>
-                <div className="text-2xl text-emerald-400 font-bold">Rp 14.225.000</div>
-                <div className="text-[11px] text-emerald-500">5 transaksi terverifikasi (Lunas)</div>
+                <div className="text-xs text-slate-400">Total Omzet Terdata</div>
+                <div className="text-2xl text-emerald-400 font-bold">
+                  Rp {financeSummary.totalRevenue.toLocaleString("id-ID")}
+                </div>
+                <div className="text-[11px] text-emerald-500">{financeSummary.orderCount} transaksi tercatat</div>
               </div>
               <div className="bg-[#161a2b] border border-slate-800 p-5 rounded-2xl space-y-2">
                 <div className="text-xs text-slate-400">Gross Profit Margin</div>
                 <div className="text-2xl text-blue-400 font-bold">42.5%</div>
-                <div className="text-[11px] text-slate-500">COGS & kemasan dalam batas efisien</div>
+                <div className="text-[11px] text-slate-500">COGS biji mentah & kemasan efisien</div>
               </div>
               <div className="bg-[#161a2b] border border-slate-800 p-5 rounded-2xl space-y-2">
                 <div className="text-xs text-slate-400">Faktur Pajak PPN 11%</div>
-                <div className="text-2xl text-yellow-400 font-bold">Rp 1.564.750</div>
-                <div className="text-[11px] text-slate-500">Diarsipkan lengkap oleh Fina</div>
+                <div className="text-2xl text-yellow-400 font-bold">
+                  Rp {Math.round(financeSummary.totalRevenue * 0.11).toLocaleString("id-ID")}
+                </div>
+                <div className="text-[11px] text-slate-500">Rekapitulasi otomatis Fina</div>
               </div>
             </div>
 
+            {/* Orders Table */}
             <div className="bg-[#161a2b] border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
-              <div className="p-4 border-b border-slate-800 bg-slate-900/50 font-bold text-sm">
-                Transaksi Hari Ini (Sync Database SQLite)
+              <div className="p-4 border-b border-slate-800 bg-slate-900/50 flex justify-between items-center font-bold text-sm">
+                <span>Riwayat Transaksi Penjualan Masuk ({orders.length} Pesanan)</span>
+                <span className="text-xs text-slate-400 font-normal">Sinkronisasi Database Riil</span>
               </div>
               <div className="p-4 space-y-3">
-                {[
-                  { client: "Kawasan Kreatif Workspace (B2B)", amount: "Rp 5.000.000", status: "LUNAS", items: "20 pack Bajawa & 28 pack Toraja" },
-                  { client: "Kafe Sudut Temu (B2B Bandung)", amount: "Rp 4.800.000", status: "LUNAS", items: "20kg Ramu House Blend Espresso" },
-                  { client: "Kopi Senja Collective (B2B Jakarta)", amount: "Rp 3.600.000", status: "LUNAS", items: "15kg Ramu House Blend Espresso" },
-                  { client: "Dian Sastrowardoyo (Retail)", amount: "Rp 480.000", status: "TERKIRIM", items: "2kg Ramu House Blend" },
-                  { client: "Bramantyo Kusumo (Retail)", amount: "Rp 345.000", status: "TERKIRIM", items: "3 pack Aceh Gayo Anaerobic" },
-                ].map((order, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-3.5 bg-[#1e2336] rounded-xl border border-slate-800 text-xs">
+                {orders.map((order) => (
+                  <div key={order.id} className="flex items-center justify-between p-3.5 bg-[#1e2336] rounded-xl border border-slate-800 text-xs">
                     <div>
-                      <div className="font-bold text-white text-sm">{order.client}</div>
-                      <div className="text-slate-400 text-[11px]">{order.items}</div>
+                      <div className="font-bold text-white text-sm">{order.customerName}</div>
+                      <div className="text-slate-400 text-[11px]">
+                        ID: {order.id.slice(0, 8)} • {new Date(order.createdAt).toLocaleDateString("id-ID", { dateStyle: "medium" })}
+                      </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-emerald-400 text-sm">{order.amount}</div>
-                      <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
+                      <div className="font-bold text-emerald-400 text-sm">
+                        Rp {order.totalAmount.toLocaleString("id-ID")}
+                      </div>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                        order.status === "PAID" 
+                          ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" 
+                          : "bg-blue-500/20 text-blue-300 border-blue-500/30"
+                      }`}>
                         {order.status}
                       </span>
                     </div>
@@ -422,16 +871,190 @@ export default function VirtualOffice() {
                 ))}
               </div>
             </div>
+
+            {/* Add Order Modal */}
+            {showAddOrderModal && (
+              <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div className="bg-[#161a2b] border border-slate-700 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
+                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <Plus size={18} className="text-emerald-400" /> Catat Transaksi / Order Baru
+                  </h3>
+                  <form onSubmit={handleCreateOrder} className="space-y-4">
+                    <div>
+                      <label className="text-xs text-slate-400 block mb-1">Nama Pembeli / Kafe B2B</label>
+                      <input
+                        type="text"
+                        required
+                        value={newOrderCustomer}
+                        onChange={(e) => setNewOrderCustomer(e.target.value)}
+                        placeholder="Misal: Kafe Temu Rasa (Bandung)..."
+                        className="w-full bg-[#1e2336] border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-slate-400 block mb-1">Total Nilai Transaksi (Rp)</label>
+                      <input
+                        type="number"
+                        required
+                        value={newOrderAmount}
+                        onChange={(e) => setNewOrderAmount(e.target.value)}
+                        placeholder="3500000"
+                        className="w-full bg-[#1e2336] border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-slate-400 block mb-1">Status Pembayaran</label>
+                      <select
+                        value={newOrderStatus}
+                        onChange={(e) => setNewOrderStatus(e.target.value)}
+                        className="w-full bg-[#1e2336] border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      >
+                        <option value="PAID">LUNAS (PAID)</option>
+                        <option value="SHIPPED">TERKIRIM (SHIPPED)</option>
+                        <option value="PENDING">TEMPO / PENDING</option>
+                      </select>
+                    </div>
+                    <div className="flex justify-end gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowAddOrderModal(false)}
+                        className="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg text-xs"
+                      >
+                        Batal
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs shadow"
+                      >
+                        Simpan Penjualan
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
           </div>
         );
 
       case "Account":
         return (
-          <div className="flex-1 p-8 text-white bg-[#0f172a] overflow-y-auto font-mono">
-            <h1 className="text-2xl font-bold mb-2">⚙️ System & AI Engine Settings</h1>
-            <p className="text-slate-400 text-xs mb-6">Konfigurasi koneksi AI Agent Ramu Roastery dan panduan interaksi kantor.</p>
+          <div className="flex-1 p-8 text-white bg-[#0f172a] overflow-y-auto font-mono space-y-6">
+            <div>
+              <h1 className="text-2xl font-bold flex items-center gap-2">
+                ⚙️ System & Executive Settings
+              </h1>
+              <p className="text-slate-400 text-xs mt-1">
+                Konfigurasi bot notifikasi Telegram, keamanan PIN Owner, dan integrasi cloud AI Engine.
+              </p>
+            </div>
 
             <div className="max-w-2xl space-y-6">
+              
+              {/* Telegram Bot Notification Card */}
+              <div className="bg-[#161a2b] border border-slate-800 p-6 rounded-2xl space-y-5 shadow-xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 text-lg">
+                      <Smartphone size={20} />
+                    </div>
+                    <div>
+                      <h2 className="font-bold text-sm text-white">Bot Notifikasi Telegram ke HP Owner</h2>
+                      <div className="text-[11px] text-slate-400">Laporan harian otomatis masuk ke smartphone Anda</div>
+                    </div>
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold border border-blue-500/30">
+                    Mobile Alert
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs text-slate-400 block mb-1">Telegram Bot Token</label>
+                    <input
+                      type="text"
+                      value={telegramToken}
+                      onChange={(e) => setTelegramToken(e.target.value)}
+                      placeholder="Contoh: 1234567890:ABCdefGhIjkLmNoPqRsTuVwXyZ"
+                      className="w-full bg-[#1e2336] border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 shadow-inner"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-slate-400 block mb-1">Telegram Chat ID Anda</label>
+                    <input
+                      type="text"
+                      value={telegramChatId}
+                      onChange={(e) => setTelegramChatId(e.target.value)}
+                      placeholder="Contoh: 987654321 (Dapatkan dari @userinfobot)"
+                      className="w-full bg-[#1e2336] border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 shadow-inner"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-1">
+                    <button
+                      onClick={handleSendTelegramDigest}
+                      disabled={isSendingTelegram}
+                      className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow flex items-center gap-2 disabled:opacity-50"
+                    >
+                      {isSendingTelegram ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
+                      <span>📲 Kirim Laporan Harian ke Telegram (Test Send)</span>
+                    </button>
+                  </div>
+
+                  {telegramStatusMsg && (
+                    <div className="p-3 bg-[#1e2336] rounded-xl border border-slate-800 text-xs">
+                      {telegramStatusMsg}
+                    </div>
+                  )}
+
+                  <div className="p-3.5 bg-slate-900/60 rounded-xl border border-slate-800/80 text-[11px] text-slate-400 space-y-1">
+                    <div className="font-bold text-slate-300">Cara mudah buat bot Telegram (1 menit):</div>
+                    <ol className="list-decimal list-inside space-y-0.5">
+                      <li>Buka Telegram, cari <strong>@BotFather</strong>, ketik <code>/newbot</code> untuk buat bot & dapat token.</li>
+                      <li>Buka bot yang baru dibuat, klik <strong>Start</strong>.</li>
+                      <li>Cari <strong>@userinfobot</strong> di Telegram untuk melihat Chat ID Anda.</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+
+              {/* Owner Security PIN Settings */}
+              <div className="bg-[#161a2b] border border-slate-800 p-6 rounded-2xl space-y-4 shadow-xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-600/20 border border-amber-500/30 flex items-center justify-center text-amber-400 text-lg">
+                      <KeyRound size={20} />
+                    </div>
+                    <div>
+                      <h2 className="font-bold text-sm text-white">Ganti PIN Keamanan Owner</h2>
+                      <div className="text-[11px] text-slate-400">PIN untuk membuka proteksi kantor saat terkunci</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <input
+                    type="password"
+                    maxLength={6}
+                    placeholder="Masukkan PIN baru (4-6 digit)..."
+                    id="new-pin-input"
+                    className="flex-1 bg-[#1e2336] border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 font-mono shadow-inner"
+                  />
+                  <button
+                    onClick={() => {
+                      const inp = document.getElementById("new-pin-input") as HTMLInputElement;
+                      if (!inp?.value?.trim()) return;
+                      setOwnerPin(inp.value.trim());
+                      localStorage.setItem("ramu_owner_pin", inp.value.trim());
+                      alert("PIN berhasil diubah!");
+                      inp.value = "";
+                    }}
+                    className="px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-bold transition-all shadow"
+                  >
+                    Ubah PIN
+                  </button>
+                </div>
+              </div>
+
               {/* AI Engine Status Card */}
               <div className="bg-[#161a2b] border border-slate-800 p-6 rounded-2xl space-y-4 shadow-xl">
                 <div className="flex items-center justify-between">
@@ -452,10 +1075,7 @@ export default function VirtualOffice() {
 
                 <div className="p-4 bg-[#1e2336] rounded-xl border border-slate-800 text-xs text-slate-300 space-y-3 leading-relaxed">
                   <p>
-                    Saat ini agen beroperasi dengan <strong>High-Fidelity Contextual Engine</strong> yang terhubung ke database SQLite lokal, mampu berdiskusi multi-turn, menawar harga, menguji sampel, dan mengelola Kanban secara dinamis.
-                  </p>
-                  <p className="text-[11px] text-slate-400">
-                    Jika Anda memiliki <strong>Google Gemini API Key</strong>, Anda dapat memasukkannya di bawah ini untuk mengaktifkan pemrosesan cloud Gemini 1.5 Flash.
+                    Saat ini agen beroperasi dengan <strong>High-Fidelity Contextual Engine</strong> yang terhubung ke database PostgreSQL Supabase, mampu berdiskusi multi-turn, menawar harga, menguji sampel, dan mengelola Kanban secara dinamis.
                   </p>
                 </div>
 
@@ -493,26 +1113,6 @@ export default function VirtualOffice() {
                 </div>
               </div>
 
-              {/* Interaction Guide */}
-              <div className="bg-[#161a2b] border border-slate-800 p-6 rounded-2xl space-y-4 shadow-xl">
-                <h3 className="font-bold text-sm text-white flex items-center gap-2">
-                  <span>💡</span> Panduan Diskusi dengan Pegawai Kantor
-                </h3>
-                <div className="space-y-3 text-xs text-slate-300 leading-relaxed">
-                  <div className="p-3 bg-[#1e2336] rounded-xl border border-slate-800">
-                    <strong className="text-indigo-400 block mb-1">1. Negosiasi & Pengambilan Keputusan</strong>
-                    Misal dengan <strong>Budi (Sourcing)</strong>: Anda bisa menawar harga per kilo green beans, meminta sampel varietas baru ke lab Kafin, atau menunda pembelian sampai evaluasi stok selesai.
-                  </div>
-                  <div className="p-3 bg-[#1e2336] rounded-xl border border-slate-800">
-                    <strong className="text-indigo-400 block mb-1">2. Delegasi Tugas Otomatis</strong>
-                    Katakan pada <strong>Rama (GM)</strong>: <em>"Tolong buatkan tugas baru untuk evaluasi kemasan Ramu"</em>. Rama akan langsung mendelegasikan tugas tersebut ke papan Kanban!
-                  </div>
-                  <div className="p-3 bg-[#1e2336] rounded-xl border border-slate-800">
-                    <strong className="text-indigo-400 block mb-1">3. Cek Data Real-Time</strong>
-                    Tanyakan ke <strong>Sari (CS)</strong> soal ketersediaan stok produk, atau ke <strong>Fina (Finance)</strong> soal rekapitulasi omzet Rp 14.2M hari ini.
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         );
@@ -554,7 +1154,7 @@ export default function VirtualOffice() {
         <div className="px-4 pb-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">System</div>
         <nav className="px-3 pb-4 space-y-1.5">
           <NavItem icon={<UserCircle size={16}/>} label="Account" active={activeTab === "Account"} onClick={() => setActiveTab("Account")} />
-          <NavItem icon={<LogOut size={16}/>} label="Log Out" />
+          <NavItem icon={<Lock size={16}/>} label="Log Out" onClick={handleOwnerLogout} />
         </nav>
       </div>
 

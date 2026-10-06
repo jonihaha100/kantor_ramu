@@ -1,6 +1,9 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Plus, Check, Clock, PlayCircle, CheckCircle2, AlertCircle, RefreshCw } from "lucide-react";
+import { 
+  Plus, Check, Clock, PlayCircle, CheckCircle2, AlertCircle, RefreshCw, 
+  FileText, Copy, Sparkles, X, ChevronRight, Loader2, Download
+} from "lucide-react";
 
 interface AgentTask {
   id: string;
@@ -8,6 +11,7 @@ interface AgentTask {
   description: string;
   role: string;
   status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | string;
+  metadata?: string | null;
   createdAt: string;
 }
 
@@ -15,6 +19,10 @@ export default function KanbanBoard() {
   const [tasks, setTasks] = useState<AgentTask[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<AgentTask | null>(null);
+  const [isGeneratingDeliverable, setIsGeneratingDeliverable] = useState(false);
+  const [copiedDeliverable, setCopiedDeliverable] = useState(false);
+
   const [newTitle, setNewTitle] = useState("");
   const [newDesc, setNewDesc] = useState("");
   const [newRole, setNewRole] = useState("CROSS_DEPARTMENT");
@@ -29,7 +37,14 @@ export default function KanbanBoard() {
     try {
       const res = await fetch("/api/internal/tasks");
       const json = await res.json();
-      if (json.success) setTasks(json.data);
+      if (json.success) {
+        setTasks(json.data);
+        // If a task is currently selected, update its reference
+        setSelectedTask(current => {
+          if (!current) return null;
+          return json.data.find((t: AgentTask) => t.id === current.id) || current;
+        });
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -40,6 +55,9 @@ export default function KanbanBoard() {
   const handleUpdateStatus = async (id: string, newStatus: string) => {
     // Optimistic UI update
     setTasks(prev => prev.map(t => t.id === id ? { ...t, status: newStatus } : t));
+    if (selectedTask && selectedTask.id === id) {
+      setSelectedTask(prev => prev ? { ...prev, status: newStatus } : null);
+    }
     try {
       await fetch("/api/internal/tasks", {
         method: "PATCH",
@@ -76,56 +94,112 @@ export default function KanbanBoard() {
     }
   };
 
+  const handleGenerateDeliverable = async (taskId: string) => {
+    setIsGeneratingDeliverable(true);
+    try {
+      const res = await fetch(`/api/internal/tasks/${taskId}/deliverable`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({})
+      });
+      const data = await res.json();
+      if (data.success) {
+        await fetchTasks();
+      }
+    } catch (err) {
+      console.error("Generate deliverable failed:", err);
+    } finally {
+      setIsGeneratingDeliverable(false);
+    }
+  };
+
+  const getDeliverableText = (task: AgentTask): string | null => {
+    if (!task.metadata) return null;
+    try {
+      const parsed = JSON.parse(task.metadata);
+      return parsed.deliverable || null;
+    } catch {
+      return null;
+    }
+  };
+
+  const handleCopyDeliverable = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedDeliverable(true);
+    setTimeout(() => setCopiedDeliverable(false), 2000);
+  };
+
   const pendingTasks = tasks.filter(t => t.status === "PENDING");
   const inProgressTasks = tasks.filter(t => t.status === "IN_PROGRESS");
   const completedTasks = tasks.filter(t => t.status === "COMPLETED");
 
-  const TaskCard = ({ task }: { task: AgentTask }) => (
-    <div className="bg-[#1e2336] p-4 rounded-xl border border-slate-700/80 shadow-md space-y-3 hover:border-indigo-500/50 transition-all group">
-      <div className="flex justify-between items-start gap-2">
-        <h3 className="font-bold text-white text-sm leading-snug">{task.title}</h3>
-        <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 text-[10px] font-bold rounded-full uppercase shrink-0 border border-indigo-500/30">
-          {task.role}
-        </span>
-      </div>
-      
-      {task.description && (
-        <p className="text-xs text-slate-400 line-clamp-3 leading-relaxed">
-          {task.description}
-        </p>
-      )}
+  const TaskCard = ({ task }: { task: AgentTask }) => {
+    const deliverable = getDeliverableText(task);
 
-      {/* Action buttons to transition task status */}
-      <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs">
-        <span className="text-[10px] text-slate-500 font-mono">
-          ID: {task.id.slice(0, 5)}
-        </span>
-        <div className="flex items-center gap-1.5">
-          {task.status === "PENDING" && (
-            <button
-              onClick={() => handleUpdateStatus(task.id, "IN_PROGRESS")}
-              className="px-2.5 py-1 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 rounded text-[11px] font-medium transition-colors flex items-center gap-1"
-            >
-              <PlayCircle size={12} /> Mulai
-            </button>
-          )}
-          {task.status === "IN_PROGRESS" && (
-            <button
-              onClick={() => handleUpdateStatus(task.id, "COMPLETED")}
-              className="px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 rounded text-[11px] font-medium transition-colors flex items-center gap-1"
-            >
-              <CheckCircle2 size={12} /> Selesai
-            </button>
-          )}
-          {task.status === "COMPLETED" && (
-            <span className="text-emerald-400 text-[11px] flex items-center gap-1">
-              <Check size={12} /> Done
-            </span>
-          )}
+    return (
+      <div 
+        onClick={() => setSelectedTask(task)}
+        className="bg-[#1e2336] p-4 rounded-xl border border-slate-700/80 shadow-md space-y-3 hover:border-indigo-500/70 hover:shadow-indigo-500/10 cursor-pointer transition-all group"
+      >
+        <div className="flex justify-between items-start gap-2">
+          <h3 className="font-bold text-white text-sm leading-snug group-hover:text-indigo-300 transition-colors">
+            {task.title}
+          </h3>
+          <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 text-[10px] font-bold rounded-full uppercase shrink-0 border border-indigo-500/30">
+            {task.role}
+          </span>
+        </div>
+        
+        {task.description && (
+          <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+            {task.description}
+          </p>
+        )}
+
+        {deliverable ? (
+          <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-950/40 border border-emerald-500/30 rounded text-[10px] text-emerald-300 font-bold">
+            <FileText size={11} className="text-emerald-400" />
+            <span>📄 Dokumen Output Siap</span>
+          </div>
+        ) : (
+          <div className="text-[10px] text-slate-500 flex items-center gap-1">
+            <span>Klik kartu untuk buka detail & draf</span>
+            <ChevronRight size={10} />
+          </div>
+        )}
+
+        {/* Action buttons to transition task status */}
+        <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs" onClick={(e) => e.stopPropagation()}>
+          <span className="text-[10px] text-slate-500 font-mono">
+            ID: {task.id.slice(0, 5)}
+          </span>
+          <div className="flex items-center gap-1.5">
+            {task.status === "PENDING" && (
+              <button
+                onClick={() => handleUpdateStatus(task.id, "IN_PROGRESS")}
+                className="px-2.5 py-1 bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 border border-blue-500/30 rounded text-[11px] font-medium transition-colors flex items-center gap-1"
+              >
+                <PlayCircle size={12} /> Kerjakan
+              </button>
+            )}
+            {task.status === "IN_PROGRESS" && (
+              <button
+                onClick={() => handleUpdateStatus(task.id, "COMPLETED")}
+                className="px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/30 rounded text-[11px] font-medium transition-colors flex items-center gap-1"
+              >
+                <CheckCircle2 size={12} /> Selesai
+              </button>
+            )}
+            {task.status === "COMPLETED" && (
+              <span className="text-emerald-400 text-[11px] flex items-center gap-1 font-bold">
+                <Check size={12} /> Selesai
+              </span>
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const Column = ({ title, count, icon, color, tasksList }: { 
     title: string; 
@@ -155,15 +229,17 @@ export default function KanbanBoard() {
     </div>
   );
 
+  const activeDeliverable = selectedTask ? getDeliverableText(selectedTask) : null;
+
   return (
     <div className="h-full flex flex-col space-y-4 font-mono">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2.5">
-            📋 Project Tasks & Delegation
+            📋 Project Tasks & Deliverables
           </h1>
           <p className="text-slate-400 text-xs mt-1">
-            Papan Kanban otomatis: Agen membuat tiket sendiri melalui diskusi, delegasi GM, atau hasil Cupping Table Meeting.
+            Papan Kanban otomatis: Klik pada tugas untuk melihat <strong>Dokumen Hasil Kerja Nyata</strong> (SOP, Proposal B2B, Naskah Konten) yang disusun para pekerja AI.
           </p>
         </div>
 
@@ -209,6 +285,139 @@ export default function KanbanBoard() {
           tasksList={completedTasks} 
         />
       </div>
+
+      {/* Detail & Deliverable Modal */}
+      {selectedTask && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-[#161a2b] border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[88vh] flex flex-col shadow-2xl overflow-hidden">
+            
+            {/* Modal Header */}
+            <div className="p-5 border-b border-slate-800 bg-[#121624] flex items-start justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-300 text-[10px] font-bold rounded uppercase border border-indigo-500/30">
+                    {selectedTask.role}
+                  </span>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                    selectedTask.status === "COMPLETED" 
+                      ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" 
+                      : selectedTask.status === "IN_PROGRESS"
+                      ? "bg-blue-500/20 text-blue-400 border-blue-500/30"
+                      : "bg-amber-500/20 text-amber-400 border-amber-500/30"
+                  }`}>
+                    {selectedTask.status}
+                  </span>
+                </div>
+                <h2 className="text-lg font-bold text-white">{selectedTask.title}</h2>
+              </div>
+              <button 
+                onClick={() => setSelectedTask(null)}
+                className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="flex-1 p-6 overflow-y-auto space-y-5 text-xs">
+              
+              {/* Task Instructions */}
+              <div className="bg-[#1e2336] p-4 rounded-xl border border-slate-800 space-y-1.5">
+                <div className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Instruksi Tugas dari Owner</div>
+                <p className="text-slate-300 leading-relaxed whitespace-pre-wrap">
+                  {selectedTask.description || "Tidak ada rincian deskripsi tambahan."}
+                </p>
+              </div>
+
+              {/* Agent Deliverable Output */}
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 font-bold text-white text-sm">
+                    <FileText size={16} className="text-indigo-400" />
+                    <span>Dokumen Hasil Kerja Nyata (Deliverable)</span>
+                  </div>
+                  {activeDeliverable && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleCopyDeliverable(activeDeliverable)}
+                        className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow"
+                      >
+                        {copiedDeliverable ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+                        <span>{copiedDeliverable ? "Tersalin!" : "Salin Draf"}</span>
+                      </button>
+                      <button
+                        onClick={() => handleGenerateDeliverable(selectedTask.id)}
+                        disabled={isGeneratingDeliverable}
+                        className="px-3 py-1 bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/40 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5"
+                      >
+                        {isGeneratingDeliverable ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                        <span>Regenerate</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {activeDeliverable ? (
+                  <div className="bg-[#0f1322] border border-indigo-500/30 rounded-xl p-4 font-mono text-[11px] text-slate-200 leading-relaxed whitespace-pre-wrap max-h-80 overflow-y-auto shadow-inner border-l-4 border-l-indigo-500">
+                    {activeDeliverable}
+                  </div>
+                ) : (
+                  <div className="p-6 bg-[#1e2336] border border-dashed border-slate-700 rounded-xl text-center space-y-3">
+                    <div className="text-2xl">📝</div>
+                    <div className="font-bold text-white">Dokumen Hasil Kerja Belum Dibuat</div>
+                    <p className="text-slate-400 text-xs max-w-md mx-auto">
+                      Instruksikan AI Agent divisi <strong>{selectedTask.role}</strong> untuk segera menyusun draf SOP, naskah konten, proposal, atau resep sangrai resmi berdasarkan tugas ini.
+                    </p>
+                    <button
+                      onClick={() => handleGenerateDeliverable(selectedTask.id)}
+                      disabled={isGeneratingDeliverable}
+                      className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition-all shadow-lg flex items-center gap-2 mx-auto disabled:opacity-50"
+                    >
+                      {isGeneratingDeliverable ? (
+                        <>
+                          <Loader2 size={14} className="animate-spin" />
+                          <span>AI Agent Sedang Menyusun Dokumen...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles size={14} />
+                          <span>⚡ Generate Hasil Kerja Otomatis (AI Agent)</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 border-t border-slate-800 bg-[#121624] flex items-center justify-between">
+              <div className="text-[11px] text-slate-500">
+                Status Tugas: <strong className="text-white">{selectedTask.status}</strong>
+              </div>
+              <div className="flex items-center gap-2">
+                {selectedTask.status !== "IN_PROGRESS" && (
+                  <button
+                    onClick={() => handleUpdateStatus(selectedTask.id, "IN_PROGRESS")}
+                    className="px-3.5 py-1.5 bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/40 rounded-lg font-bold transition-all"
+                  >
+                    Set In Progress
+                  </button>
+                )}
+                {selectedTask.status !== "COMPLETED" && (
+                  <button
+                    onClick={() => handleUpdateStatus(selectedTask.id, "COMPLETED")}
+                    className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold transition-all shadow flex items-center gap-1.5"
+                  >
+                    <CheckCircle2 size={13} />
+                    <span>Tandai Selesai (Completed)</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add Task Modal */}
       {showAddModal && (
