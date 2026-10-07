@@ -15,17 +15,17 @@ import {
 } from "lucide-react";
 
 export type AgentRole = 
-  | "Rama (GM)" 
-  | "Sari (CS)" 
-  | "Rian (Web Dev)" 
-  | "Fina (Finance)" 
-  | "Doni (Inventory)" 
-  | "Gilang (Logistics)"
-  | "Bayu (B2B)"
-  | "Kafin (R&D)"
-  | "Arya (Ads)"
-  | "Maya (Content)"
-  | "Budi (Sourcing)"
+  | "Kang Dudung (GM)" 
+  | "Teh Euis (CS)" 
+  | "Ujang (Web Dev)" 
+  | "Ceu Edah (Finance)" 
+  | "Mang Dadang (Inventory)" 
+  | "Kang Aceng (Logistics)"
+  | "Kang Jajang (B2B)"
+  | "Kang Tatang (R&D)"
+  | "Kang Deden (Ads)"
+  | "Neng Iteung (Content)"
+  | "Mang Encep (Sourcing)"
   | null;
 
 type MenuTab = "Office HQ" | "AI Agents" | "Projects" | "Storage Room" | "Roastery" | "Finances" | "Reports" | "WhatsApp CS" | "Account";
@@ -40,17 +40,17 @@ const ALL_AGENTS_DATA: {
   status: string;
   currentTask: string;
 }[] = [
-  { id: "Rama (GM)", name: "Rama", role: "General Manager", dept: "Executive", emoji: "👨‍💼", color: "bg-blue-500", status: "Active", currentTask: "Reviewing weekly strategy & KPI" },
-  { id: "Sari (CS)", name: "Sari", role: "Customer Service (24/7 Non-Stop)", dept: "Support", emoji: "👩‍💼", color: "bg-pink-500", status: "Active 24/7", currentTask: "Standby 24 Jam non-stop melayani chat WA & panduan seduh" },
-  { id: "Rian (Web Dev)", name: "Rian", role: "Full-Stack Dev", dept: "Engineering", emoji: "👨‍💻", color: "bg-emerald-500", status: "Active", currentTask: "Optimizing Next.js 15 staging cache" },
-  { id: "Fina (Finance)", name: "Fina", role: "Financial Lead", dept: "Finance", emoji: "👩‍💼", color: "bg-yellow-500", status: "Active", currentTask: "Reconciling daily sales Rp 14.2M" },
-  { id: "Bayu (B2B)", name: "Bayu", role: "B2B Sales Lead", dept: "Commercial", emoji: "👨‍💼", color: "bg-rose-500", status: "Active", currentTask: "Closing 20kg/week deal with Kafe Sudut Temu" },
-  { id: "Arya (Ads)", name: "Arya", role: "Performance Ads", dept: "Marketing", emoji: "👨‍💼", color: "bg-sky-500", status: "Active", currentTask: "Scaling Meta Ads ROAS 3.8x" },
-  { id: "Maya (Content)", name: "Maya", role: "Content Creator", dept: "Creative", emoji: "👩‍🎤", color: "bg-purple-500", status: "Active", currentTask: "Editing Reels 'Rahasia Roasting Kopi'" },
-  { id: "Kafin (R&D)", name: "Kafin", role: "R&D & Cupping", dept: "Quality", emoji: "👨‍🔬", color: "bg-teal-500", status: "Active", currentTask: "Cupping Batch #14 - Score 87.5 pts" },
-  { id: "Doni (Inventory)", name: "Doni", role: "Warehouse Lead", dept: "Roastery", emoji: "👨‍🔧", color: "bg-orange-500", status: "Active", currentTask: "QC roasted beans & packing 42kg" },
-  { id: "Gilang (Logistics)", name: "Gilang", role: "Logistics Dispatch", dept: "Supply Chain", emoji: "👨‍🔧", color: "bg-violet-500", status: "Active", currentTask: "Dispatching J&T Cargo batch afternoon" },
-  { id: "Budi (Sourcing)", name: "Budi", role: "Bean Sourcing", dept: "Agriculture", emoji: "👨‍🌾", color: "bg-lime-500", status: "Active", currentTask: "Direct trade contract with Takengon farmers" },
+  { id: "Kang Dudung (GM)", name: "Kang Dudung", role: "General Manager", dept: "Executive", emoji: "👨‍💼", color: "bg-blue-500", status: "Active", currentTask: "Mungkas evaluasi operasional roastery bari ngopi tubruk ☕" },
+  { id: "Teh Euis (CS)", name: "Teh Euis", role: "Customer Service (24/7 Geulis)", dept: "Support", emoji: "👩‍💼", color: "bg-pink-500", status: "Active 24/7", currentTask: "Standby 24 Jam ramah pisan ngabalesan chat WA juragan" },
+  { id: "Ujang (Web Dev)", name: "Ujang", role: "Full-Stack Dev", dept: "Engineering", emoji: "👨‍💻", color: "bg-emerald-500", status: "Active", currentTask: "Ngoprek Next.js 15 bari nyemil bala-bala bumbu kacang" },
+  { id: "Ceu Edah (Finance)", name: "Ceu Edah", role: "Bendahara Roastery", dept: "Finance", emoji: "👩‍💼", color: "bg-yellow-500", status: "Active", currentTask: "Ngitung laba bersih jeung nagih kuitansi bon belanjaan" },
+  { id: "Kang Jajang (B2B)", name: "Kang Jajang", role: "B2B Sales Lead", dept: "Commercial", emoji: "👨‍💼", color: "bg-rose-500", status: "Active", currentTask: "Lobi-lobi kafe Bandung deal suplai biji kopi 50kg/minggu" },
+  { id: "Kang Deden (Ads)", name: "Kang Deden", role: "Performance Ads", dept: "Marketing", emoji: "👨‍💼", color: "bg-sky-500", status: "Active", currentTask: "Ngoptimalkeun Meta Ads ameh ROAS gurih teu boncos" },
+  { id: "Neng Iteung (Content)", name: "Neng Iteung", role: "Content Creator Geulis", dept: "Creative", emoji: "👩‍🎤", color: "bg-purple-500", status: "Active", currentTask: "Syuting video Reels proses sangrai kopi viral" },
+  { id: "Kang Tatang (R&D)", name: "Kang Tatang", role: "R&D & Master Cupping", dept: "Quality", emoji: "👨‍🔬", color: "bg-teal-500", status: "Active", currentTask: "Nyeruput cupping Gayo Anaerobic - skor 87.5 SCA" },
+  { id: "Mang Dadang (Inventory)", name: "Mang Dadang", role: "Mandor Gudang", dept: "Roastery", emoji: "👨‍🔧", color: "bg-orange-500", status: "Active", currentTask: "Ngontrol karung green beans & mesin roaster Probat" },
+  { id: "Kang Aceng (Logistics)", name: "Kang Aceng", role: "Kurir Satset", dept: "Supply Chain", emoji: "👨‍🔧", color: "bg-violet-500", status: "Active", currentTask: "Gaspol motor matic nganter paket kargo tepat waktu" },
+  { id: "Mang Encep (Sourcing)", name: "Mang Encep", role: "Sobat Patani Kopi", dept: "Agriculture", emoji: "👨‍🌾", color: "bg-lime-500", status: "Active", currentTask: "Nyaba ka kebon kopi Takengon silaturahmi jeung patani" },
 ];
 
 function NavItem({ 
@@ -120,7 +120,7 @@ export default function VirtualOffice() {
   const [reportsData, setReportsData] = useState<any>(null);
   const [isReportsLoading, setIsReportsLoading] = useState(false);
   const [reportsSubTab, setReportsSubTab] = useState<"gm" | "workers" | "closing">("gm");
-  const [selectedWorkerId, setSelectedWorkerId] = useState<string>("Rama (GM)");
+  const [selectedWorkerId, setSelectedWorkerId] = useState<string>("Kang Dudung (GM)");
   const [activeDeliverableModal, setActiveDeliverableModal] = useState<any>(null);
   const [selectedClosingMonth, setSelectedClosingMonth] = useState<string>("2026-10");
   const [isClosingExecuting, setIsClosingExecuting] = useState(false);
@@ -142,9 +142,9 @@ export default function VirtualOffice() {
 
   // Live office event chatter stream
   const [officeEvents, setOfficeEvents] = useState<OfficeEventLog[]>([
-    { id: "1", time: "16:45", speaker: "Rama (GM)", message: "Morning briefing selesai: target omzet roastery minggu ini tercapai.", type: "system" },
-    { id: "2", time: "16:50", speaker: "Sari (CS)", message: "Tiket komplain gilingan kopi selesai ditangani dengan rating bintang 5.", type: "collab" },
-    { id: "3", time: "16:55", speaker: "Kafin (R&D)", message: "Kalibrasi batch Gayo Anaerobic tembus cupping score 87.5 poin.", type: "collab" },
+    { id: "1", time: "16:45", speaker: "Kang Dudung (GM)", message: "Briefing isuk rengse: target omzet roastery minggu ieu kahontal, mangga gararap!", type: "system" },
+    { id: "2", time: "16:50", speaker: "Teh Euis (CS)", message: "Alhamdulillah tiket komplain gilingan kopi tos beres dilayani kalayan ramah, bintang 5!", type: "collab" },
+    { id: "3", time: "16:55", speaker: "Kang Tatang (R&D)", message: "Kopi Gayo Anaerobic tembus cupping score 87.5 poin, seungitna matak kabita!", type: "cupping" },
   ]);
 
   const handleOfficeEvent = (event: OfficeEventLog) => {
@@ -160,8 +160,8 @@ export default function VirtualOffice() {
         handleOfficeEvent({
           id: Math.random().toString(),
           time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
-          speaker: "Rama (GM)",
-          message: "📢 PERHATIAN TIM: Rapat pleno koordinasi di Cupping Table dimulai! Semua divisi segera merapat.",
+          speaker: "Kang Dudung (GM)",
+          message: "📢 Euleuh-euleuh barudak! Hayu kumpul di Meja Cupping urang rapat pleno koordinasi heula!",
           type: "meeting"
         });
       } else {
@@ -169,8 +169,8 @@ export default function VirtualOffice() {
         handleOfficeEvent({
           id: Math.random().toString(),
           time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
-          speaker: "Rama (GM)",
-          message: "Rapat selesai. Terima kasih tim, silakan kembali bertugas ke pos masing-masing.",
+          speaker: "Kang Dudung (GM)",
+          message: "Rapat rengse. Hatur nuhun sadayana, mangga teraskeun hanca garapan masing-masing!",
           type: "meeting"
         });
       }
@@ -268,7 +268,7 @@ export default function VirtualOffice() {
   }, []);
 
   const handleExecuteClosing = async () => {
-    if (!confirm(`Konfirmasi Tutup Buku Bulanan Periode ${selectedClosingMonth}?\n\nRekonsiliasi omzet, HPP, OPEX, dan persediaan akan diverifikasi dan dikunci secara resmi oleh GM Rama & Fina (Finance Lead).`)) {
+    if (!confirm(`Konfirmasi Tutup Buku Bulanan Periode ${selectedClosingMonth}?\n\nRekonsiliasi omzet, HPP, OPEX, dan persediaan akan diverifikasi dan dikunci secara resmi oleh Kang Dudung (GM) & Ceu Edah (Finance Lead).`)) {
       return;
     }
     setIsClosingExecuting(true);
@@ -280,7 +280,7 @@ export default function VirtualOffice() {
         body: JSON.stringify({
           month: selectedClosingMonth,
           action: "CLOSE_BOOK",
-          notes: `Tutup buku periode ${selectedClosingMonth} telah diaudit dan diverifikasi resmi oleh Rama (GM) bersama Fina (Finance Lead). Seluruh pos kas dan aset terekonsiliasi 100%.`
+          notes: `Tutup buku periode ${selectedClosingMonth} telah diaudit dan diverifikasi resmi oleh Kang Dudung (GM) bersama Ceu Edah (Finance Lead). Seluruh pos kas dan aset terekonsiliasi 100%.`
         })
       });
       const json = await res.json();
@@ -1220,7 +1220,7 @@ export default function VirtualOffice() {
                   </span>
                 </div>
                 <p className="text-slate-400 text-xs mt-1.5 leading-relaxed">
-                  Konsolidasi hasil pekerjaan 11 divisi pekerja oleh GM Rama serta Laporan Tutup Buku Bulanan (P&L & Valuasi Stok) profesional.
+                  Konsolidasi hasil pekerjaan 11 divisi pekerja oleh Kang Dudung (GM) serta Laporan Tutup Buku Bulanan (P&L & Valuasi Stok) profesional.
                 </p>
               </div>
 
@@ -1338,7 +1338,7 @@ export default function VirtualOffice() {
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h2 className="text-lg font-bold text-white">Rama — General Manager Briefing</h2>
+                          <h2 className="text-lg font-bold text-white">Kang Dudung — General Manager Briefing</h2>
                           <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-mono">
                             {gmSummary?.period || "Oktober 2026"}
                           </span>
@@ -1473,7 +1473,7 @@ export default function VirtualOffice() {
                   </div>
                   <div className="space-y-1.5 max-h-[680px] overflow-y-auto pr-1">
                     {workerList.map((worker: any) => {
-                      const isSelected = worker.id === (currentWorker?.id || "Rama (GM)");
+                      const isSelected = worker.id === (currentWorker?.id || "Kang Dudung (GM)");
                       return (
                         <button
                           key={worker.id}
@@ -1674,7 +1674,7 @@ export default function VirtualOffice() {
                         <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-mono">Tgl 1 Pukul 00:01 WIB</span>
                       </div>
                       <div className="text-[11px] text-slate-400 leading-relaxed">
-                        GM Rama otomatis mengunci pembukuan bulan lalu, menghitung laba bersih, dan mengirim ringkasan P&L + Dividen langsung ke Telegram HP Anda.
+                        Kang Dudung (GM) otomatis mengunci pembukuan bulan lalu, menghitung laba bersih, dan mengirim ringkasan P&L + Dividen langsung ke Telegram HP Anda.
                       </div>
                       <div className="text-[10px] text-slate-500 font-mono">
                         Endpoint Cron: <code>/api/internal/cron/monthly-closing</code>
@@ -1948,7 +1948,7 @@ export default function VirtualOffice() {
                   <div className="p-4 bg-[#161a2b] rounded-2xl border border-slate-800 space-y-2">
                     <div className="text-[10px] text-slate-500 uppercase tracking-wider">Disusun & Disetujui Oleh</div>
                     <div className="text-xl">👨‍💼</div>
-                    <div className="font-bold text-white text-xs">Rama</div>
+                    <div className="font-bold text-white text-xs">Kang Dudung</div>
                     <div className="text-[11px] text-indigo-400 font-mono">General Manager</div>
                     <div className="text-[10px] text-emerald-400 bg-emerald-500/10 py-1 rounded-lg border border-emerald-500/20">
                       ✓ SIGNED & AUDITED
@@ -1958,7 +1958,7 @@ export default function VirtualOffice() {
                   <div className="p-4 bg-[#161a2b] rounded-2xl border border-slate-800 space-y-2">
                     <div className="text-[10px] text-slate-500 uppercase tracking-wider">Diaudit & Direkonsiliasi Oleh</div>
                     <div className="text-xl">👩‍💼</div>
-                    <div className="font-bold text-white text-xs">Fina</div>
+                    <div className="font-bold text-white text-xs">Ceu Edah</div>
                     <div className="text-[11px] text-yellow-400 font-mono">Head of Finance & Tax Accounting</div>
                     <div className="text-[10px] text-emerald-400 bg-emerald-500/10 py-1 rounded-lg border border-emerald-500/20">
                       ✓ RECONCILED 100%

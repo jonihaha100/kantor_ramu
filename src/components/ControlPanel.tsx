@@ -30,114 +30,114 @@ const AGENT_CONFIGS: Record<string, {
   roleDescription: string;
   discussionTopics: string[];
 }> = {
-  "Budi (Sourcing)": {
-    greeting: "Halo bos! Saya baru kontak kelompok tani di Takengon dan Pangalengan. Ada beberapa hal terkait pasokan green beans yang perlu kita diskusikan.",
-    roleDescription: "Menangani kemitraan petani, negosiasi harga biji kopi mentah (direct-trade), kalender panen, dan sampel micro-lot.",
+  "Kang Dudung (GM)": {
+    greeting: "Sampurasun bos! Sadayana 10 divisi roastery nuju harudang gararap tugas. Aya pituduh strategis atanapi tugas anyar anu bade didelegasikeun?",
+    roleDescription: "Pimpinan roastery bageur anu ngatur sadaya divisi, nyatujuan anggaran belanja, sareng mingpin rapat pleno di Meja Cupping.",
     discussionTopics: [
-      "Berapa harga green beans Gayo kalau kita tawar?",
-      "Tolong kirimkan sampel 2kg ke lab Kafin untuk dites",
-      "Kapan jadwal panen raya berikutnya di Takengon?",
-      "Tunda dulu pembelian green beans bulan ini, kita evaluasi stok"
+      "Kumaha evaluasi kinerja operasional roastery dinten ieu?",
+      "Pangdamelkeun tugas anyar keur evaluasi bungkus kemasan Ramu",
+      "Kumaha rencana ekspansi kafe B2B di Bandung minggu ieu?",
+      "Kumpulkeun sadaya tim urang rapat pleno di Meja Cupping!"
     ]
   },
-  "Rama (GM)": {
-    greeting: "Halo bos, semua divisi roastery sedang beroperasi. Ada arahan strategis, evaluasi KPI, atau tugas baru yang perlu didelegasikan?",
-    roleDescription: "Memimpin koordinasi antar departemen, menyetujui anggaran, dan mendelegasikan tugas ke papan Kanban.",
+  "Teh Euis (CS)": {
+    greeting: "Sampurasun juragan! Layanan palanggan WhatsApp sareng marketplace 24 jam standby terus. Aya anu tiasa dibantos ku Teh Euis dinten ieu?",
+    roleDescription: "Ngalayanan palanggan kalayan ramah pisan 24 jam nonstop, ngajaga kapuasan pembeli (CSAT), sareng konsultasi grind size seduh kopi.",
     discussionTopics: [
-      "Bagaimana evaluasi performa operasional roastery hari ini?",
-      "Tolong buatkan tugas baru untuk evaluasi kemasan Ramu",
-      "Bagaimana rencana ekspansi kafe B2B minggu ini?",
-      "Kumpulkan seluruh tim untuk rapat di Cupping Table"
+      "Cek kasadiaan stok kopi Bajawa Honey di gudang",
+      "Kumaha status tiket keluhan sareng respon palanggan WA?",
+      "Biji kopi naon anu pangcocokna kanggo diseduh V60 di bumi?",
+      "Aya palanggan satia anu nyuhunkeun diskon grosiran teu?"
     ]
   },
-  "Sari (CS)": {
-    greeting: "Hai bos! Layanan pelanggan WhatsApp dan marketplace aktif. Rata-rata response time kita di 2 menit.",
-    roleDescription: "Menangani interaksi pelanggan, kepuasan pembeli (CSAT), rekomendasi grind size, dan tiket komplain.",
+  "Ujang (Web Dev)": {
+    greeting: "Aman bos! Server Next.js 15 lemes pisan latency 9ms bari nyemil bala-bala haneut. Web store siap nampung jutaan pesenan checkout!",
+    roleDescription: "Arsitek web store Next.js Ramu Coffee, ngurus pembayaran QRIS otomatis Midtrans, sareng ngajaga server ameh teu ngadat.",
     discussionTopics: [
-      "Cek ketersediaan stok kopi terlaris di gudang",
-      "Bagaimana status tiket keluhan dan respon pelanggan?",
-      "Biji kopi apa yang paling cocok untuk seduh V60 rumahan?",
-      "Adakah pelanggan loyal yang minta diskon pembelian grosir?"
+      "Sabaraha latency server sareng performa checkout web store?",
+      "Aya bug pamayaran QRIS anu dilaporkeun dinten ieu teu?",
+      "Kumaha optimasi loading web dina HP ameh leuwih ngabret?",
+      "Tiasa damelkeun fitur langganan kopi otomatis tiap sasih?"
     ]
   },
-  "Rian (Web Dev)": {
-    greeting: "Server stabil, latency 9ms di edge server. Web store Ramu siap menampung lonjakan pesanan checkout.",
-    roleDescription: "Bertanggung jawab atas arsitektur web Next.js 15, integrasi payment QRIS Midtrans, dan performa teknis.",
+  "Ceu Edah (Finance)": {
+    greeting: "Wilujeng sumping bos! Pembukuan kas dinten ieu parantos diitung nepi ka sabubuk-bubukna. Mana kuitansi bon balanjaan kamari, tong hilap!",
+    roleDescription: "Bendahara roastery anu taliti pisan, ngatur arus kas (cashflow), rekonsiliasi mutasi bank, tagihan invoice kafe tempo 14 dinten, sareng faktur pajak.",
     discussionTopics: [
-      "Berapa latency server dan performa checkout web store Ramu?",
-      "Apakah ada bug pembayaran QRIS yang dilaporkan hari ini?",
-      "Bagaimana optimasi kecepatan loading web di perangkat mobile?",
-      "Bisa buatkan fitur langganan kopi otomatis setiap bulan?"
+      "Sabaraha total omzet lebet sareng posisi kas urang dinten ieu?",
+      "Sabaraha margin laba bersih sabada dipotong biaya gas & bungkus?",
+      "Kumaha status faktur pajak PPN transaksi kafe B2B?",
+      "Sabaraha anggaran aman keur balanja green beans minggu payun?"
     ]
   },
-  "Fina (Finance)": {
-    greeting: "Selamat siang bos. Pembukuan harian dan rekonsiliasi mutasi bank BCA & Mandiri sudah selesai saya audit.",
-    roleDescription: "Mengelola arus kas roastery, rekonsiliasi omzet, invoice B2B tempo 14 hari, dan faktur pajak PPN 11%.",
+  "Kang Tatang (R&D)": {
+    greeting: "Salam sruuup bos! Lab cupping sareng sensorik hurung terus. Biji kopi anyar skor SCA na 87.5 poin, seungitna matak kabita pisan!",
+    roleDescription: "Master cupping & sensorik, ngulik kurva sangrai (RoR & DTR), evaluasi cita rasa specialty coffee standar SCA, sareng nyiptakeun blend anyar.",
     discussionTopics: [
-      "Berapa total omzet masuk dan posisi kas kita hari ini?",
-      "Berapa gross profit margin kita setelah biaya kemasan & gas?",
-      "Bagaimana status faktur pajak PPN transaksi B2B?",
-      "Berapa budget aman untuk belanja green beans minggu depan?"
+      "Kumaha hasil cupping score batch Gayo Anaerobic?",
+      "Jelaskeun kurva RoR sareng DTR dina roasting dinten ieu",
+      "Naha profil sangrai ieu cocog keur mesin espresso kafe?",
+      "Kumaha babandingan rasa proses Anaerobic vs Honey?"
     ]
   },
-  "Kafin (R&D)": {
-    greeting: "Salam bos! Lab cupping dan sensorik aktif. Profil sangrai batch terbaru sudah selesai dievaluasi.",
-    roleDescription: "Menganalisis kurva roasting (RoR & DTR), cupping score standar SCA, dan eksperimen cita rasa specialty coffee.",
+  "Mang Dadang (Inventory)": {
+    greeting: "Siap juragan! Gudang beresih, karung kopi aman di luhur palet, mesin Probat siap ngagolak deui 5 batch dinten ieu!",
+    roleDescription: "Mandor gudang, ngadalikeun stok fisik karung green beans, kemasan roasted beans siap kirim, sareng operasional mesin sangrai Probat.",
     discussionTopics: [
-      "Bagaimana hasil cupping score batch Gayo Anaerobic?",
-      "Jelaskan kurva RoR dan DTR pada roasting hari ini",
-      "Apakah profil sangrai ini cocok untuk espresso mesin kafe?",
-      "Bagaimana perbandingan rasa proses Anaerobic vs Honey?"
+      "Sabaraha sésa karung green beans di gudang sareng suhu ruangan?",
+      "Sabaraha batch roasting anu tiasa digeber mesin Probat dinten ieu?",
+      "Naha stok bungkus valve 200g sareng 1kg masih cekap?",
+      "Iraha jadwal meresihan drum roaster sareng chaff collector?"
     ]
   },
-  "Doni (Inventory)": {
-    greeting: "Siap bos! Gudang roastery dalam kondisi bersih, suhu 22°C dan kelembaban 60% terjaga optimal.",
-    roleDescription: "Mengontrol stok fisik karung green beans, kemasan roasted beans siap kirim, dan operasional mesin Probat.",
+  "Kang Aceng (Logistics)": {
+    greeting: "Laporan kargo siap bos! Paket ekspedisi kargo sareng kurir sameday tos siap ngabret, resi parantos dibagi-bagi!",
+    roleDescription: "Kurir satset, ngatur serah terima resi kargo darat/hawa, kurir sameday tiis, sareng ngajaga paket dugi ka tujuan kalayan salamet tepat waktu.",
     discussionTopics: [
-      "Berapa sisa karung green beans di gudang dan kelembaban ruangan?",
-      "Berapa batch roasting yang bisa dijalankan mesin Probat hari ini?",
-      "Apakah stok kemasan foil valve 200g dan 1kg masih mencukupi?",
-      "Kapan jadwal pembersihan drum roaster dan chaff collector?"
+      "Kumaha status pangiriman kargo pesenan kafe Jakarta?",
+      "Aya kakirangan armada kurir menjelang akhir sasih teu?",
+      "Sabaraha babandingan ongkir Paxel vs J&T Cargo?",
+      "Kumaha nanganan paket anu lecet nalika dikirim ka luar pulo?"
     ]
   },
-  "Gilang (Logistics)": {
-    greeting: "Laporan logistik siap, bos. Paket ekspedisi kargo dan kurir sameday sudah dijadwalkan pickup tepat waktu.",
-    roleDescription: "Mengatur serah terima resi kargo darat/udara, kurir sameday dingin, dan menjaga SLA pengiriman tepat waktu.",
+  "Kang Jajang (B2B)": {
+    greeting: "Halo bos! Pipeline kafe B2B sae pisan. Parantos aya 2 kafe anyar sapuk bade meser biji kopi 50kg rutin sabulan!",
+    roleDescription: "Jagoan lobi kafe & hotel, muka kerjasama suplai biji kopi komersil, kontrak PO rutin, sareng negosiasi volume borongan B2B.",
     discussionTopics: [
-      "Bagaimana status pengiriman kargo pesanan kafe Jakarta?",
-      "Apakah ada keterlambatan kurir darat menjelang akhir bulan?",
-      "Berapa perbandingan tarif Paxel Cold Chain vs J&T Cargo?",
-      "Bagaimana penanganan paket rusak saat pengiriman luar pulau?"
+      "Kumaha nawarkeun suplai 20kg ka Kafe Sudut Temu Bandung?",
+      "Sabaraha minimal order (MOQ) ameh kafe kenging harga grosir?",
+      "Naha urang nyadiakeun mesin kopi haratis keur kontrak sataun?",
+      "Tiasa damelkeun proposal panawaran khusus keur hotel bintang 4?"
     ]
   },
-  "Bayu (B2B)": {
-    greeting: "Halo bos! Pipeline prospek kafe dan hotel bulan ini sangat potensial. Sudah ada 2 kafe baru minta penawaran harga grosir.",
-    roleDescription: "Membuka kemitraan pasokan biji kopi komersial, kontrak PO rutin, dan negosiasi volume B2B.",
+  "Kang Deden (Ads)": {
+    greeting: "Halo bos! Iklan Meta Ads nuju ngabret, ROAS rata-rata 4.2x gurih nyoy teu boncos. Siap scale-up anggaran iklan!",
+    roleDescription: "Spesialis iklan digital berbayar (Meta Ads, Google Search, TikTok Ads), retargeting audiens nginum kopi, sareng ningkatkeun konversi checkout.",
     discussionTopics: [
-      "Bagaimana penawaran suplai 20kg ke Kafe Sudut Temu?",
-      "Berapa minimal order (MOQ) untuk kafe baru dapat harga grosir?",
-      "Apakah kita sediakan mesin kopi gratis untuk kontrak jangka panjang?",
-      "Bisa buatkan proposal penawaran khusus untuk hotel bintang 4?"
+      "Sabaraha ROAS sareng CPA (biaya per pembeli) kampanye ayeuna?",
+      "Target audiens mana anu ngahasilkeun pameseran kopi pangseueurna?",
+      "Kumaha hasil iklan retargeting palanggan anu can checkout?",
+      "Sabaraha proyeksi omzet lamun budget iklan ditaekkeun 30%?"
     ]
   },
-  "Arya (Ads)": {
-    greeting: "Halo bos! Kampanye Meta Ads dan Google Ads roastery berjalan optimal. ROAS rata-rata stabil di angka 3.8x.",
-    roleDescription: "Mengelola performa iklan berbayar (Meta Ads, Google Search), retargeting audiens, dan konversi checkout.",
+  "Neng Iteung (Content)": {
+    greeting: "Sampurasun wargi roastery! Neng Iteung nembe rengse ngadamel video Reels TikTok proses nyeduh V60, viewersna pasti rame!",
+    roleDescription: "Kreator konten geulis & kreatif, ngadamel video pondok organik, carita inspiratif patani kopi binaan, sareng visual branding Ramu Coffee.",
     discussionTopics: [
-      "Berapa ROAS dan CPA (biaya per akuisisi) kampanye saat ini?",
-      "Audiens mana yang menghasilkan pembelian kopi tertinggi?",
-      "Bagaimana hasil iklan retargeting pelanggan yang abandoned cart?",
-      "Berapa proyeksi omzet jika budget iklan dinaikkan 30%?"
+      "Video Reels naon anu nuju trending sareng engagementna pangluhurna?",
+      "Kumaha konsép video edukasi proses fermentasi kopi anaerobik?",
+      "Iraha jadwal tayang video promo paket hemat akhir pekan?",
+      "Tiasa ngadamel liputan wawancara patani kopi di kebon Pangalengan?"
     ]
   },
-  "Maya (Content)": {
-    greeting: "Halo bos! Konsep video reels dan TikTok edukasi kopi Nusantara sudah masuk tahap editing. Ada pesan khusus yang mau disampaikan?",
-    roleDescription: "Membuat video pendek organik, storytelling biji kopi petani binaan, dan visual branding roastery.",
+  "Mang Encep (Sourcing)": {
+    greeting: "Sampurasun bos! Mang Encep nembe mulang ti kebon kopi Takengon silaturahmi jeung patani. Pasokan green beans aman terkendali!",
+    roleDescription: "Sobat patani kopi di kebon gunung, negosiasi harga meuli biji kopi mentah (direct-trade) anu adil, kalender panen raya, sareng milari micro-lot langka.",
     discussionTopics: [
-      "Video Reels apa yang trending dan menghasilkan engagement tertinggi?",
-      "Bagaimana konsep video edukasi proses fermentasi kopi anaerobik?",
-      "Kapan jadwal tayang konten video promo bundle akhir pekan?",
-      "Bisa buatkan konten wawancara petani kopi binaan di kebun?"
+      "Sabaraha harga green beans Gayo lamun urang tawar borongan?",
+      "Pangintunkeun sampel 2kg ka lab Kang Tatang keur dites cupping",
+      "Iraha jadwal panen raya salajengna di Takengon jeung Pangalengan?",
+      "Tunda heula meuli green beans sasih ieu, urang cek stok gudang"
     ]
   }
 };
@@ -157,17 +157,17 @@ const RND_DATA = [
 ];
 
 const ALL_AGENTS_SUMMARY: { role: AgentRole; name: string; dept: string; emoji: string }[] = [
-  { role: "Rama (GM)", name: "Rama", dept: "General Manager", emoji: "👨‍💼" },
-  { role: "Sari (CS)", name: "Sari", dept: "24/7 WhatsApp CS", emoji: "👩‍💼" },
-  { role: "Rian (Web Dev)", name: "Rian", dept: "E-Commerce Tech", emoji: "👨‍💻" },
-  { role: "Fina (Finance)", name: "Fina", dept: "Finance & Tax", emoji: "👩‍💼" },
-  { role: "Kafin (R&D)", name: "Kafin", dept: "R&D & Cupping", emoji: "👨‍🔬" },
-  { role: "Doni (Inventory)", name: "Doni", dept: "Roastery & Stock", emoji: "👨‍🔧" },
-  { role: "Gilang (Logistics)", name: "Gilang", dept: "Logistics & Cargo", emoji: "🚚" },
-  { role: "Bayu (B2B)", name: "Bayu", dept: "B2B Cafe Contracts", emoji: "🤝" },
-  { role: "Arya (Ads)", name: "Arya", dept: "Meta & Google Ads", emoji: "📈" },
-  { role: "Maya (Content)", name: "Maya", dept: "Social Media & Reels", emoji: "📱" },
-  { role: "Budi (Sourcing)", name: "Budi", dept: "Green Beans Sourcing", emoji: "🌿" }
+  { role: "Kang Dudung (GM)", name: "Kang Dudung", dept: "General Manager", emoji: "👨‍💼" },
+  { role: "Teh Euis (CS)", name: "Teh Euis", dept: "24/7 WhatsApp CS", emoji: "👩‍💼" },
+  { role: "Ujang (Web Dev)", name: "Ujang", dept: "E-Commerce Tech", emoji: "👨‍💻" },
+  { role: "Ceu Edah (Finance)", name: "Ceu Edah", dept: "Bendahara Roastery", emoji: "👩‍💼" },
+  { role: "Kang Tatang (R&D)", name: "Kang Tatang", dept: "R&D & Master Cupping", emoji: "👨‍🔬" },
+  { role: "Mang Dadang (Inventory)", name: "Mang Dadang", dept: "Mandor Gudang", emoji: "👨‍🔧" },
+  { role: "Kang Aceng (Logistics)", name: "Kang Aceng", dept: "Kurir Satset", emoji: "🚚" },
+  { role: "Kang Jajang (B2B)", name: "Kang Jajang", dept: "Lobi Kafe B2B", emoji: "🤝" },
+  { role: "Kang Deden (Ads)", name: "Kang Deden", dept: "Meta & Google Ads", emoji: "📈" },
+  { role: "Neng Iteung (Content)", name: "Neng Iteung", dept: "Medsos & TikTok", emoji: "📱" },
+  { role: "Mang Encep (Sourcing)", name: "Mang Encep", dept: "Sobat Patani Kopi", emoji: "🌿" }
 ];
 
 export default function ControlPanel({ 
@@ -387,22 +387,34 @@ export default function ControlPanel({
     );
   }
 
-  const name = selectedAgent.split(" ")[0];
+  const name = selectedAgent.split("(")[0].trim();
   const role = selectedAgent.split("(")[1]?.replace(")", "");
   const config = AGENT_CONFIGS[selectedAgent as keyof typeof AGENT_CONFIGS];
 
   const agentIdMap: Record<string, string> = {
-    "Rama": "rama",
-    "Sari": "sari",
-    "Rian": "rian",
-    "Fina": "fina",
-    "Doni": "doni",
-    "Gilang": "gilang",
-    "Bayu": "bayu",
-    "Kafin": "kafin",
-    "Arya": "arya",
-    "Maya": "maya",
-    "Budi": "budi"
+    "Kang Dudung": "dudung",
+    "Teh Euis": "euis",
+    "Ujang": "ujang",
+    "Ceu Edah": "edah",
+    "Mang Dadang": "dadang",
+    "Kang Aceng": "aceng",
+    "Kang Jajang": "jajang",
+    "Kang Tatang": "tatang",
+    "Kang Deden": "deden",
+    "Neng Iteung": "iteung",
+    "Mang Encep": "encep",
+    // Fallback legacy IDs
+    "Rama": "dudung",
+    "Sari": "euis",
+    "Rian": "ujang",
+    "Fina": "edah",
+    "Doni": "dadang",
+    "Gilang": "aceng",
+    "Bayu": "jajang",
+    "Kafin": "tatang",
+    "Arya": "deden",
+    "Maya": "iteung",
+    "Budi": "encep"
   };
 
   const handleAction = async (action: string, label: string) => {
@@ -417,7 +429,7 @@ export default function ControlPanel({
     setIsTyping(true);
 
     try {
-      const apiId = agentIdMap[name] || "rama";
+      const apiId = agentIdMap[name] || "dudung";
       const res = await fetch(`/api/internal/agents/${apiId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -433,7 +445,7 @@ export default function ControlPanel({
       let replyText = "";
 
       if (!res.ok) {
-        replyText = `Maaf, terjadi kendala: ${responseJson.error || "Gagal menghubungi agen."}`;
+        replyText = `Hapunten, aya kendala: ${responseJson.error || "Teu tiasa ngahubungi agen."}`;
       } else {
         replyText = responseJson.data.reply;
       }
@@ -449,7 +461,7 @@ export default function ControlPanel({
     } catch (err) {
       setConversations(prev => ({
         ...prev,
-        [currentAgent]: [...(prev[currentAgent] || []), { sender: "agent", text: "Koneksi ke backend terputus. Mohon periksa jaringan server." }]
+        [currentAgent]: [...(prev[currentAgent] || []), { sender: "agent", text: "Koneksi ka server pegat. Mangga parios jaringan internét." }]
       }));
     } finally {
       setIsTyping(false);
@@ -472,7 +484,16 @@ export default function ControlPanel({
         <div className="p-3 bg-[#c9865f] border-b-2 border-[#ad6e49] shrink-0 flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-[#fff8ea] border-2 border-[#ad6e49] flex items-center justify-center text-base shadow">
-              {name === "Rama" ? "👨‍💼" : name === "Sari" ? "👩‍💼" : name === "Fina" ? "👩‍💼" : name === "Rian" ? "👨‍💻" : name === "Maya" ? "👩‍🎤" : name === "Kafin" ? "👨‍🔬" : name === "Budi" ? "👨‍🌾" : name === "Bayu" ? "👨‍💼" : name === "Arya" ? "👨‍💼" : "👨‍🔧"}
+              {name.includes("Dudung") ? "👨‍💼" : 
+               name.includes("Euis") ? "👩‍💼" : 
+               name.includes("Edah") ? "👩‍💼" : 
+               name.includes("Ujang") ? "👨‍💻" : 
+               name.includes("Iteung") ? "👩‍🎤" : 
+               name.includes("Tatang") ? "👨‍🔬" : 
+               name.includes("Encep") ? "👨‍🌾" : 
+               name.includes("Jajang") ? "👨‍💼" : 
+               name.includes("Deden") ? "👨‍💼" : 
+               name.includes("Dadang") ? "👨‍🔧" : "🚚"}
             </div>
             <div>
               <div className="font-bold text-[#2d1808] text-xs font-silkscreen flex items-center gap-1.5">

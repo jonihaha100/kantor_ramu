@@ -103,17 +103,17 @@ export default function MeetingPanel({ onClose, onSpeakerChange, onViewProjects,
       let fallbackDiscussion: { speaker: string; text: string }[] = [];
       if (targetRecipient && targetRecipient !== "ALL") {
         fallbackDiscussion = [
-          { speaker: "Rama (GM)", text: `${sapaan} tim. Mari kita dengarkan tanggapan langsung dari ${targetRecipient} mengenai topik: "${finalTopic}".` },
-          { speaker: `${targetRecipient}`, text: `${sapaan} bos! Mengenai arahan tersebut, divisi kami siap mengawal eksekusinya dan menjaga standar mutu tanpa kompromi.` },
-          { speaker: "Rama (GM)", text: "Terima kasih atas klarifikasinya. Segera catat dan eksekusi di task board tim." }
+          { speaker: "Kang Dudung (GM)", text: `${sapaan} tim. Mangga urang regepkeun waleran langsung ti ${targetRecipient} ngeunaan agenda: "${finalTopic}".` },
+          { speaker: `${targetRecipient}`, text: `${sapaan} juragan bos! Ngeunaan pituduh ieu, divisi abdi siap ngalaksanakeun tur ngajaga kualitas pangsaena tanpa kompromi.` },
+          { speaker: "Kang Dudung (GM)", text: "Hatur nuhun kana kajelasanana. Geura catet tur eksekusi dina task board tim ayeuna." }
         ];
       } else {
         fallbackDiscussion = [
-          { speaker: "Rama (GM)", text: `${sapaan} rekan-rekan tim Ramu! Rapat pleno koordinasi dibuka untuk agenda: "${finalTopic}". Semua divisi standby.` },
-          { speaker: "Kafin (R&D)", text: "Dari sisi lab sensorik dan roasting, seluruh batch sangrai hari ini konsisten di skor 87.5 poin specialty. Siap memenuhi kebutuhan produksi." },
-          { speaker: "Budi (Sourcing)", text: "Pasokan green beans Gayo dan Flores Bajawa di gudang aman untuk 3 bulan ke depan, kemitraan petani berjalan sangat baik." },
-          { speaker: "Arya (Ads)", text: "Kampanye meta ads dan konten Reels hari ini menghasilkan ROAS 4.2x dengan lonjakan traffic checkout yang stabil." },
-          { speaker: "Rama (GM)", text: "Kerja bagus semuanya. Arahan sudah dicatat dan tugas tindak lanjut otomatis dibuat di sistem." }
+          { speaker: "Kang Dudung (GM)", text: `${sapaan} barudak tim Ramu! Rapat pleno koordinasi dibuka kanggo agenda: "${finalTopic}". Sadaya divisi standby!` },
+          { speaker: "Kang Tatang (R&D)", text: "Ti sisi lab sensorik sareng sangrai, sadaya batch sangrai dinten ieu konsisten dina skor 87.5 poin specialty. Siap nyumponan produksi!" },
+          { speaker: "Mang Encep (Sourcing)", text: "Pasokan green beans Gayo sareng Flores Bajawa di gudang aman kanggo 3 sasih ka payun, gotong royong sareng patani sae pisan." },
+          { speaker: "Kang Deden (Ads)", text: "Iklan Meta Ads sareng video TikTok Neng Iteung ngahasilkeun ROAS 4.2x kalayan lonjakan checkout anu lemes." },
+          { speaker: "Kang Dudung (GM)", text: "Alus pisan sadayana! Pituduh tos dicatet tur tugas tindak lanjut otomatis dijieun dina sistem." }
         ];
       }
       setDiscussion(fallbackDiscussion);
@@ -207,7 +207,7 @@ export default function MeetingPanel({ onClose, onSpeakerChange, onViewProjects,
         )}
 
         {visibleDiscussion.map((msg, idx) => {
-          const isRama = msg.speaker.includes("Rama");
+          const isRama = msg.speaker.includes("Rama") || msg.speaker.includes("Dudung");
           const isCurrent = idx === activeTurn && !isCompleted;
 
           return (
@@ -289,17 +289,17 @@ export default function MeetingPanel({ onClose, onSpeakerChange, onViewProjects,
             👥 Semua
           </button>
           {[
-            { id: "Budi", name: "Budi (Sourcing)" },
-            { id: "Kafin", name: "Kafin (R&D)" },
-            { id: "Doni", name: "Doni (Gudang)" },
-            { id: "Rian", name: "Rian (Web Dev)" },
-            { id: "Fina", name: "Fina (Finance)" },
-            { id: "Sari", name: "Sari (CS)" },
-            { id: "Gilang", name: "Gilang (Logistik)" },
-            { id: "Bayu", name: "Bayu (B2B)" },
-            { id: "Arya", name: "Arya (Ads)" },
-            { id: "Maya", name: "Maya (Konten)" },
-            { id: "Rama", name: "Rama (GM)" },
+            { id: "Kang Dudung", name: "Kang Dudung (GM)" },
+            { id: "Teh Euis", name: "Teh Euis (CS)" },
+            { id: "Ceu Edah", name: "Ceu Edah (Finance)" },
+            { id: "Ujang", name: "Ujang (Web Dev)" },
+            { id: "Kang Jajang", name: "Kang Jajang (B2B)" },
+            { id: "Kang Deden", name: "Kang Deden (Ads)" },
+            { id: "Neng Iteung", name: "Neng Iteung (Konten)" },
+            { id: "Kang Tatang", name: "Kang Tatang (R&D)" },
+            { id: "Mang Dadang", name: "Mang Dadang (Gudang)" },
+            { id: "Kang Aceng", name: "Kang Aceng (Logistik)" },
+            { id: "Mang Encep", name: "Mang Encep (Sourcing)" },
           ].map(agent => (
             <button
               key={agent.id}
@@ -311,7 +311,7 @@ export default function MeetingPanel({ onClose, onSpeakerChange, onViewProjects,
                   : (theme === "retro" ? "bg-[#fff8ea]/60 text-[#3e2208] hover:bg-[#fff8ea]" : "bg-slate-800 text-slate-300 hover:bg-slate-700")
               }`}
             >
-              {agent.name.split(" ")[0]}
+              {agent.name.split(" ")[0]} {agent.name.split(" ")[1] || ""}
             </button>
           ))}
         </div>
@@ -323,8 +323,8 @@ export default function MeetingPanel({ onClose, onSpeakerChange, onViewProjects,
             onChange={(e) => setTopic(e.target.value)}
             placeholder={
               targetRecipient === "ALL" 
-                ? "Tanya tim (atau ketik: 'Budi, harga berapa?')..." 
-                : `Tanya langsung ke ${targetRecipient} saja...`
+                ? "Tanya tim (atawa ketik: 'Mang Encep, sabaraha harga kopi?')..." 
+                : `Tanya langsung ka ${targetRecipient} wae...`
             }
             disabled={isLoading || (activeTurn >= 0 && !isCompleted)}
             className={`flex-1 px-3 py-2 rounded-lg text-xs font-mono disabled:opacity-50 ${theme === "retro" ? "bg-[#fff8ea] border-2 border-[#ad6e49] text-[#3e2208] placeholder-[#8d5b38]" : "bg-[#1e2336] border border-slate-700 text-white placeholder-slate-500 focus:border-indigo-500"}`}

@@ -100,10 +100,10 @@ const CAT_SPOTS: CatSpot[] = [
   { name: "Mangkuk Makanan", x: 410, y: 460, preferredState: "eating", desc: "Makan biskuit tuna & minum air segar 🐟" },
   { name: "Sofa Santai", x: 475, y: 475, preferredState: "grooming", desc: "Bersantai di sofa beludru sambil bersolek ✨" },
   { name: "Karpet Cupping", x: 390, y: 285, preferredState: "stretching", desc: "Menggeliat manja di atas karpet Persia 🐾" },
-  { name: "Meja Sari (CS)", x: 175, y: 380, preferredState: "sniffing", desc: "Menemani Sari membalas chat pelanggan 💬" },
-  { name: "Meja Rama (GM)", x: 175, y: 150, preferredState: "sitting", desc: "Duduk anggun mengawasi operasional kantor 👔" },
-  { name: "Meja Rian (Dev)", x: 175, y: 490, preferredState: "sniffing", desc: "Mengendus rubber ducky & codingan Rian 💻" },
-  { name: "Meja Kafin (R&D)", x: 285, y: 490, preferredState: "sitting", desc: "Mencium aroma seduhan kopi cupping ☕" },
+  { name: "Meja Teh Euis (CS)", x: 175, y: 380, preferredState: "sniffing", desc: "Maturan Teh Euis ngawaleran chat palanggan 💬" },
+  { name: "Meja Kang Dudung (GM)", x: 175, y: 150, preferredState: "sitting", desc: "Calik ngawaskeun operasional roastery bari ngopi tubruk 👔" },
+  { name: "Meja Ujang (Dev)", x: 175, y: 490, preferredState: "sniffing", desc: "Ngambuan bebek karét & codingan Next.js Ujang 💻" },
+  { name: "Meja Kang Tatang (R&D)", x: 285, y: 490, preferredState: "sitting", desc: "Nyium seungitna seduhan kopi cupping ☕" },
   { name: "Area Bar Kopi", x: 440, y: 115, preferredState: "butt_wiggle", desc: "Mengincar remah biji kopi sangrai 🎯" },
   { name: "Dekat Jendela Terang", x: 575, y: 80, preferredState: "sitting", desc: "Menikmati hangatnya cahaya matahari pagi ☀️" },
   { name: "Pintu Roastery", x: 625, y: 280, preferredState: "sitting", desc: "Mengintip kesibukan di gudang roastery 🏭" }
@@ -126,263 +126,263 @@ const MEETING_SPOTS = [
 
 const INITIAL_AGENTS: AgentData[] = [
   // Office Hub (Left Cluster)
-  { id: "Rama (GM)", deskX: 130, deskY: 150, x: 130, y: 150, color: "#3b82f6", label: "Rama", hair: "#1e1e1e", roleBadge: "GM Review", activity: "working", targetX: 130, targetY: 150, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
-  { id: "Fina (Finance)", deskX: 130, deskY: 260, x: 130, y: 260, color: "#eab308", label: "Fina", hair: "#451a03", roleBadge: "Rekap Rp 14.2M", activity: "working", targetX: 130, targetY: 260, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
-  { id: "Sari (CS)", deskX: 130, deskY: 380, x: 130, y: 380, color: "#ec4899", label: "Sari", hair: "#5c3a21", roleBadge: "CS WA 24/7 💬", activity: "working", targetX: 130, targetY: 380, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
-  { id: "Rian (Web Dev)", deskX: 130, deskY: 490, x: 130, y: 490, color: "#10b981", label: "Rian", hair: "#d97706", roleBadge: "Dev Next.js", activity: "working", targetX: 130, targetY: 490, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
+  { id: "Kang Dudung (GM)", deskX: 130, deskY: 150, x: 130, y: 150, color: "#3b82f6", label: "Kang Dudung", hair: "#1e1e1e", roleBadge: "Juragan Dudung ☕", activity: "working", targetX: 130, targetY: 150, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
+  { id: "Ceu Edah (Finance)", deskX: 130, deskY: 260, x: 130, y: 260, color: "#eab308", label: "Ceu Edah", hair: "#451a03", roleBadge: "Nagih Bon & Kas 💰", activity: "working", targetX: 130, targetY: 260, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
+  { id: "Teh Euis (CS)", deskX: 130, deskY: 380, x: 130, y: 380, color: "#ec4899", label: "Teh Euis", hair: "#5c3a21", roleBadge: "CS 24 Jam Geulis 💬", activity: "working", targetX: 130, targetY: 380, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
+  { id: "Ujang (Web Dev)", deskX: 130, deskY: 490, x: 130, y: 490, color: "#10b981", label: "Ujang", hair: "#d97706", roleBadge: "Ujang Koding 💻", activity: "working", targetX: 130, targetY: 490, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
 
   // Center-Left Marketing & Commercial Pod
-  { id: "Bayu (B2B)", deskX: 250, deskY: 150, x: 250, y: 150, color: "#f87171", label: "Bayu", hair: "#292524", roleBadge: "Deal Kafe B2B", activity: "working", targetX: 250, targetY: 150, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
-  { id: "Arya (Ads)", deskX: 250, deskY: 260, x: 250, y: 260, color: "#60a5fa", label: "Arya", hair: "#44403c", roleBadge: "Meta ROAS 3.8x", activity: "working", targetX: 250, targetY: 260, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
-  { id: "Maya (Content)", deskX: 250, deskY: 380, x: 250, y: 380, color: "#c084fc", label: "Maya", hair: "#991b1b", roleBadge: "Edit Reels TikTok", activity: "working", targetX: 250, targetY: 380, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
-  { id: "Kafin (R&D)", deskX: 250, deskY: 490, x: 250, y: 490, color: "#2dd4bf", label: "Kafin", hair: "#0f172a", roleBadge: "Cupping Score 87.5", activity: "working", targetX: 250, targetY: 490, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
+  { id: "Kang Jajang (B2B)", deskX: 250, deskY: 150, x: 250, y: 150, color: "#f87171", label: "Kang Jajang", hair: "#292524", roleBadge: "Lobi Kafe Raos 🤝", activity: "working", targetX: 250, targetY: 150, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
+  { id: "Kang Deden (Ads)", deskX: 250, deskY: 260, x: 250, y: 260, color: "#60a5fa", label: "Kang Deden", hair: "#44403c", roleBadge: "Iklan Ngabret 📈", activity: "working", targetX: 250, targetY: 260, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
+  { id: "Neng Iteung (Content)", deskX: 250, deskY: 380, x: 250, y: 380, color: "#c084fc", label: "Neng Iteung", hair: "#991b1b", roleBadge: "TikTok Geulis ✨", activity: "working", targetX: 250, targetY: 380, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
+  { id: "Kang Tatang (R&D)", deskX: 250, deskY: 490, x: 250, y: 490, color: "#2dd4bf", label: "Kang Tatang", hair: "#0f172a", roleBadge: "Cupping 87.5 SCA ☕", activity: "working", targetX: 250, targetY: 490, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
 
   // Roastery Warehouse & Supply Chain (Right Side)
-  { id: "Doni (Inventory)", deskX: 780, deskY: 310, x: 780, y: 310, color: "#f97316", label: "Doni", hair: "#1c1917", roleBadge: "QC Biji Sangrai", activity: "working", targetX: 780, targetY: 310, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: false },
-  { id: "Gilang (Logistics)", deskX: 890, deskY: 310, x: 890, y: 310, color: "#8b5cf6", label: "Gilang", hair: "#18181b", roleBadge: "Dispatch Kargo", activity: "working", targetX: 890, targetY: 310, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: false },
-  { id: "Budi (Sourcing)", deskX: 830, deskY: 460, x: 830, y: 460, color: "#a3e635", label: "Budi", hair: "#3f2b1d", roleBadge: "Direct Trade Petani", activity: "working", targetX: 830, targetY: 460, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: false },
+  { id: "Mang Dadang (Inventory)", deskX: 780, deskY: 310, x: 780, y: 310, color: "#f97316", label: "Mang Dadang", hair: "#1c1917", roleBadge: "Mandor Gudang 📦", activity: "working", targetX: 780, targetY: 310, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: false },
+  { id: "Kang Aceng (Logistics)", deskX: 890, deskY: 310, x: 890, y: 310, color: "#8b5cf6", label: "Kang Aceng", hair: "#18181b", roleBadge: "Kurir Satset 🚚", activity: "working", targetX: 890, targetY: 310, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: false },
+  { id: "Mang Encep (Sourcing)", deskX: 830, deskY: 460, x: 830, y: 460, color: "#a3e635", label: "Mang Encep", hair: "#3f2b1d", roleBadge: "Sobat Patani 🌿", activity: "working", targetX: 830, targetY: 460, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: false },
 ];
 
 // Rich peer-to-peer collaboration dialogue sequences (Walking visits)
 const COLLAB_SCENARIOS = [
   {
-    visitorId: "Sari (CS)",
-    targetId: "Doni (Inventory)",
+    visitorId: "Teh Euis (CS)",
+    targetId: "Mang Dadang (Inventory)",
     emote: "📦",
     dialogue: [
-      { speaker: "Sari", text: "Don, PO Kafe Sudut Temu 20kg siap kirim hari ini?" },
-      { speaker: "Doni", text: "Siap Sar! Baru beres di-packing dan di-seal valve rapi." },
-      { speaker: "Sari", text: "Mantap, langsung ku konfirmasi ke admin kafe via WA!" }
+      { speaker: "Teh Euis", text: "Mang Dadang! PO ti Kafe Sudut Temu 20kg parantos siap dikintun dinten ieu?" },
+      { speaker: "Mang Dadang", text: "Parantos beres atuh geulis! Karungna tos diseal rapih bari ditiup doa." },
+      { speaker: "Teh Euis", text: "Hatur nuhun Mang! Langsung ku abdi infokeun ka juragan kafe via WA nya~" }
     ]
   },
   {
-    visitorId: "Maya (Content)",
-    targetId: "Kafin (R&D)",
+    visitorId: "Neng Iteung (Content)",
+    targetId: "Kang Tatang (R&D)",
     emote: "🎬",
     dialogue: [
-      { speaker: "Maya", text: "Kafin! Boleh rekam video pour-over batch Bajawa Honey?" },
-      { speaker: "Kafin", text: "Boleh May! Notes aroma peach & madunya semerbak banget." },
-      { speaker: "Maya", text: "Cakep, gue edit Reels edukasi di CapCut sekarang!" }
+      { speaker: "Neng Iteung", text: "Kang Tatang kasep! Neda widi bade ngarekam pour-over Bajawa Honey kaci teu?" },
+      { speaker: "Kang Tatang", text: "Mangga Neng Iteung! Ieu seungit peach sareng maduna mani ngahiliwir pisan!" },
+      { speaker: "Neng Iteung", text: "Alus pisan! Langsung ku Iteung edit di CapCut bari pasang sora kacapi suling!" }
     ]
   },
   {
-    visitorId: "Rama (GM)",
-    targetId: "Fina (Finance)",
+    visitorId: "Kang Dudung (GM)",
+    targetId: "Ceu Edah (Finance)",
     emote: "📊",
     dialogue: [
-      { speaker: "Rama", text: "Fin, rekonsiliasi omzet Rp 14.2M hari ini sudah klop?" },
-      { speaker: "Fina", text: "Sudah klop Pak Rama, invoice Kafe Sudut Temu sudah lunas." },
-      { speaker: "Rama", text: "Bagus, amankan alokasi belanja green beans Takengon." }
+      { speaker: "Kang Dudung", text: "Ceu Edah, kumaha omzet roastery dinten ieu Rp 14.2M tos klop teu aya nu leungit?" },
+      { speaker: "Ceu Edah", text: "Klop atuh Kang Dudung! Duitna teu kaci leungit sapeser oge, abdi pelototan terus!" },
+      { speaker: "Kang Dudung", text: "Mantep Ceu! Tahan alokasi meser biji kopi Gayo ti Mang Encep nya." }
     ]
   },
   {
-    visitorId: "Gilang (Logistics)",
-    targetId: "Sari (CS)",
+    visitorId: "Kang Aceng (Logistics)",
+    targetId: "Teh Euis (CS)",
     emote: "🚚",
     dialogue: [
-      { speaker: "Gilang", text: "Sar, resi J&T Cargo batch siang sudah terbit ya." },
-      { speaker: "Sari", text: "Thank you mas Gilang, langsung ku teruskan ke WhatsApp pembeli!" },
-      { speaker: "Gilang", text: "Sip, kurir kargo jalan tepat waktu jam 15:30." }
+      { speaker: "Kang Aceng", text: "Teh Euis, resi kargo J&T kloter siang tos kaluar kabeh, gaspol satset!" },
+      { speaker: "Teh Euis", text: "Hatur nuhun Kang Aceng pituin kuring! Langsung ku abdi share ka palanggan." },
+      { speaker: "Kang Aceng", text: "Sip Teh! Motor matic kuring tos dipanasan, siap nembus macet Pasteur!" }
     ]
   },
   {
-    visitorId: "Rian (Web Dev)",
-    targetId: "Arya (Ads)",
+    visitorId: "Ujang (Web Dev)",
+    targetId: "Kang Deden (Ads)",
     emote: "⚡",
     dialogue: [
-      { speaker: "Rian", text: "Arya, conversion tracking Meta Pixel di web store 100% akurat." },
-      { speaker: "Arya", text: "Mantap Rian! Gua naikin budget kampanye 20% ya." },
-      { speaker: "Rian", text: "Gas! Server edge kita siap tampung lonjakan checkout." }
+      { speaker: "Ujang", text: "Kang Deden, kode tracking Meta Pixel di web store tos hejo lemes 100%!" },
+      { speaker: "Kang Deden", text: "Edun pisan Jang! Lamun kitu mah ku kuring budget iklanna dibebekkeun 20%!" },
+      { speaker: "Ujang", text: "Sikat Kang! Server Vercel & edge siap nampung pembeli ti sabang dugi merauke!" }
     ]
   },
   {
-    visitorId: "Bayu (B2B)",
-    targetId: "Budi (Sourcing)",
+    visitorId: "Kang Jajang (B2B)",
+    targetId: "Mang Encep (Sourcing)",
     emote: "🤝",
     dialogue: [
-      { speaker: "Bayu", text: "Bud, ada coffeeshop Jaksel mau kontrak suplai 100kg/bulan." },
-      { speaker: "Budi", text: "Aman Bay! Kontak koperasi di Takengon baru panen raya." },
-      { speaker: "Bayu", text: "Keren, gue siapin draft MOU kemitraannya." }
+      { speaker: "Kang Jajang", text: "Mang Encep! Aya juragan kafe Dago badag hoyong kontrak 100kg/sasih euy!" },
+      { speaker: "Mang Encep", text: "Aman Kang Jajang! Barudak tani di kebon Takengon nuju panen raya beuneur pisan." },
+      { speaker: "Kang Jajang", text: "Keren pisan Mang! Kuring bade nyiapkeun materai jeung draf MOU na." }
     ]
   },
   {
-    visitorId: "Doni (Inventory)",
-    targetId: "Kafin (R&D)",
+    visitorId: "Mang Dadang (Inventory)",
+    targetId: "Kang Tatang (R&D)",
     emote: "🔥",
     dialogue: [
-      { speaker: "Doni", text: "Kaf, moisture content green beans hari ini stabil di 11.2%." },
-      { speaker: "Kafin", text: "Ideal banget Don, gas roasting batch specialty berikutnya." },
-      { speaker: "Doni", text: "Mesin Probat drumnya udah pre-heat di 205°C!" }
+      { speaker: "Mang Dadang", text: "Kang Tatang, kadar cai green beans stabil di 11.2%, drum Probat tos panas 205°C!" },
+      { speaker: "Kang Tatang", text: "Alus Mang Dadang! Hayu urang sangrai batch specialty ameh seungitna dugi ka alun-alun." },
+      { speaker: "Mang Dadang", text: "Siap laksanakan juragan! Kuring geus nyiapkeun karung goni anyar." }
     ]
   },
   {
-    visitorId: "Kafin (R&D)",
-    targetId: "Budi (Sourcing)",
+    visitorId: "Kang Tatang (R&D)",
+    targetId: "Mang Encep (Sourcing)",
     emote: "☕",
     dialogue: [
-      { speaker: "Kafin", text: "Bud! Sampel anaerobic natural dari Takengon cupping score 87.5!" },
-      { speaker: "Budi", text: "Wah serius Kaf? Petani Pak Samsul pasti senang dengarnya." },
-      { speaker: "Kafin", text: "Kunci kontraknya Bud, rasa winey & blackcurrant-nya istimewa!" }
+      { speaker: "Kang Tatang", text: "Mang Encep! Biji anaerobik ti kebon pun paman cupping score-na tembus 87.5!" },
+      { speaker: "Mang Encep", text: "Aduh Kang Tatang, leresan eta teh? Patani pasti bungah kacida ngadengena!" },
+      { speaker: "Kang Tatang", text: "Kunci kontrakna Mang, rasa winey sareng berry-na juara sadunya!" }
     ]
   },
   {
-    visitorId: "Arya (Ads)",
-    targetId: "Maya (Content)",
+    visitorId: "Kang Deden (Ads)",
+    targetId: "Neng Iteung (Content)",
     emote: "📈",
     dialogue: [
-      { speaker: "Arya", text: "May! Video Reels 'Crema Tebal Anti Maag' CTR-nya tembus 3.12%!" },
-      { speaker: "Maya", text: "Keren kan! Visual pouring slow-mo emang paling disukai audiens." },
-      { speaker: "Arya", text: "Gue pasang budget iklan retargeting biar penjualan meroket." }
+      { speaker: "Kang Deden", text: "Neng Iteung! Video TikTok 'Kopi Susu Crema Kandel' CTR-na tembus 3.12%!" },
+      { speaker: "Neng Iteung", text: "Pan bener ceuk Iteung oge Kang Deden! Audiens mah resep nu visualna ngagurilap!" },
+      { speaker: "Kang Deden", text: "Ku kuring retargeting deui ah, ameh cuanna ngocor sapertos cai terjun!" }
     ]
   },
   {
-    visitorId: "Fina (Finance)",
-    targetId: "Bayu (B2B)",
+    visitorId: "Ceu Edah (Finance)",
+    targetId: "Kang Jajang (B2B)",
     emote: "💰",
     dialogue: [
-      { speaker: "Fina", text: "Bayu, pembayaran invoice Kafe Sudut Temu Rp 4.8M udah masuk." },
-      { speaker: "Bayu", text: "Alhamdulillah lunas! Berarti jatah suplai minggu depan siap jalan." },
-      { speaker: "Fina", text: "Faktur pajak PPN 11% juga sudah ku terbitkan ya." }
+      { speaker: "Ceu Edah", text: "Kang Jajang! Duit invoice Kafe Sudut Temu Rp 4.8M parantos lebet ka rekening!" },
+      { speaker: "Kang Jajang", text: "Alhamdulillah genah Ceu! Hartosna jatah kirim minggu payun tiasa langsung mangkat." },
+      { speaker: "Ceu Edah", text: "Faktur pajak PPN 11% tos dicitak ku kuring, kade ulah leungit nya!" }
     ]
   },
   {
-    visitorId: "Rian (Web Dev)",
-    targetId: "Sari (CS)",
+    visitorId: "Ujang (Web Dev)",
+    targetId: "Teh Euis (CS)",
     emote: "💻",
     dialogue: [
-      { speaker: "Rian", text: "Sar, fitur pemilih gilingan V60 & espresso di web udah lancar?" },
-      { speaker: "Sari", text: "Lancar banget Rian! Gak ada lagi pembeli salah pilih gilingan." },
-      { speaker: "Rian", text: "Sip! CSAT kita bakal tetap bertahan di atas 98%." }
+      { speaker: "Ujang", text: "Teh Euis, tombol pilih gilingan V60 sareng espresso di web tos rapih teu nge-bug deui?" },
+      { speaker: "Teh Euis", text: "Lemes pisan Jang! Ayeuna teu aya deui palanggan nu lepat milih ukuran bubuk kopi." },
+      { speaker: "Ujang", text: "Alus Teh! Pokona mun aya bug, bejaan Ujang bari pesenkeun bala-bala haneut!" }
     ]
   },
   {
-    visitorId: "Budi (Sourcing)",
-    targetId: "Rama (GM)",
+    visitorId: "Mang Encep (Sourcing)",
+    targetId: "Kang Dudung (GM)",
     emote: "🌾",
     dialogue: [
-      { speaker: "Budi", text: "Pak Rama, kontrak direct trade 2 ton petani Pangalengan siap diteken." },
-      { speaker: "Rama", text: "Berapa kesepakatan harga per kilo dengan kelompok tani mas Budi?" },
-      { speaker: "Budi", text: "Rp 86.000/kg pak, win-win buat petani dan margin roastery kita." }
+      { speaker: "Mang Encep", text: "Kang Dudung, kontrak direct trade 2 ton sareng patani Pangalengan siap ditandatangan." },
+      { speaker: "Kang Dudung", text: "Sabaraha pangaos perkilona Mang Encep sareng kelompok tani ditu?" },
+      { speaker: "Mang Encep", text: "Rp 86.000/kg Kang, sami-sami untung, patani bungah roastery urang sugih!" }
     ]
   },
   {
-    visitorId: "Kafin (R&D)",
-    targetId: "Doni (Inventory)",
+    visitorId: "Kang Tatang (R&D)",
+    targetId: "Mang Dadang (Inventory)",
     emote: "☕",
     dialogue: [
-      { speaker: "Kafin", text: "Don, jadwal roasting sore ini 2 batch Sumatra Kerinci ya." },
-      { speaker: "Doni", text: "Siap Kafin! Biji kopi mentah udah selesai ditimbang 24kg." },
-      { speaker: "Kafin", text: "Jaga RoR drum saat first crack di 8.5°C/menit ya Don." }
+      { speaker: "Kang Tatang", text: "Mang Dadang, jadwal nyangrai sonten ieu 2 batch Sumatra Kerinci nya!" },
+      { speaker: "Mang Dadang", text: "Siap Kang Tatang! Biji mentah parantos ditimbang 24kg dina baskom badag." },
+      { speaker: "Kang Tatang", text: "Ati-ati RoR drum nalika first crack kedah pas di 8.5°C/menit nya Mang." }
     ]
   },
   {
-    visitorId: "Maya (Content)",
-    targetId: "Bayu (B2B)",
+    visitorId: "Neng Iteung (Content)",
+    targetId: "Kang Jajang (B2B)",
     emote: "✨",
     dialogue: [
-      { speaker: "Maya", text: "Bay, e-katalog B2B edisi kuartal ini sudah selesai ku desain!" },
-      { speaker: "Bayu", text: "Wah cakep banget May! Foto kemasan Ramu terlihat mewah." },
-      { speaker: "Maya", text: "Semoga mempermudah closing kemitraan kafe-kafe baru ya!" }
+      { speaker: "Neng Iteung", text: "Kang Jajang, e-katalog B2B roastery parantos beres didesain ku Iteung!" },
+      { speaker: "Kang Jajang", text: "Aduh geulis pisan Neng! Bungkusan Ramu katingal mewah asa kopi ti Paris." },
+      { speaker: "Neng Iteung", text: "Mugi-mugi ngagampilkeun closing sareng bos-bos kafe di Jawa Barat nya!" }
     ]
   },
   {
-    visitorId: "Gilang (Logistics)",
-    targetId: "Doni (Inventory)",
+    visitorId: "Kang Aceng (Logistics)",
+    targetId: "Mang Dadang (Inventory)",
     emote: "🚚",
     dialogue: [
-      { speaker: "Gilang", text: "Don, pengiriman kargo Bali butuh 15 karton blend espresso." },
-      { speaker: "Doni", text: "Udah standby di pallet 2, kardusnya udah dilapis bubble wrap tebal." },
-      { speaker: "Gilang", text: "Oke, armada kurir Paxel jemput jam 14:00 teng." }
+      { speaker: "Kang Aceng", text: "Mang Dadang, kiriman kargo ka Bali peryogi 15 dus espresso blend!" },
+      { speaker: "Mang Dadang", text: "Tos standby dina palet kai Mang Aceng, dilapis bubble wrap kandel lima lapis." },
+      { speaker: "Kang Aceng", text: "Sip Mang! Mobil kargo ekspedisi dongkap jam 14:00 teng teu kaci telat." }
     ]
   },
   {
-    visitorId: "Rama (GM)",
-    targetId: "Kafin (R&D)",
+    visitorId: "Kang Dudung (GM)",
+    targetId: "Kang Tatang (R&D)",
     emote: "👑",
     dialogue: [
-      { speaker: "Rama", text: "Kafin, bagaimana perkembangan formula signature blend baru kita?" },
-      { speaker: "Kafin", text: "Sudah seimbang pak! 70% Gayo Arabica dan 30% Robusta Dampit." },
-      { speaker: "Rama", text: "Aroma manis karamelnya kuat, siap kita luncurkan ke pasar." }
+      { speaker: "Kang Dudung", text: "Kang Tatang, kumaha racikan signature blend anyar urang parantos pas dina létah?" },
+      { speaker: "Kang Tatang", text: "Tos pas pisan Kang Dudung! 70% Gayo Arabica sareng 30% Robusta Dampit gurih nyooy." },
+      { speaker: "Kang Dudung", text: "Seungit karamelna sedep kacida, ieu mah siap urang luncurkeun ka pasar!" }
     ]
   },
   {
-    visitorId: "Fina (Finance)",
-    targetId: "Budi (Sourcing)",
+    visitorId: "Ceu Edah (Finance)",
+    targetId: "Mang Encep (Sourcing)",
     emote: "🧾",
     dialogue: [
-      { speaker: "Fina", text: "Mas Budi, transfer pelunasan green beans Gayo sudah berhasil terkirim." },
-      { speaker: "Budi", text: "Terima kasih mbak Fina, resi kargo truk pengangkut sudah meluncur." },
-      { speaker: "Fina", text: "Bukti potong pajak PPh 22-nya sudah ku arsipkan rapi." }
+      { speaker: "Ceu Edah", text: "Mang Encep, transferan pelunasan green beans Gayo parantos dikintun ti BCA!" },
+      { speaker: "Mang Encep", text: "Hatur nuhun Ceu Edah geulis, resi kargo treuk pengangkut parantos dikintun." },
+      { speaker: "Ceu Edah", text: "Bukti potong pajeg PPh 22 parantos diarsipkeun rapih dina map beureum." }
     ]
   },
   {
-    visitorId: "Arya (Ads)",
-    targetId: "Rama (GM)",
+    visitorId: "Kang Deden (Ads)",
+    targetId: "Kang Dudung (GM)",
     emote: "🎯",
     dialogue: [
-      { speaker: "Arya", text: "Pak Rama, laporan mingguan Meta Ads mencatatkan ROAS 3.82x." },
-      { speaker: "Rama", text: "Prestasi bagus Arya, CAC di angka berapa sekarang?" },
-      { speaker: "Arya", text: "Stabil di Rp 24.200 per transaksi baru, sangat efisien pak!" }
+      { speaker: "Kang Deden", text: "Kang Dudung, laporan mingguan Meta Ads kenging ROAS 3.82x mani gurih!" },
+      { speaker: "Kang Dudung", text: "Alus pisan Deden kasep, sabaraha biaya meunangkeun pembeli anyar (CAC)?" },
+      { speaker: "Kang Deden", text: "Stabil di Rp 24.200 per transaksi anyar, hemat pisan Kang teu aya nu boncos!" }
     ]
   },
   {
-    visitorId: "Doni (Inventory)",
-    targetId: "Budi (Sourcing)",
+    visitorId: "Mang Dadang (Inventory)",
+    targetId: "Mang Encep (Sourcing)",
     emote: "⚖️",
     dialogue: [
-      { speaker: "Doni", text: "Mas Budi, 40 karung goni Flores Bajawa baru sampai di dock gudang." },
-      { speaker: "Budi", text: "Cek fisik karungnya Don, pastikan segel GrainPro masih utuh." },
-      { speaker: "Doni", text: "Aman mas, biji kopi wangi kering dan bersih tanpa cacat." }
+      { speaker: "Mang Dadang", text: "Mang Encep, 40 karung goni Flores Bajawa parantos dugi ka panto gudang." },
+      { speaker: "Mang Encep", text: "Pariksa karungna Mang Dadang, pastikeun segel palastik GrainPro teu soek." },
+      { speaker: "Mang Dadang", text: "Aman Mang, biji kopina seungit garing teu aya kutu atawa kokotor." }
     ]
   },
   {
-    visitorId: "Sari (CS)",
-    targetId: "Fina (Finance)",
+    visitorId: "Teh Euis (CS)",
+    targetId: "Ceu Edah (Finance)",
     emote: "💬",
     dialogue: [
-      { speaker: "Sari", text: "Mbak Fina, Kafe Rekanan minta invoice resmi atas nama PT mereka." },
-      { speaker: "Fina", text: "Sudah ku generate Sar, PDF faktur pajak sudah ku kirim ke emailmu." },
-      { speaker: "Sari", text: "Siap mbak, langsung ku forward ke WhatsApp owner kafenya!" }
+      { speaker: "Teh Euis", text: "Ceu Edah bageur, Kafe Rekanan nyuhunkeun invoice resmi nganggo NPWP PT." },
+      { speaker: "Ceu Edah", text: "Tos dijieun ku Ceu Edah atuh Euis, PDF faktur pajegna tos dikirim ka email." },
+      { speaker: "Teh Euis", text: "Muhun Ceu, langsung diforward ka WhatsApp juragan kafenya ayeuna keneh!" }
     ]
   },
   {
-    visitorId: "Kafin (R&D)",
-    targetId: "Maya (Content)",
+    visitorId: "Kang Tatang (R&D)",
+    targetId: "Neng Iteung (Content)",
     emote: "☕",
     dialogue: [
-      { speaker: "Kafin", text: "May, tasting notes blend ini: Dark Chocolate, Roasted Hazelnut & Molasses." },
-      { speaker: "Maya", text: "Deskripsi rasanya bikin ngiler! Ku cantumkan di postingan Instagram ya." },
-      { speaker: "Kafin", text: "Jangan lupa ingatkan audiens buat resting biji 5 hari setelah sangrai!" }
+      { speaker: "Kang Tatang", text: "Neng Iteung, tasting notes blend ieu: Dark Chocolate, Roasted Hazelnut & Molasses." },
+      { speaker: "Neng Iteung", text: "Aduh ngabibita pisan Kang! Ku Iteung langsung didamelkeun caption Instagram geura." },
+      { speaker: "Kang Tatang", text: "Ulah hilap wartosan balarea supados resting biji 5 dinten sanggeus disangrai!" }
     ]
   },
   {
-    visitorId: "Rian (Web Dev)",
-    targetId: "Rama (GM)",
+    visitorId: "Ujang (Web Dev)",
+    targetId: "Kang Dudung (GM)",
     emote: "⚡",
     dialogue: [
-      { speaker: "Rian", text: "Pak Rama, laporan performa web store: uptime 99.99% dan loading 0.6 detik." },
-      { speaker: "Rama", text: "Bagus sekali Rian, keamanan payment gateway Midtrans terpantau aman?" },
-      { speaker: "Rian", text: "Sangat aman pak, proteksi webhook SSL aktif tanpa celah." }
+      { speaker: "Ujang", text: "Kang Dudung, laporan wéb store: uptime 99.99% sareng loading kilat 0.6 detik." },
+      { speaker: "Kang Dudung", text: "Pinter pisan Ujang, kaamanan pembayaran QRIS Midtrans aman teu aya bobol?" },
+      { speaker: "Ujang", text: "Aman pisan Kang! Di-enkripsi lemes, serverna Ujang jagain bari ngopi tubruk." }
     ]
   },
   {
-    visitorId: "Bayu (B2B)",
-    targetId: "Doni (Inventory)",
+    visitorId: "Kang Jajang (B2B)",
+    targetId: "Mang Dadang (Inventory)",
     emote: "🤝",
     dialogue: [
-      { speaker: "Bayu", text: "Don, ada repeat order 50kg House Blend dari jaringan kafe BSD." },
-      { speaker: "Doni", text: "Stok roasted beans kita melimpah 180kg, langsung ku pack kardus!" },
-      { speaker: "Bayu", text: "Sip, klien minta dikirim via kurir sameday besok pagi." }
+      { speaker: "Kang Jajang", text: "Mang Dadang, aya repeat order 50kg House Blend ti kafe di Bandung wetan!" },
+      { speaker: "Mang Dadang", text: "Stok biji sangrai urang seueur 180kg, langsung dipaking kana kardus ayeuna!" },
+      { speaker: "Kang Jajang", text: "Sip Mang, klien nyuhunkeun dikintun nganggo ojeg online enjing enjing." }
     ]
   },
   {
-    visitorId: "Maya (Content)",
-    targetId: "Sari (CS)",
+    visitorId: "Neng Iteung (Content)",
+    targetId: "Teh Euis (CS)",
     emote: "💡",
     dialogue: [
-      { speaker: "Maya", text: "Sar, pertanyaan apa yang paling sering ditanya pelanggan di WhatsApp?" },
-      { speaker: "Sari", text: "Banyak yang bingung bedanya rasa anaerobic sama washed process May." },
-      { speaker: "Maya", text: "Mantap! Gua langsung bikin video edukasi 30 detik buat TikTok!" }
+      { speaker: "Neng Iteung", text: "Teh Euis, patarosan naon nu paling seueur ditaroskeun ku palanggan di WA?" },
+      { speaker: "Teh Euis", text: "Seueur nu lieur ngabedakeun rasa proses anaerobik sareng washed Neng Iteung." },
+      { speaker: "Neng Iteung", text: "Edun! Iteung langsung ngadamel video edukasi 30 detik dina TikTok ayeuna!" }
     ]
   }
 ];
@@ -390,93 +390,93 @@ const COLLAB_SCENARIOS = [
 // Desk-to-Desk Neighbor Micro-Discussions (Colleagues chatting without leaving their chairs)
 const POD_DISCUSSIONS = [
   {
-    speaker1Id: "Rian (Web Dev)",
-    speaker2Id: "Kafin (R&D)",
+    speaker1Id: "Ujang (Web Dev)",
+    speaker2Id: "Kang Tatang (R&D)",
     emote: "💻",
     dialogue: [
-      { speaker: "Rian", text: "Kaf, data cupping score batch Gayo udah live di website!" },
-      { speaker: "Kafin", text: "Sip Rian! Customer bisa langsung cek profil rasanya." }
+      { speaker: "Ujang", text: "Kang Tatang, data cupping score batch Gayo parantos tayang dina website!" },
+      { speaker: "Kang Tatang", text: "Sip Jang! Pelanggan tiasa langsung ningali aroma buah sareng catetan rasana." }
     ]
   },
   {
-    speaker1Id: "Sari (CS)",
-    speaker2Id: "Maya (Content)",
+    speaker1Id: "Teh Euis (CS)",
+    speaker2Id: "Neng Iteung (Content)",
     emote: "💬",
     dialogue: [
-      { speaker: "Sari", text: "May, banyak pelanggan di WA nanya grind size buat V60." },
-      { speaker: "Maya", text: "Ide konten cakep! Gue bikinin video Reels seduh sore ini!" }
+      { speaker: "Teh Euis", text: "Neng Iteung, seueur pisan palanggan di WA naroskeun ukuran gilingan V60." },
+      { speaker: "Neng Iteung", text: "Ide konten sae pisan Teh! Ku Iteung didamelkeun Reels video nyeduh sonten ieu!" }
     ]
   },
   {
-    speaker1Id: "Arya (Ads)",
-    speaker2Id: "Fina (Finance)",
+    speaker1Id: "Kang Deden (Ads)",
+    speaker2Id: "Ceu Edah (Finance)",
     emote: "📈",
     dialogue: [
-      { speaker: "Arya", text: "Fin, ROAS Meta Ads hari ini 3.82x. Boleh naikin budget 15%?" },
-      { speaker: "Fina", text: "Boleh Arya, margin bersih kita masih tebal di 30.6%." }
+      { speaker: "Kang Deden", text: "Ceu Edah, ROAS Meta Ads dinten ieu 3.82x, kaci teu nambihan budget iklan 15%?" },
+      { speaker: "Ceu Edah", text: "Mangga Kang Deden, nu penting cuan lebet, margin bersih urang masih kandel 30.6%!" }
     ]
   },
   {
-    speaker1Id: "Bayu (B2B)",
-    speaker2Id: "Rama (GM)",
+    speaker1Id: "Kang Jajang (B2B)",
+    speaker2Id: "Kang Dudung (GM)",
     emote: "🤝",
     dialogue: [
-      { speaker: "Bayu", text: "Pak Rama, Kafe Sudut Temu fix kontrak 120kg/bulan." },
-      { speaker: "Rama", text: "Keren Bayu! Siapkan sample roast profile khusus buat mereka." }
+      { speaker: "Kang Jajang", text: "Kang Dudung, Kafe Sudut Temu fix kontrak suplai 120kg/sasih euy!" },
+      { speaker: "Kang Dudung", text: "Edun Kang Jajang! Siapkeun racikan sampel sangrai khusus keur maranehna." }
     ]
   },
   {
-    speaker1Id: "Doni (Inventory)",
-    speaker2Id: "Gilang (Logistics)",
+    speaker1Id: "Mang Dadang (Inventory)",
+    speaker2Id: "Kang Aceng (Logistics)",
     emote: "📦",
     dialogue: [
-      { speaker: "Doni", text: "Lang, kardus kemasan 200g udah di-bubble wrap rapi." },
-      { speaker: "Gilang", text: "Oke Don, kurir kargo jemput tepat jam 15:30 nanti." }
+      { speaker: "Mang Dadang", text: "Ceng, kardus bungkusan 200g parantos dibubble wrap pageuh pisan." },
+      { speaker: "Kang Aceng", text: "Sip Mang Dadang! Kurir kargo ekspedisi dongkap pas jam 15:30 sonten." }
     ]
   },
   {
-    speaker1Id: "Budi (Sourcing)",
-    speaker2Id: "Doni (Inventory)",
+    speaker1Id: "Mang Encep (Sourcing)",
+    speaker2Id: "Mang Dadang (Inventory)",
     emote: "🌾",
     dialogue: [
-      { speaker: "Budi", text: "Don, 2 ton green bean Sigarar Utang Pangalengan sampai besok." },
-      { speaker: "Doni", text: "Gudang B siap mas Budi, pallet kayu & humidity meter standby!" }
+      { speaker: "Mang Encep", text: "Mang Dadang, 2 ton green bean Sigarar Utang Pangalengan dugi enjing!" },
+      { speaker: "Mang Dadang", text: "Gudang B siap Mang Encep, palet kai sareng hygrometer parantos standby!" }
     ]
   },
   {
-    speaker1Id: "Kafin (R&D)",
-    speaker2Id: "Rama (GM)",
+    speaker1Id: "Kang Tatang (R&D)",
+    speaker2Id: "Kang Dudung (GM)",
     emote: "☕",
     dialogue: [
-      { speaker: "Kafin", text: "Pak Rama, cupping batch Bajawa tembus score 87.5 poin!" },
-      { speaker: "Rama", text: "Luar biasa Kafin, layak kita rilis jadi edisi Reserve." }
+      { speaker: "Kang Tatang", text: "Kang Dudung, cupping batch Bajawa tembus score 87.5 poin, edun!" },
+      { speaker: "Kang Dudung", text: "Luar biasa Tatang kasep, pantes ieu mah dijadikeun edisi Reserve roastery!" }
     ]
   },
   {
-    speaker1Id: "Maya (Creative)",
-    speaker2Id: "Arya (Ads)",
+    speaker1Id: "Neng Iteung (Content)",
+    speaker2Id: "Kang Deden (Ads)",
     emote: "✨",
     dialogue: [
-      { speaker: "Maya", text: "Arya, video ASMR espresso kemarin tembus 180k views lho!" },
-      { speaker: "Arya", text: "Pantesan! CPR di Meta Ads langsung turun ke Rp 19.500!" }
+      { speaker: "Neng Iteung", text: "Kang Deden, video ASMR espresso kamari tembus 180k views dina TikTok!" },
+      { speaker: "Kang Deden", text: "Pantesan atuh! Biaya iklan CPR di Meta Ads langsung turun ka Rp 19.500!" }
     ]
   },
   {
-    speaker1Id: "Sari (CS)",
-    speaker2Id: "Rian (Web Dev)",
+    speaker1Id: "Teh Euis (CS)",
+    speaker2Id: "Ujang (Web Dev)",
     emote: "⚡",
     dialogue: [
-      { speaker: "Sari", text: "Rian, opsi pilih gilingan di web store gampang dipahami pembeli." },
-      { speaker: "Rian", text: "Mantap Sar, konversi checkout mobile naik 28% berkat itu!" }
+      { speaker: "Teh Euis", text: "Ujang, menu milih gilingan di wéb store gampil pisan kahartos ku palanggan." },
+      { speaker: "Ujang", text: "Mantap Teh Euis! Checkout ti HP naek 28% margi wébna enteng pisan!" }
     ]
   },
   {
-    speaker1Id: "Bayu (B2B)",
-    speaker2Id: "Fina (Finance)",
+    speaker1Id: "Kang Jajang (B2B)",
+    speaker2Id: "Ceu Edah (Finance)",
     emote: "💰",
     dialogue: [
-      { speaker: "Bayu", text: "Fin, invoice Kafe Sudut Temu termin pertama sudah cair?" },
-      { speaker: "Fina", text: "Sudah masuk rekening BCA roastery jam 10 tadi, aman!" }
+      { speaker: "Kang Jajang", text: "Ceu Edah, invoice Kafe Sudut Temu termin kahiji parantos cair teu acan?" },
+      { speaker: "Ceu Edah", text: "Tos lebet kana rekening BCA roastery jam 10 tadi enjing, aman santosa!" }
     ]
   }
 ];
@@ -484,133 +484,133 @@ const POD_DISCUSSIONS = [
 // Spontaneous Cupping Table Tastings around the Persian Carpet
 const CUPPING_SESSIONS = [
   {
-    hostId: "Kafin (R&D)",
-    guestId: "Maya (Content)",
+    hostId: "Kang Tatang (R&D)",
+    guestId: "Neng Iteung (Content)",
     dialogue: [
-      { speaker: "Kafin", text: "May, coba seruput cupping spoon batch Bajawa ini. Rasain acidity-nya!" },
-      { speaker: "Maya", text: "Wah! Aroma apricot segar dan aftertaste manis madu semerbak!" },
-      { speaker: "Kafin", text: "Betul! Ini yang kita sebut specialty coffee ber-score 87.5 poin!" }
+      { speaker: "Kang Tatang", text: "Neng Iteung, cobian sruput nganggo sendok cupping batch Bajawa ieu. Raoskeun kaasaman buahna!" },
+      { speaker: "Neng Iteung", text: "Aduh Kang! Seungit buah aprikot seger sareng aftertaste amis madu mani ngahiliwir!" },
+      { speaker: "Kang Tatang", text: "Leres pisan Neng! Ieu nu disebat specialty coffee score 87.5 poin pituin nusantara!" }
     ]
   },
   {
-    hostId: "Kafin (R&D)",
-    guestId: "Rama (GM)",
+    hostId: "Kang Tatang (R&D)",
+    guestId: "Kang Dudung (GM)",
     dialogue: [
-      { speaker: "Kafin", text: "Pak Rama, ini hasil sangrai roast profile medium dark untuk kafe rekanan." },
-      { speaker: "Rama", text: "Crema-nya tebal sekali, rasa pahitnya gurih tanpa cacat sangrai." },
-      { speaker: "Kafin", text: "Sempurna untuk menu es kopi susu kekinian mitra B2B kita!" }
+      { speaker: "Kang Tatang", text: "Kang Dudung, ieu hasil sangrai profil medium dark kanggo kafe mitra urang." },
+      { speaker: "Kang Dudung", text: "Crema-na kandel pisan Tatang, paitna gurih teu aya pait gosong acan." },
+      { speaker: "Kang Tatang", text: "Sampurna kanggo menu es kopi susu kekinian mitra B2B roastery urang!" }
     ]
   },
   {
-    hostId: "Budi (Sourcing)",
-    guestId: "Kafin (R&D)",
+    hostId: "Mang Encep (Sourcing)",
+    guestId: "Kang Tatang (R&D)",
     dialogue: [
-      { speaker: "Budi", text: "Kafin, ini sampel kopi petik merah fermentasi anaerobik 72 jam Takengon." },
-      { speaker: "Kafin", text: "Aroma keringnya wangi buah berry ungu! Body-nya juicy banget." },
-      { speaker: "Budi", text: "Mantap, petani di Aceh berhasil jaga konsistensi fermentasinya!" }
+      { speaker: "Mang Encep", text: "Kang Tatang, ieu sampel kopi beureum fermentasi anaerobik 72 jam ti Takengon." },
+      { speaker: "Kang Tatang", text: "Seungit garingna wangi buah berry ungu! Awak kopina (body) kandel pisan." },
+      { speaker: "Mang Encep", text: "Alus pisan, patani di kebon leres-leres tartib ngajaga fermentasina!" }
     ]
   }
 ];
 
 // Ambient Desk Thoughts: realistic internal monologues showing busy roastery work
 const AMBIENT_DESK_THOUGHTS: Record<string, { thoughts: string[]; emote: string }> = {
-  "Rama (GM)": {
+  "Kang Dudung (GM)": {
     emote: "👑",
     thoughts: [
-      "Memeriksa dasbor kinerja 11 divisi roastery.. 📊",
-      "Proyeksi dividen & reinvestasi panen raya aman. 💰",
-      "Target ekspansi 5 kafe mitra baru bulan ini. 🎯",
-      "SOP operasional & kontrol kualitas berjalan mulus. ✨"
+      "Marios dasbor omzet 11 divisi roastery bari ngopi tubruk.. 📊",
+      "Barudak gawe sarumanget, dividen panen raya aman kacida. 💰",
+      "Target ekspansi 5 kafe mitra anyar di Bandung & Jakarta. 🎯",
+      "SOP operasional lemes, moal aya nu prot-protan deui. ✨"
     ]
   },
-  "Fina (Finance)": {
+  "Ceu Edah (Finance)": {
     emote: "📊",
     thoughts: [
-      "Audit mutasi bank BCA & Mandiri sudah 100% klop. 🧾",
-      "Gross profit margin stabil di 52.8%, sangat sehat! 📈",
-      "Alokasi belanja green beans Takengon terproteksi. 💼",
-      "Rekapitulasi faktur pajak PPN 11% transaksi B2B selesai. ✍️"
+      "Audit mutasi BCA & Mandiri 100% klop, sapeser oge moal leungit! 🧾",
+      "Gross profit margin 52.8%, dompet roastery beuteung buncit! 📈",
+      "Alokasi balanja green beans Mang Encep tos diamankeun. 💼",
+      "Faktur pajeg PPN 11% beres, mana atuh bon dahar beurangna! ✍️"
     ]
   },
-  "Sari (CS)": {
+  "Teh Euis (CS)": {
     emote: "💬",
     thoughts: [
-      "Standby CS WhatsApp 24/7 tanpa jam closing! 💬",
-      "Respon chat pelanggan tercepat: 1.2 detik! ⚡",
-      "Rekomendasi grind size V60 & espresso terkirim. ☕",
-      "Review bintang 5 baru masuk dari home brewer! ⭐"
+      "Standby CS WhatsApp 24/7 pituin ramah 'Muhun mangga juragan~' 💬",
+      "Balesan chat kilat 1.2 detik, palanggan meuni resep pisan! ⚡",
+      "Saran ukuran gilingan tubruk & V60 tos dikintun ka balarea. ☕",
+      "Review bentang 5 ti pembeli garut: 'Kopina mantep geulis!' ⭐"
     ]
   },
-  "Rian (Web Dev)": {
+  "Ujang (Web Dev)": {
     emote: "💻",
     thoughts: [
-      "git commit & push ke edge server: 0 downtime. 💻",
-      "Latency web store 9ms, checkout QRIS kilat! ⚡",
-      "Integrasi Webhook WhatsApp & Midtrans sinkron. 🔗",
-      "Monitoring server VPS & auto-backup database aman. 🛡️"
+      "git push origin main beres bari nyemil bala-bala haneut. 💻",
+      "Latency wéb ngan 9ms, checkout QRIS sakiceup lemes! ⚡",
+      "Webhook WhatsApp & Midtrans sinkron tanpa bejad server. 🔗",
+      "Monitoring VPS bari ninyuh kopi hideung pait mantep. 🛡️"
     ]
   },
-  "Bayu (B2B)": {
+  "Kang Jajang (B2B)": {
     emote: "🤝",
     thoughts: [
-      "Follow-up proposal suplai ke Kafe Sudut Temu 120kg. 🤝",
-      "Siapkan tester profile roast untuk calon mitra hotel. ☕",
-      "18 kafe rekanan aktif dalam pipeline suplai rutin. 📋",
-      "Draft kontrak B2B volume builder siap ditandatangani. 📑"
+      "Ngotéktak kontak WA bos-bos kafe di Dago & Braga 120kg. 🤝",
+      "Nyiapkeun tester sangrai keur calon mitra hotel bintang lima. ☕",
+      "18 kafe langganan satia meser biji kopi Ramu tiap sasih. 📋",
+      "Ngosok-ngosok draf kontrak B2B sangkan deal enjing. 📑"
     ]
   },
-  "Arya (Ads)": {
+  "Kang Deden (Ads)": {
     emote: "📈",
     thoughts: [
-      "ROAS Meta Ads stabil di 3.82x, jauh di atas target! 📈",
-      "Biaya per akuisisi (CAC) ditekan ke Rp 24.200. 🎯",
-      "Retargeting audiens kopi susu menghasilkan konversi tinggi. 💡",
-      "Alokasi budget Meta & TikTok Ads berjalan optimal. 📊"
+      "ROAS Meta Ads 3.82x, gurih nyooy teu aya boncos-boncosan! 📈",
+      "Biaya per akuisisi ditekan dugi Rp 24.200 per pesenan. 🎯",
+      "Iklan retargeting video Neng Iteung konversina joss pisan. 💡",
+      "Algoritma Meta taluk ka racikan iklan Kang Deden! 📊"
     ]
   },
-  "Maya (Content)": {
+  "Neng Iteung (Content)": {
     emote: "🎬",
     thoughts: [
-      "Editing video Reels: 'Rahasia Kopi Susu Gurih Anti-Maag'. 🎬",
-      "340.000 views organik minggu ini di TikTok @ramuroastery. ✨",
-      "Foto katalog aesthetic kemasan 200g siap tayang. 📸",
-      "Naskah video proses sangrai Probat UG22 sudah siap. 📝"
+      "Ngedit Reels: 'Rahasia Kopi Susu Nikmat Teu Matak Kembung'. 🎬",
+      "340.000 views organik dina TikTok @ramuroastery, alus pisan! ✨",
+      "Foto katalog estetik bungkusan kopi 200g tos siap upload. 📸",
+      "Naskah video proses nyangrai Probat UG22 tos rampung. 📝"
     ]
   },
-  "Kafin (R&D)": {
+  "Kang Tatang (R&D)": {
     emote: "☕",
     thoughts: [
-      "Kalibrasi sensorik batch Gayo: aroma melati & madu! 👃",
-      "Cupping score SCA 87.5 poin, kualitas specialty murni. ☕",
-      "Monitoring kurva RoR & DTR mesin sangrai Probat. 🔥",
-      "Eksperimen profil roasting anaerobic natural batch #14. 🧪"
+      "Nyoba nyeruput sensorik batch Gayo: seungit melati & madu! 👃",
+      "Cupping score SCA 87.5 poin, specialty kelas internasional! ☕",
+      "Mencrong kurva RoR & DTR mesin sangrai Probat ulah tutung. 🔥",
+      "Eksperimen profil roasting fermentasi nanas batch #14. 🧪"
     ]
   },
-  "Doni (Inventory)": {
+  "Mang Dadang (Inventory)": {
     emote: "📦",
     thoughts: [
-      "Stok 180 kg roasted beans siap kirim tersusun rapi. 📦",
-      "Kadar air green beans 11.2%, kelembaban gudang 60% RH. ⚖️",
-      "Mesin sangrai Probat drum pre-heat stabil di 205°C. 🚜",
-      "Chaff collector dan filter pendingin dibersihkan bersih. 🧹"
+      "180 kg biji sangrai siap kirim tos ngajajar rapih dina rak. 📦",
+      "Kadar cai green beans 11.2%, hawa gudang seger 60% RH. ⚖️",
+      "Drum mesin sangrai Probat tos dipanasan stabil 205°C. 🚜",
+      "Chaff collector sareng saringan pendingin tos disapu beresih. 🧹"
     ]
   },
-  "Gilang (Logistics)": {
+  "Kang Aceng (Logistics)": {
     emote: "🚚",
     thoughts: [
-      "8 koli karton biji kopi siap serah terima ke J&T Cargo. 🚚",
-      "Semua pesanan ritel sameday ter-dispatch sebelum cut-off. ⏱️",
-      "Resi pengiriman otomatis tersinkron ke WA pembeli. 📱",
-      "Jadwal armada kurir kargo Jakarta & Bandung tepat waktu. 🗺️"
+      "8 karung koli kargo parantos siap dipasrahkeun ka J&T! 🚚",
+      "Paket sameday Bandung-Jakarta tos beres sateuacan ashar. ⏱️",
+      "Resi kargo otomatis kakintun kana WhatsApp pembeli. 📱",
+      "Motor matic gaspol, jaket kandel siap nembus hujan tiris. 🗺️"
     ]
   },
-  "Budi (Sourcing)": {
+  "Mang Encep (Sourcing)": {
     emote: "🌾",
     thoughts: [
-      "Kontrak direct trade 2 ton varietas Sigarar Utang aman. 🌾",
-      "Petani Takengon & Pangalengan dapat kepastian harga adil. 🤝",
-      "Jadwal panen raya kopi specialty minggu kedua bulan ini. ☀️",
-      "Sampel micro-lot fermentasi 72 jam siap diuji lab. 🌱"
+      "Kontrak direct trade 2 ton varietas Sigarar Utang aman santosa. 🌾",
+      "Patani di gunung Takengon & Pangalengan kenging pangaos adil. 🤝",
+      "Jadwal panen raya kopi beureum minggu payun meuni leubeut. ☀️",
+      "Sampel kopi micro-lot fermentasi 72 jam siap dites ku Tatang. 🌱"
     ]
   }
 };
@@ -3262,17 +3262,17 @@ export default function OfficeCanvas({
 
   const triggerCoffeeBreak = () => {
     const coffeeQuotes = [
-      "Espresso double shot biar fokus! ☕",
-      "Americano panas pas buat rekap margin! ☕",
-      "Caramel latte dingin pelepas penat chat CS ☕",
-      "Kopi hitam tubruk teman ngoding Next.js 💻",
-      "Cupping Bajawa Honey 87.5 poin! 🍯",
-      "Es kopi susu buat ide konten viral TikTok! ✨",
-      "Cold brew nitro penambah energi scale-up ads! 🚀",
-      "Filter V60 buat meeting deal kafe B2B! ☕",
-      "Fresh roasted langsung dari drum Probat! 🔥",
-      "Kopi seduh botolan teman kurir kargo! 📦",
-      "Kopi petik merah asli Takengon Gayo! 🌿"
+      "Kopi hideung tubruk panas ameh teu tunduh, juragan! ☕",
+      "Espresso pait nyongkab, pas keur mariksa bon kuitansi Ceu Edah! ☕",
+      "Caramel latte tiis ngubaran rieut ngawaler WA palanggan~ ☕",
+      "Kopi tubruk gula aren rencang ngoding Ujang bari nyemil cireng! 💻",
+      "Sruput Bajawa Honey 87.5 poin, hmmm meuni ngahiliwir! 🍯",
+      "Es kopi susu gula kawung keur inspirasi TikTok Neng Iteung! ✨",
+      "Cold brew tiris panambih tanaga ngageber Meta Ads Kang Deden! 🚀",
+      "Filter V60 manual brew keur nawarkeun kontrak ka bos kafe! ☕",
+      "Fresh roasted panas kurunyung tina drum Probat Mang Dadang! 🔥",
+      "Kopi seduh botolan rencang satia Kang Aceng di jalan! 📦",
+      "Kopi petik beureum asli gunung ti Mang Encep, juara! 🌿"
     ];
     if (selectedAgent) {
       const target = agentsRef.current.find(a => a.id === selectedAgent);
@@ -3280,7 +3280,7 @@ export default function OfficeCanvas({
         target.activity = "drinking";
         target.waitTimer = 5.5;
         target.sipTimer = 5.5;
-        target.message = "Ngopi dulu sebentar ya bos! ☕";
+        target.message = "Ngopi heula atuh juragan, ulah teuing gawe bisi lieur! ☕";
         target.messageTimer = 4.5;
       }
     } else {
@@ -3424,11 +3424,11 @@ export default function OfficeCanvas({
       cat.timer = 5.0;
       cat.actionDesc = "Mendengkur manja karena baru saja dielus hangat! 😻";
       const catQuotes = [
-        "Purrrrrr~ ❤️ Mochi suka banget dielus di dagu!",
-        "Ngeong! 🐾 Chief Happiness Officer Ramu siap menyemangati tim!",
-        "Meoww~ ✨ Aroma kopi Gayo & seduhan V60 bikin Mochi rileks.",
-        "Purrr purrr~ 😻 Hoki penjualan roastery naik 100% setelah elus Mochi!",
-        "Mroww! ☕ Mochi teman setia barista & roaster Ramu Coffee sejak hari pertama."
+        "Purrrrrr~ ❤️ Mochi resep pisan diusap daguna atuh!",
+        "Ngeong! 🐾 Ucing kantor Ramu siap nyemangatan barudak sadayana!",
+        "Meoww~ ✨ Seungit kopi Gayo & seduhan V60 matak tunduh Mochi.",
+        "Purrr purrr~ 😻 Hoki penjualan roastery naek 100% sanggeus ngusap Mochi!",
+        "Ngeong juragan! 🐟 Menta lauk asin atawa pindang tongkol sapotong atuh!"
       ];
       cat.message = catQuotes[Math.floor(Math.random() * catQuotes.length)];
       cat.messageTimer = 3.5;
@@ -3442,7 +3442,7 @@ export default function OfficeCanvas({
         onOfficeEvent({
           id: Math.random().toString(),
           time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
-          speaker: "Mochi (Cat 🐱)",
+          speaker: "Mochi (Ucing Kantor 🐱)",
           message: "Purrrr... Mochi mendengkur bahagia sambil menggesekkan pipinya ke tangan Anda.",
           type: "system"
         });

@@ -38,10 +38,10 @@ const AGENT_INTELLIGENCE: Record<string, {
   handleLocalReply: (userMsg: string, history: any[]) => Promise<string>;
 }> = {
   "budi": {
-    name: "Budi",
+    name: "Mang Encep",
     roleTitle: "Green Bean Sourcing & Farmer Relations",
     department: "Supply & Agriculture",
-    personality: "Humble, paham agrikultur kopi, negosiator direct-trade yang adil bagi petani dan menguntungkan roastery.",
+    personality: "Sobat dalit patani kopi, bageur, jujur, resep ngariung di saung kebon Pangalengan & Gayo, negosiator direct-trade anu adil.",
     handleLocalReply: async (userMsg: string, history: any[]) => {
       const lower = userMsg.toLowerCase();
       const lastBotMsg = history.filter(h => h.sender === "agent").pop()?.text || "";
@@ -121,10 +121,10 @@ Opsi mana yang ingin Anda prioritaskan untuk kita diskusikan lebih dalam?`;
   },
 
   "kafin": {
-    name: "Kafin",
+    name: "Kang Tatang",
     roleTitle: "R&D & Quality Control Lead",
     department: "Roasting & Coffee Science",
-    personality: "Ilmiah, perfeksionis soal profil rasa, cupping score, dan kurva roasting (RoR).",
+    personality: "Master cupping & sensorik pituin Sunda, perfeksionis soal profil rasa, skor SCA 87+, jeung kurva roasting (RoR).",
     handleLocalReply: async (userMsg: string, history: any[]) => {
       const lower = userMsg.toLowerCase();
 
@@ -155,10 +155,10 @@ Semua sampel di atas 85 poin masuk kategori 'Excellent' standar Specialty Coffee
   },
 
   "fina": {
-    name: "Fina",
+    name: "Ceu Edah",
     roleTitle: "Finance & Accounting Lead",
     department: "Financial Operations",
-    personality: "Teliti, akurat, analitis terhadap margin keuntungan, arus kas, dan pajak.",
+    personality: "Bendahara roastery galak soal nota & kuitansi: 'Mana bonna atuh!', taliti sapeser oge teu kaci leungit.",
     handleLocalReply: async (userMsg: string) => {
       const orders = await prisma.order.findMany();
       const totalRev = orders.reduce((sum, o) => sum + o.totalAmount, 0);
@@ -191,10 +191,10 @@ Jika kita memberikan diskon ke B2B di atas 10%, margin akan tergerus. Saya rekom
   },
 
   "sari": {
-    name: "Sari",
+    name: "Teh Euis",
     roleTitle: "Customer Service & Retention",
     department: "Customer Support",
-    personality: "Ramah, responsif, berorientasi kepuasan pelanggan, paham katalog kopi luar kepala.",
+    personality: "Customer service 24/7 pituin Sunda soméah pisan: 'Muhun mangga juragan~', ramah, teu aya jam closing.",
     handleLocalReply: async (userMsg: string) => {
       const lower = userMsg.toLowerCase();
       const products = await prisma.product.findMany();
@@ -228,10 +228,10 @@ Kapan pun pelanggan bertanya atau pesan kopi di WhatsApp kita—baik pagi, siang
   },
 
   "rama": {
-    name: "Rama",
+    name: "Kang Dudung",
     roleTitle: "General Manager",
     department: "Executive & Operations",
-    personality: "Berwibawa, strategis, solutif, memegang kendali operasional roastery menyeluruh.",
+    personality: "Pimpinan roastery bageur tapi lieur ngatur budak ngora, resep ngopi tubruk hideung pait, bijaksana tur solutif.",
     handleLocalReply: async (userMsg: string) => {
       const lower = userMsg.toLowerCase();
       const orders = await prisma.order.findMany();
@@ -264,10 +264,10 @@ Jika ingin menyamakan visi seluruh tim, Anda bisa klik tombol 'Cupping Meeting' 
   },
 
   "rian": {
-    name: "Rian",
+    name: "Ujang",
     roleTitle: "Lead Full-Stack Web Developer",
     department: "Engineering & Tech",
-    personality: "Geeky, presisi, tech-savvy, mengutamakan performa web dan kelancaran checkout.",
+    personality: "Programmer Next.js ngoding bari nyemil bala-bala & cireng, server edge kilat 9ms, anti-bug.",
     handleLocalReply: async (userMsg: string, history: any[] = []) => {
       const lower = userMsg.toLowerCase();
       const lastBotMsg = history.filter(h => h.sender === "agent").pop()?.text || "";
@@ -321,10 +321,10 @@ Conversion rate checkout naik dari 2.4% ke 3.1% setelah implementasi one-click c
   },
 
   "doni": {
-    name: "Doni",
+    name: "Mang Dadang",
     roleTitle: "Warehouse & Green Bean Inventory",
     department: "Roastery Operations",
-    personality: "Praktis, to the point, menguasai fisik biji kopi mentah dan kapasitas sangrai gudang.",
+    personality: "Mandor gudang jagjag waringkas ngagotong karung kopi 60kg, ngarti kapasitas mesin sangrai Probat UG22.",
     handleLocalReply: async (userMsg: string) => {
       const lower = userMsg.toLowerCase();
       if (lower.includes("stok") || lower.includes("karung") || lower.includes("mentah") || lower.includes("green") || lower.includes("gudang")) {
@@ -340,10 +340,10 @@ Kapasitas drum roaster Probat kita masih sanggup menampung 4 batch sangrai lagi 
   },
 
   "gilang": {
-    name: "Gilang",
+    name: "Kang Aceng",
     roleTitle: "Logistics & Dispatch Coordinator",
     department: "Supply Chain",
-    personality: "Sigap, paham rute kargo dan kurir instan, menjaga SLA pengiriman tepat waktu.",
+    personality: "Kurir kargo satset gaspol motor matic nembus macet Pasteur, resi kilat, bungkusan aman lapis bubble wrap kandel.",
     handleLocalReply: async (userMsg: string) => {
       const lower = userMsg.toLowerCase();
       if (lower.includes("kirim") || lower.includes("kurir") || lower.includes("resi") || lower.includes("kargo") || lower.includes("ongkir") || lower.includes("ekspedisi")) {
@@ -359,10 +359,10 @@ Tingkat keberhasilan pengiriman tepat waktu (SLA) bulan ini di angka 99.2%. Ada 
   },
 
   "bayu": {
-    name: "Bayu",
+    name: "Kang Jajang",
     roleTitle: "B2B Coffee Partnership & Sales",
     department: "Business Development",
-    personality: "Persuasif, berjiwa entrepreneur, ahli closing kontrak suplai kafe dan hotel.",
+    personality: "Sales kafe jago ngolo-ngolo bos kafe Bandung & Jakarta sangkan borong biji kopi kiloan, ahli closing kontrak.",
     handleLocalReply: async (userMsg: string) => {
       const lower = userMsg.toLowerCase();
       if (lower.includes("kafe") || lower.includes("klien") || lower.includes("b2b") || lower.includes("kontrak") || lower.includes("sales") || lower.includes("penawaran") || lower.includes("proposal")) {
@@ -378,10 +378,10 @@ Apakah Anda ingin saya kirimkan proposal final ke calon mitra Jaksel hari ini?`;
   },
 
   "arya": {
-    name: "Arya",
+    name: "Kang Deden",
     roleTitle: "Performance Marketing & Ads",
     department: "Growth Marketing",
-    personality: "Data-driven, obsesi pada ROAS, CAC, CTR, dan efisiensi belanja iklan digital.",
+    personality: "Spesialis Meta Ads mikiran ROAS ameh gurih nyoy teu boncos, ahli retargeting kopi susu gula aren.",
     handleLocalReply: async (userMsg: string) => {
       const lower = userMsg.toLowerCase();
       if (lower.includes("iklan") || lower.includes("ads") || lower.includes("roas") || lower.includes("budget") || lower.includes("meta") || lower.includes("traffic") || lower.includes("google")) {
@@ -398,10 +398,10 @@ Saran saya: Naikkan budget harian 20% khusus untuk ad set winning ini selama akh
   },
 
   "maya": {
-    name: "Maya",
+    name: "Neng Iteung",
     roleTitle: "Creative Director & Content Creator",
     department: "Brand & Creative",
-    personality: "Trendi, estetik, paham algoritma TikTok & IG Reels, storytelling visual kuat.",
+    personality: "Kreator konten TikTok/Reels geulis & heboh, visual estetik pour over, ahli trending audio viral.",
     handleLocalReply: async (userMsg: string) => {
       const lower = userMsg.toLowerCase();
       if (lower.includes("konten") || lower.includes("video") || lower.includes("reels") || lower.includes("tiktok") || lower.includes("sosmed") || lower.includes("post") || lower.includes("viral")) {
@@ -416,6 +416,19 @@ Visual estetik dan storytelling proses roasting artisanal kita terbukti ampuh me
     }
   }
 };
+
+// Dual Sundanese-to-original key mapping for direct intelligence routing
+AGENT_INTELLIGENCE["dudung"] = AGENT_INTELLIGENCE["rama"];
+AGENT_INTELLIGENCE["euis"] = AGENT_INTELLIGENCE["sari"];
+AGENT_INTELLIGENCE["ujang"] = AGENT_INTELLIGENCE["rian"];
+AGENT_INTELLIGENCE["edah"] = AGENT_INTELLIGENCE["fina"];
+AGENT_INTELLIGENCE["jajang"] = AGENT_INTELLIGENCE["bayu"];
+AGENT_INTELLIGENCE["deden"] = AGENT_INTELLIGENCE["arya"];
+AGENT_INTELLIGENCE["iteung"] = AGENT_INTELLIGENCE["maya"];
+AGENT_INTELLIGENCE["tatang"] = AGENT_INTELLIGENCE["kafin"];
+AGENT_INTELLIGENCE["dadang"] = AGENT_INTELLIGENCE["doni"];
+AGENT_INTELLIGENCE["aceng"] = AGENT_INTELLIGENCE["gilang"];
+AGENT_INTELLIGENCE["encep"] = AGENT_INTELLIGENCE["budi"];
 
 // Helper to calculate Indonesian greeting and formatted time based on client or WIB
 function getTimeContext(clientTime?: string, timezone?: string) {
@@ -479,7 +492,54 @@ export async function POST(
     const effectiveKey = headerKey || process.env.GEMINI_API_KEY || "";
     const hasValidGeminiKey = effectiveKey && !effectiveKey.includes("ISI_DENGAN") && effectiveKey.length > 20;
 
-    const agentIntel = AGENT_INTELLIGENCE[agentId.toLowerCase()] || AGENT_INTELLIGENCE["rama"];
+    const rawId = decodeURIComponent(agentId).toLowerCase().trim();
+    const aliasMap: Record<string, string> = {
+      "dudung": "dudung",
+      "kang dudung": "dudung",
+      "kang dudung (gm)": "dudung",
+      "rama": "dudung",
+      "euis": "euis",
+      "teh euis": "euis",
+      "teh euis (cs)": "euis",
+      "sari": "euis",
+      "ujang": "ujang",
+      "ujang (web dev)": "ujang",
+      "rian": "ujang",
+      "edah": "edah",
+      "ceu edah": "edah",
+      "ceu edah (finance)": "edah",
+      "fina": "edah",
+      "jajang": "jajang",
+      "kang jajang": "jajang",
+      "kang jajang (b2b)": "jajang",
+      "bayu": "jajang",
+      "deden": "deden",
+      "kang deden": "deden",
+      "kang deden (ads)": "deden",
+      "arya": "deden",
+      "iteung": "iteung",
+      "neng iteung": "iteung",
+      "neng iteung (content)": "iteung",
+      "maya": "iteung",
+      "tatang": "tatang",
+      "kang tatang": "tatang",
+      "kang tatang (r&d)": "tatang",
+      "kafin": "tatang",
+      "dadang": "dadang",
+      "mang dadang": "dadang",
+      "mang dadang (inventory)": "dadang",
+      "doni": "dadang",
+      "aceng": "aceng",
+      "kang aceng": "aceng",
+      "kang aceng (logistics)": "aceng",
+      "gilang": "aceng",
+      "encep": "encep",
+      "mang encep": "encep",
+      "mang encep (sourcing)": "encep",
+      "budi": "encep"
+    };
+    const resolvedId = aliasMap[rawId] || rawId;
+    const agentIntel = AGENT_INTELLIGENCE[resolvedId] || AGENT_INTELLIGENCE["dudung"] || AGENT_INTELLIGENCE["rama"];
 
     // Retrieve live working memory from database (active tasks & latest meeting)
     const [recentTasks, latestMeeting] = await Promise.all([

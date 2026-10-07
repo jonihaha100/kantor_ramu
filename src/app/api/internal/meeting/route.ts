@@ -63,123 +63,123 @@ interface AgentProfile {
 
 const AGENTS_LIST: AgentProfile[] = [
   {
-    name: "Budi",
-    fullName: "Budi (Sourcing)",
+    name: "Mang Encep",
+    fullName: "Mang Encep (Sourcing)",
     role: "Green Bean Sourcing & Farmer Relations",
-    keywords: ["budi", "sourcing", "petani", "kebun", "green bean", "green beans", "gabah", "gayo", "takengon", "pangalengan", "bajawa", "panen", "beli biji", "harga biji", "tani", "koperasi"],
+    keywords: ["mang encep", "encep", "budi", "sourcing", "petani", "kebun", "green bean", "green beans", "gabah", "gayo", "takengon", "pangalengan", "bajawa", "panen", "beli biji", "harga biji", "tani", "koperasi"],
     generateAnswer: (topic, greeting) => {
       const t = topic.toLowerCase();
-      if (t.includes("harga") || t.includes("nego") || t.includes("tawar") || t.includes("biaya") || t.includes("per kilo")) {
-        return `${greeting} bos! Mengenai harga green beans Gayo Grade 1, koperasi petani Takengon buka harga Rp 92.000/kg. Mereka bersedia kita kunci di Rp 86.000/kg asalkan ambil minimal 1.5 ton dengan DP 30%. Typica Pangalengan skor 88+ di Rp 105.000/kg. Pasokan kita aman dan margin roastery tetap terlindungi.`;
+      if (t.includes("harga") || t.includes("nego") || t.includes("tawar") || t.includes("biaya") || t.includes("per kilo") || t.includes("sabaraha")) {
+        return `Sampurasun juragan bos! Ngeunaan pangaos green beans Gayo Grade 1, koperasi patani Takengon muka harga Rp 92.000/kg. Aranjeunna kersa dikonci di Rp 86.000/kg pami urang candak minimal 1.5 ton sareng DP 30%. Typica Pangalengan skor 88+ di Rp 105.000/kg. Pasokan urang aman santosa, margin roastery kajaga!`;
       }
-      if (t.includes("sampel") || t.includes("sample") || t.includes("uji")) {
-        return `${greeting} bos! Sampel fisik 2kg biji kopi Gayo Anaerobic & Typica Pangalengan sudah saya kirimkan ke lab R&D Kafin untuk uji sensorik. Besok pagi datanya siap kita review bersama.`;
+      if (t.includes("sampel") || t.includes("sample") || t.includes("uji") || t.includes("coba")) {
+        return `Sampurasun juragan bos! Sampel fisik 2kg biji kopi Gayo Anaerobic & Typica Pangalengan parantos dikintun ka lab Kang Tatang kanggo diuji sensorik. Enjing enjing datana parantos siap urang review sasarengan.`;
       }
-      if (t.includes("kapan") || t.includes("jadwal") || t.includes("panen")) {
-        return `${greeting} bos! Di Takengon saat ini sedang masuk fly crop kedua dengan kualitas petik merah sangat optimal karena curah matahari ideal. Flores Bajawa panen berikutnya sekitar bulan Juli-Agustus.`;
+      if (t.includes("kapan") || t.includes("jadwal") || t.includes("panen") || t.includes("iraha")) {
+        return `Sampurasun juragan bos! Di Takengon nuju lebet panen kadua kalayan kualitas petik beureum optimal pisan margi panas panonpoe sae. Flores Bajawa panen sasih Juli-Agustus.`;
       }
-      return `${greeting} bos! Hubungan kemitraan direct-trade dengan kelompok tani kopi di Gayo dan Pangalengan berjalan sangat solid. Pasokan green beans di gudang aman untuk kebutuhan 3 bulan ke depan tanpa risiko putus stok.`;
+      return `Sampurasun juragan bos! Gotong royong direct-trade sareng kelompok tani kopi di Gayo sareng Pangalengan sae pisan. Pasokan green beans di gudang aman dugi 3 sasih ka payun tanpa resiko putus stok.`;
     }
   },
   {
-    name: "Kafin",
-    fullName: "Kafin (R&D)",
+    name: "Kang Tatang",
+    fullName: "Kang Tatang (R&D)",
     role: "R&D & Sensory Cupping Lead",
-    keywords: ["kafin", "r&d", "rnd", "cupping", "rasa", "skor", "score", "notes", "acidity", "body", "roasting profile", "sangrai", "profil", "dtr", "ror", "v60", "espresso", "formula", "resep"],
+    keywords: ["kang tatang", "tatang", "kafin", "r&d", "rnd", "cupping", "rasa", "skor", "score", "notes", "acidity", "body", "roasting profile", "sangrai", "profil", "dtr", "ror", "v60", "espresso", "formula", "resep"],
     generateAnswer: (topic, greeting) => {
       const t = topic.toLowerCase();
       if (t.includes("skor") || t.includes("score") || t.includes("batch") || t.includes("rasa") || t.includes("cupping")) {
-        return `${greeting} bos! Hasil cupping sensorik Batch #14 Gayo Anaerobic kemarin meraih skor 87.5 poin (Specialty Grade). Tasting notes dominan peach, brown sugar, dan lingering jasmine yang sangat clean. Profil RoR saya kunci di DTR 14.2% agar crema di mesin espresso tebal dan acidity-nya balance.`;
+        return `${greeting} juragan bos! Hasil cupping sensorik Batch #14 Gayo Anaerobic kamari kenging skor 87.5 poin (Specialty Grade). Catetan rasa dominan buah peach, gula kawung, sareng melati nu beresih pisan. Profil RoR dikonci dina DTR 14.2% supados crema dina mesin espresso kandel tur kaasamanana saimbang!`;
       }
       if (t.includes("sample") || t.includes("sampel") || t.includes("uji")) {
-        return `${greeting} bos! Sampel green beans baru dari mas Budi sudah masuk tahap sample roasting di mesin IKAWA. Parameter moisture 11.2% sangat ideal. Besok pagi saya jadwalkan sesi cupping internal di meja Cupping Table.`;
+        return `${greeting} juragan bos! Sampel green beans anyar ti Mang Encep parantos lebet tahap sample roasting dina mesin IKAWA. Parameter kadar cai 11.2% ideal pisan. Enjing urang cupping di meja Cupping Table nya bos!`;
       }
-      return `${greeting} bos! Seluruh batch specialty coffee Ramu lolos standar quality control sensorik. Kalibrasi rasa untuk racikan espresso bar maupun filter V60 terjaga konsisten di skor 86+ poin.`;
+      return `${greeting} juragan bos! Sadaya batch specialty coffee Ramu lolos standar quality control sensorik. Kalibrasi rasa kanggo espresso bar atanapi filter V60 konsisten dina skor 86+ poin!`;
     }
   },
   {
-    name: "Doni",
-    fullName: "Doni (Inventory)",
+    name: "Mang Dadang",
+    fullName: "Mang Dadang (Inventory)",
     role: "Warehouse & Roastery Lead",
-    keywords: ["doni", "gudang", "inventory", "stok", "warehouse", "probat", "mesin sangrai", "mesin roasting", "suhu", "packing", "kemasan", "karung", "stok kopi"],
+    keywords: ["mang dadang", "dadang", "doni", "gudang", "inventory", "stok", "warehouse", "probat", "mesin sangrai", "mesin roasting", "suhu", "packing", "kemasan", "karung", "stok kopi"],
     generateAnswer: (topic, greeting) => {
-      return `${greeting} bos! Laporan gudang operasional: Suhu drum mesin Probat UG22 stabil di 205°C, kelembapan gudang 60% RH beroperasi normal. Stok green beans di pallet aman 1.3 ton, dan stok kemasan 200g Ramu Blend siap 120 pack di rak display. Siap sangrai batch berikutnya!`;
+      return `${greeting} juragan bos! Laporan gudang operasional: Hawa drum mesin Probat UG22 stabil dina 205°C, hawa gudang seger 60% RH. Stok green beans dina palet aman 1.3 ton, sareng stok bungkusan 200g Ramu Blend siap 120 pack dina rak. Siap nyangrai batch salajengna!`;
     }
   },
   {
-    name: "Rian",
-    fullName: "Rian (Web Dev)",
+    name: "Ujang",
+    fullName: "Ujang (Web Dev)",
     role: "Full-Stack Web Dev & Infrastructure",
-    keywords: ["rian", "web", "website", "dev", "server", "store", "midtrans", "qris", "checkout", "bug", "it", "nextjs", "online", "loading"],
+    keywords: ["ujang", "rian", "web", "website", "dev", "server", "store", "midtrans", "qris", "checkout", "bug", "it", "nextjs", "online", "loading"],
     generateAnswer: (topic, greeting) => {
-      return `${greeting} bos! Status teknologi web store Ramu: Server edge Next.js 15 berjalan stabil dengan latency 9ms dan uptime 99.98%. Transaksi pembayaran otomatis QRIS Midtrans lancar tanpa kendala. Katalog belanja siap menampung lonjakan pesanan pelanggan kapan saja.`;
+      return `${greeting} juragan bos kasep! Status téknologi wéb store Ramu: Server edge Next.js 15 jalan lemes kalayan latency 9ms sareng uptime 99.98%. Transaksi otomatis QRIS Midtrans lancar pisan tanpa kendala. Siap nampung pesenan balarea!`;
     }
   },
   {
-    name: "Fina",
-    fullName: "Fina (Finance)",
+    name: "Ceu Edah",
+    fullName: "Ceu Edah (Finance)",
     role: "Financial & Revenue Lead",
-    keywords: ["fina", "finance", "keuangan", "omzet", "pendapatan", "kas", "cashflow", "uang", "laba", "rugi", "margin", "invoice", "tagihan", "piutang", "budget"],
+    keywords: ["ceu edah", "edah", "fina", "finance", "keuangan", "omzet", "pendapatan", "kas", "cashflow", "uang", "laba", "rugi", "margin", "invoice", "tagihan", "piutang", "budget", "duit"],
     generateAnswer: (topic, greeting) => {
-      return `${greeting} bos! Rekapitulasi keuangan harian: Total omzet hari ini tembus Rp 14.225.000 dari kombinasi pesanan online web store dan invoice suplai kafe B2B. Margin laba kotor terjaga di 42%, piutang B2B term of payment aman maksimal 14 hari, dan arus kas roastery dalam kondisi sangat sehat.`;
+      return `${greeting} juragan bos! Rekapitulasi artos sareng omzet roastery dinten ieu tembus Rp 14.225.000 tina gabungan pesenan wéb store sareng invoice kafe B2B. Margin kauntungan 42%, piutang B2B aman, sareng kas roastery pohara sehatna! Mana atuh bon kuitansina ulah leungit nya bos!`;
     }
   },
   {
-    name: "Sari",
-    fullName: "Sari (CS)",
+    name: "Teh Euis",
+    fullName: "Teh Euis (CS)",
     role: "Customer Service & Experience Lead",
-    keywords: ["sari", "cs", "customer service", "pelanggan", "pembeli", "komplain", "chat", "wa", "whatsapp", "tanya", "grind size", "gilingan", "tiket", "closing", "jam", "24 jam", "tutup"],
+    keywords: ["teh euis", "euis", "sari", "cs", "customer service", "pelanggan", "pembeli", "komplain", "chat", "wa", "whatsapp", "tanya", "grind size", "gilingan", "tiket", "closing", "jam", "24 jam", "tutup"],
     generateAnswer: (topic, greeting) => {
       const t = topic.toLowerCase();
       if (t.includes("closing") || t.includes("jam") || t.includes("tutup") || t.includes("24") || t.includes("aktif")) {
-        return `${greeting} bos! Layanan WhatsApp CS Ramu Roastery beroperasi 24 Jam Non-Stop tanpa jam closing. Mau pagi, siang, atau tengah malam sekalipun, saya selalu standby aktif merespons setiap pertanyaan pelanggan di WhatsApp dalam hitungan detik!`;
+        return `Muhun mangga juragan bos! Layanan WhatsApp CS Ramu Roastery beroperasi 24 Jam Non-Stop tanpa jam closing! Bade enjing, siang, atanapi tengah wengi, Teh Euis salawasna standby ngabales chat palanggan dina hitungan detik!`;
       }
-      return `${greeting} bos! Update customer service WhatsApp (Standby 24/7 Tanpa Jam Closing): Waktu respon rata-rata 1.2 menit dengan CSAT 98.4%. Pertanyaan terbanyak seputar panduan grind size seduh manual dan rekomendasi beans specialty. Layanan chat kita selalu aktif melayani pelanggan tanpa henti!`;
+      return `Muhun mangga juragan bos! Waktos balesan rata-rata CSAT urang 98.4%. Patarosan pangseueurna ngeunaan ukuran gilingan tubruk sareng rekomendasi beans. Layanan chat urang salawasna aktip tanpa reureuh!`;
     }
   },
   {
-    name: "Gilang",
-    fullName: "Gilang (Logistics)",
+    name: "Kang Aceng",
+    fullName: "Kang Aceng (Logistics)",
     role: "Logistics & Dispatch Lead",
-    keywords: ["gilang", "logistik", "kurir", "ekspedisi", "kargo", "resi", "kirim", "pengiriman", "j&t", "paxel", "jne", "paket", "pickup"],
+    keywords: ["kang aceng", "aceng", "gilang", "logistik", "kurir", "ekspedisi", "kargo", "resi", "kirim", "pengiriman", "j&t", "paxel", "jne", "paket", "pickup"],
     generateAnswer: (topic, greeting) => {
-      return `${greeting} bos! Update logistik pengiriman: Seluruh paket pesanan hari ini sudah di-packing rapi dan di-pickup oleh kurir kargo J&T dan Paxel tepat jam 15:30 sore. Nomor resi otomatis terbit dan langsung di-blast ke WhatsApp pemesan. Rute Jakarta dan Jawa Barat estimasi 1 hari sampai.`;
+      return `Siap gaspol juragan bos! Sadaya paket dinten ieu tos dipaking rapih tur dipickup ku kurir kargo J&T sareng Paxel pas tabuh 15:30 sonten. Nomer resi otomatis kaluar tur diblast kana WA pemesan. Bandung-Jakarta sapoe nepi!`;
     }
   },
   {
-    name: "Bayu",
-    fullName: "Bayu (B2B)",
+    name: "Kang Jajang",
+    fullName: "Kang Jajang (B2B)",
     role: "B2B Sales & Commercial Lead",
-    keywords: ["bayu", "b2b", "sales", "kafe", "kedai", "kemitraan", "franchise", "horeca", "grosir", "kontrak", "klien"],
+    keywords: ["kang jajang", "jajang", "bayu", "b2b", "sales", "kafe", "kedai", "kemitraan", "franchise", "horeca", "grosir", "kontrak", "klien"],
     generateAnswer: (topic, greeting) => {
-      return `${greeting} bos! Perkembangan kemitraan B2B: Kafe Sudut Temu resmi tanda tangan kontrak suplai 20kg per minggu. Selain itu ada 2 prospek franchise kafe di Jakarta Selatan berminat kontrak 100kg/bulan. Profil rasa yang diminta medium-roast seimbang. Draft kontrak siap diajukan untuk bos tandatangani.`;
+      return `Kabar gumbira ti palanggan kafe bos! Kafe Sudut Temu resmi tanda tangan kontrak suplai 20kg per minggu. Aya oge 2 franchise kafe di Jakarta Selatan minat kontrak 100kg/sasih. Draf kontrak siap diajukeun ka juragan bos!`;
     }
   },
   {
-    name: "Arya",
-    fullName: "Arya (Ads)",
+    name: "Kang Deden",
+    fullName: "Kang Deden (Ads)",
     role: "Performance Marketing & Ads",
-    keywords: ["arya", "ads", "iklan", "meta ads", "facebook ads", "instagram ads", "roas", "cpc", "budget iklan", "campaign", "marketing"],
+    keywords: ["kang deden", "deden", "arya", "ads", "iklan", "meta ads", "facebook ads", "instagram ads", "roas", "cpc", "budget iklan", "campaign", "marketing"],
     generateAnswer: (topic, greeting) => {
-      return `${greeting} bos! Laporan performa iklan digital: Kampanye Meta Ads kita menghasilkan ROAS 3.8x hari ini dengan CTR 2.4%. Alokasi budget optimal menyasar pecinta specialty coffee Nusantara di wilayah Jabodetabek dan kota-kota besar. Biaya per akuisisi pelanggan (CPA) sangat efisien.`;
+      return `Gurih nyooy juragan bos! Kampanye Meta Ads urang ngahasilkeun ROAS 3.8x dinten ieu kalayan CTR 2.4%. Alokasi budget optimal pisan nyasar penikmat specialty coffee Nusantara. Moal aya nu boncos!`;
     }
   },
   {
-    name: "Maya",
-    fullName: "Maya (Content)",
+    name: "Neng Iteung",
+    fullName: "Neng Iteung (Content)",
     role: "Content Creator & Storyteller",
-    keywords: ["maya", "konten", "content", "tiktok", "reels", "video", "sosmed", "instagram", "ig", "visual", "edukasi kopi", "branding"],
+    keywords: ["neng iteung", "iteung", "maya", "konten", "content", "tiktok", "reels", "video", "sosmed", "instagram", "ig", "visual", "edukasi kopi", "branding"],
     generateAnswer: (topic, greeting) => {
-      return `${greeting} bos! Kabar dari tim kreatif: Video Reels & TikTok 'Sensasi Tasting Notes Kopi Susu vs Manual Brew' sudah selesai tahap editing dengan hook visual pour over estetik. Konten ini diproyeksikan menggaet ribuan views organik dan mengarahkan calon pembeli langsung ke web store Ramu.`;
+      return `Aduh juragan bos kasep! Video Reels & TikTok 'Sensasi Kopi Susu Nikmat Teu Matak Kembung' parantos beres diedit nganggo visual slow-mo estetik pisan. Siap ngadatangkeun jutaan views ka wéb store urang!`;
     }
   },
   {
-    name: "Rama",
-    fullName: "Rama (GM)",
+    name: "Kang Dudung",
+    fullName: "Kang Dudung (GM)",
     role: "General Manager & Operations Lead",
-    keywords: ["rama", "gm", "general manager", "manajer", "arahan", "kpi", "evaluasi", "strategi", "koordinasi"],
+    keywords: ["kang dudung", "dudung", "rama", "gm", "general manager", "manajer", "arahan", "kpi", "evaluasi", "strategi", "koordinasi"],
     generateAnswer: (topic, greeting) => {
-      return `${greeting} bos! Seluruh 11 divisi roastery beroperasi penuh sesuai standar mutu Ramu. Sinergi antara tim sourcing petani, lab sangrai, tim e-commerce, hingga pengiriman berjalan sangat rapi. Saya siap mengawal eksekusi instruksi dan target prioritas berikutnya dari bos.`;
+      return `Sampurasun juragan bos! Sadaya 11 divisi roastery jalan lemes tur tartib sapertos biasa. Sinergi antara kebon patani, lab sangrai, tim wéb dugi logistik kurir satset pisan. Abdi siap ngawal instruksi prioritas salajengna ti bos!`;
     }
   }
 ];
@@ -235,59 +235,59 @@ function generateTailoredMeetingDiscussion(topic: string, greeting: string = "Se
 
   if (t.includes("marketing") || t.includes("iklan") || t.includes("konten") || t.includes("sosmed") || t.includes("promo") || t.includes("reels")) {
     return [
-      { speaker: "Rama (GM)", text: `${greeting} rekan-rekan Ramu Roastery. Rapat dimulai. Fokus bahasan kita adalah: "${topic}". Bagaimana evaluasi strategi promosi dan alokasi budget kita?` },
-      { speaker: "Arya (Ads)", text: "Data kampanye Meta Ads kita kemarin menghasilkan ROAS 3.8x. Tapi cost-per-click mulai naik. Kita butuh creative content yang lebih segar agar audience tidak jenuh." },
-      { speaker: "Maya (Content)", text: "Gue udah rancang video TikTok & Reels 'Sensasi Tasting Notes Kopi Susu vs Manual Brew'. Visual slow-mo pour over dan audio trending bakal boost organic reach kita." },
-      { speaker: "Sari (CS)", text: "Kalau kontennya tayang akhir pekan, tolong koordinasikan tanggalnya ya May. Biasanya chat WhatsApp dan DM masuk ratusan, tim CS harus standby kuota promo." },
-      { speaker: "Fina (Finance)", text: "Dari sisi cashflow, saya setuju alokasi tambahan budget marketing Rp 3.500.000 selama target blended ROAS tetap di atas 3.2x." },
-      { speaker: "Doni (Inventory)", text: "Stok kemasan 200g Ramu Blend siap 120 pack di rak display. Tinggal gas eksekusi!" },
-      { speaker: "Rama (GM)", text: "Bagus sekali. Maya jalankan produksi video hari ini, Arya siapkan ad set lookalike, dan Fina release budget-nya. Meeting ditutup!" }
+      { speaker: "Kang Dudung (GM)", text: `${greeting} barudak Ramu Roastery sadayana. Rapat dikawitan. Bahasan urang ayeuna: "${topic}". Kumaha evaluasi strategi promosi sareng alokasi budget iklan urang?` },
+      { speaker: "Kang Deden (Ads)", text: "Data kampanye Meta Ads urang kamari kenging ROAS 3.8x gurih. Mung biaya klik mimiti naek. Urang peryogi konten kreatif anyar nu leuwih seger sangkan audiens teu bosenan." },
+      { speaker: "Neng Iteung (Content)", text: "Iteung parantos ngarancang video TikTok & Reels 'Sensasi Kopi Susu Nikmat Teu Matak Kembung'. Visual slow-mo pour over sareng audio trending dijamin boost organic reach urang!" },
+      { speaker: "Teh Euis (CS)", text: "Pami kontenna tayang sabtu-minggu, wartosan Euis nya Neng. Biasana chat WhatsApp ratusan lebet sakaligus, tim CS kedah standby kuota promo juragan." },
+      { speaker: "Ceu Edah (Finance)", text: "Ti sisi cashflow, Ceu Edah satuju alokasi tambahan budget marketing Rp 3.500.000 asal target ROAS kajaga di luhur 3.2x. Duitna ulah dihambur-hambur nya Deden!" },
+      { speaker: "Mang Dadang (Inventory)", text: "Stok bungkusan 200g Ramu Blend siap 120 pack dina rak display. Tinggal gas eksekusi!" },
+      { speaker: "Kang Dudung (GM)", text: "Alus pisan sadayana. Neng Iteung geura gas produksi video, Kang Deden setel iklanna, sareng Ceu Edah cairkeun danana. Rapat ditutup!" }
     ];
   }
 
   if (t.includes("roast") || t.includes("kualitas") || t.includes("rasa") || t.includes("cupping") || t.includes("beans") || t.includes("biji") || t.includes("tren") || t.includes("produksi") || t.includes("penjualan") || t.includes("stok")) {
     return [
-      { speaker: "Rama (GM)", text: `${greeting} rekan-rekan Ramu Roastery. Langsung saja ke intinya, data penjualan minggu ini menunjukkan ada beberapa pergerakan menarik di kopi Nusantara kita. Kita harus segera putuskan stok biji kopi mana yang harus kita up produksinya minggu ini. Kafin, dari R&D dan roasting, bagaimana pantauan tren saat ini?` },
-      { speaker: "Kafin (R&D)", text: "Terima kasih pak Rama. Batch #14 Gayo Anaerobic skornya 87.5 poin, tapi profil RoR pada menit ke-8 terlalu tajam. Saya sarankan kurangi airflow di fase yellowing agar rasa manis buahnya lebih karamel." },
-      { speaker: "Doni (Inventory)", text: "Suhu drum roaster Probat kita stabil di 205°C. Tapi kadar air green beans dari karung batch baru agak tinggi, di angka 11.8%. Jadi butuh waktu drying 45 detik lebih lama." },
-      { speaker: "Budi (Sourcing)", text: "Benar Don, panen kemarin di Takengon sering kena hujan sore. Tapi prosesor di sana jamin fermentasinya bersih tanpa tumpukan apek." },
-      { speaker: "Bayu (B2B)", text: "Klien kafe kita banyak minta profil medium-roast yang aman untuk mesin espresso komersial. Jangan sampai terlalu asam (sour) ya mas Kafin." },
-      { speaker: "Kafin (R&D)", text: "Tenang mas Bayu, kita kunci DTR di 14.2% supaya crema tebal dan acidity tetap balance." },
-      { speaker: "Rama (GM)", text: "Kesepakatan tercapai: Kafin sesuaikan profile sangrai besok pagi, Doni catat log roasting di papan, dan Budi monitor pasokan. Terima kasih semuanya." }
+      { speaker: "Kang Dudung (GM)", text: `${greeting} barudak Ramu Roastery. Langsung kana intina, data penjualan minggu ieu aya pergerakan sae di kopi Nusantara urang. Urang kedah mutuskeun biji mana nu kedah di-up produksina. Kang Tatang, kumaha ti R&D sareng sangrai?` },
+      { speaker: "Kang Tatang (R&D)", text: "Hatur nuhun Kang Dudung. Batch #14 Gayo Anaerobic skor na 87.5 poin, tapi profil RoR dina menit ka-8 seukeut teuing. Saena airflow dikirangan supados amis karamelna langkung kaluar." },
+      { speaker: "Mang Dadang (Inventory)", text: "Hawa drum roaster Probat stabil di 205°C. Mung kadar cai green beans ti karung anyar rada luhur di 11.8%, janten peryogi drying 45 detik langkung lami." },
+      { speaker: "Mang Encep (Sourcing)", text: "Leres Mang Dadang, panen kamari di Takengon sering kahujanan sonten. Nanging prosesor di ditu ngajamin fermentasina beresih teu apek." },
+      { speaker: "Kang Jajang (B2B)", text: "Klien kafe urang seueur nu nyuhunkeun profil medium-roast nu aman keur mesin espresso. Kade ulah haseum teuing nya Kang Tatang." },
+      { speaker: "Kang Tatang (R&D)", text: "Tenang Kang Jajang, urang konci DTR di 14.2% supados crema kandel tur kaasaman tetep saimbang." },
+      { speaker: "Kang Dudung (GM)", text: "Kasapukan kahontal: Tatang atur profil sangrai enjing, Dadang catet log di bor, sareng Encep pantau pasokan kebon. Hatur nuhun sadayana!" }
     ];
   }
 
   if (t.includes("kirim") || t.includes("ekspedisi") || t.includes("kurir") || t.includes("logistik") || t.includes("pengiriman") || t.includes("resi")) {
     return [
-      { speaker: "Rama (GM)", text: `${greeting} rekan-rekan Ramu Roastery. Agenda rapat mendesak: "${topic}". Gilang dan Sari, silakan paparkan evaluasi pengiriman barang kita.` },
-      { speaker: "Gilang (Logistics)", text: "Beberapa hari ini kargo darat J&T agak padat menjelang akhir bulan, ada keterlambatan 1 hari untuk rute Jawa Timur. Untuk Jakarta & Bandung masih aman 1 hari sampai." },
-      { speaker: "Sari (CS)", text: "Betul pak, ada 4 pelanggan kafe yang tanya nomor resi karena stok kopi bar mereka mulai menipis. Saya butuh update resi lebih cepat setiap jam 2 siang." },
-      { speaker: "Gilang (Logistics)", text: "Solusinya kita bisa aktifkan alternatif Paxel Big & JNE Trucking untuk pesanan di atas 10kg. Pickup jam 13:00 siang tetap." },
-      { speaker: "Fina (Finance)", text: "Selisih ongkos kirim Paxel hanya Rp 2.000 per kg lebih tinggi, tapi bisa kita cover dari margin B2B demi menjaga kepuasan klien." },
-      { speaker: "Rama (GM)", text: "Keputusan disetujui. Gilang terapkan Paxel sebagai opsi priority kargo, Sari berikan notifikasi proaktif ke pelanggan. Eksekusi sekarang." }
+      { speaker: "Kang Dudung (GM)", text: `${greeting} rekan-rekan tim. Agenda rapat mendesak: "${topic}". Kang Aceng sareng Teh Euis, mangga paparkeun evaluasi kiriman barang urang.` },
+      { speaker: "Kang Aceng (Logistics)", text: "Sababaraha dinten ieu kargo darat J&T rada padet payuneun akhir sasih. Aya telat 1 dinten keur Jawa Wetan, mung Bandung-Jakarta tetep sapoe nepi aman santosa!" },
+      { speaker: "Teh Euis (CS)", text: "Leres Kang, aya 4 palanggan kafe nu naroskeun resi margi stok kopi bar maranehna tosIPis. Peryogi update resi langkung enggal jam 2 siang." },
+      { speaker: "Kang Aceng (Logistics)", text: "Solusina urang tiasa aktipkeun Paxel Big & JNE Trucking keur pesenan di luhur 10kg. Pickup jam 13:00 siang tetep satset!" },
+      { speaker: "Ceu Edah (Finance)", text: "Selisih ongkos kirim Paxel mung Rp 2.000 per kg, tiasa urang cover tina margin B2B demi kasugeman palanggan." },
+      { speaker: "Kang Dudung (GM)", text: "Satuju pisan. Aceng terapkeun Paxel keur prioritas, Euis pasihan notifikasi ka pembeli. Eksekusi ayeuna!" }
     ];
   }
 
   if (t.includes("b2b") || t.includes("kafe") || t.includes("partnership") || t.includes("sales") || t.includes("klien")) {
     return [
-      { speaker: "Rama (GM)", text: `${greeting} rekan-rekan Ramu Roastery. Rapat kemitraan B2B dimulai. Topik kita: "${topic}". Bayu, bagaimana status ekspansi suplai kopi kita?` },
-      { speaker: "Bayu (B2B)", text: "Kabar baik, Pak Rama! Kafe Sudut Temu resmi teken PO 20kg per minggu. Selain itu ada 2 cafe franchise di Jakarta Selatan tertarik kontrak 100kg/bulan." },
-      { speaker: "Fina (Finance)", text: "Tolong pastikan terms of payment (TOP) maksimal 14 hari kerja ya mas Bayu, jangan sampai piutang macet mengganggu cashflow belanja green beans." },
-      { speaker: "Doni (Inventory)", text: "Kapasitas roasting kita masih sanggup nambah 250kg per minggu. Mesin siap, green beans di gudang aman 1.3 ton." },
-      { speaker: "Kafin (R&D)", text: "Untuk kafe baru, saya sarankan kirim 'Cupping Sample Kit' 3 varietas dulu supaya barista mereka bisa kalibrasi grind size mesin espresso-nya." },
-      { speaker: "Rama (GM)", text: "Sempurna. Bayu finalisasi kontrak dengan klausul pembayaran Fina, Kafin siapkan sample kit. Prospek bisnis ini prioritas tinggi!" }
+      { speaker: "Kang Dudung (GM)", text: `${greeting} barudak sadayana. Rapat kemitraan B2B dikawitan. Topik urang: "${topic}". Kang Jajang, kumaha status suplai kopi kafe-kafe anyar?` },
+      { speaker: "Kang Jajang (B2B)", text: "Kabar sae Kang Dudung! Kafe Sudut Temu resmi teken PO 20kg per minggu. Salian ti eta aya 2 franchise kafe di Jaksel resep pisan kana sampel urang." },
+      { speaker: "Ceu Edah (Finance)", text: "Pastikeun TOP mayarna maksimal 14 dinten kerja nya Jajang! Ulah dugi piutang macet ngaganggu kas balanja biji kopi Mang Encep." },
+      { speaker: "Mang Dadang (Inventory)", text: "Kapasitas sangrai urang masih tiasa nambih 250kg per minggu. Mesin siap, green beans di gudang melimpah 1.3 ton." },
+      { speaker: "Kang Tatang (R&D)", text: "Kanggo kafe anyar, Tatang kirimkeun Sample Kit 3 varietas supados barista maranehna tiasa kalibrasi gilingan mesin espressona." },
+      { speaker: "Kang Dudung (GM)", text: "Sampurna! Jajang béréskeun kontrakna sareng klausul Ceu Edah, Tatang siapkeun sampelna. Ieu prioritas luhur urang!" }
     ];
   }
 
   // General Operational Discussion (Plenary)
   return [
-    { speaker: "Rama (GM)", text: `${greeting} rekan-rekan Ramu Roastery. Rapat koordinasi roastery dibuka. Topik yang kita diskusikan: "${topic}". Mari kita review dari masing-masing departemen.` },
-    { speaker: "Sari (CS)", text: "Dari sisi pelanggan, sentimen sangat positif hari ini. Permintaan repeat order produk filter coffee meningkat 25%." },
-    { speaker: "Rian (Web Dev)", text: "Infrastruktur web store stabil, loading time 0.8 detik. Integrasi QRIS Midtrans berjalan mulus tanpa kendala pembayaran." },
-    { speaker: "Fina (Finance)", text: "Omzet harian kita tembus target di Rp 14.225.000 dengan margin laba kotor terjaga di 42%. Arus kas aman terkendali." },
-    { speaker: "Kafin (R&D)", text: "Riset varietas kopi terbaru sudah siap diluncurkan. Karakter rasa bersih dan konsisten dengan standar specialty coffee." },
-    { speaker: "Doni (Inventory)", text: "Gudang dan mesin roasting siap menopang lonjakan permintaan. Jadwal sangrai besok sudah tertata rapi." },
-    { speaker: "Rama (GM)", text: "Semua tim menunjukkan performa prima. Mari kita jaga sinergi dan eksekusi rencana kerja minggu ini dengan disiplin. Rapat selesai!" }
+    { speaker: "Kang Dudung (GM)", text: `${greeting} barudak Ramu Roastery sadayana. Rapat koordinasi roastery dibuka. Topik urang dinten ieu: "${topic}". Mangga review ti masing-masing divisi.` },
+    { speaker: "Teh Euis (CS)", text: "Ti sisi palanggan, respon sae pisan. Pamenta repeat order produk filter coffee naek 25%." },
+    { speaker: "Ujang (Web Dev)", text: "Infrastruktur wéb store stabil pisan, loading 0.8 detik. Integrasi QRIS Midtrans jalan lemes tanpa kendala." },
+    { speaker: "Ceu Edah (Finance)", text: "Omzet harian tembus Rp 14.225.000 kalayan margin kandel 42%. Arus kas aman terkendali moal aya kakirangan!" },
+    { speaker: "Kang Tatang (R&D)", text: "Riset varietas anyar parantos siap diluncurkeun. Karakter rasa beresih tur konsisten standar specialty internasional." },
+    { speaker: "Mang Dadang (Inventory)", text: "Gudang sareng mesin roasting siap nampung lonjakan pesanan. Jadwal sangrai enjing tos tertata rapih." },
+    { speaker: "Kang Dudung (GM)", text: "Sadaya tim nunjukkeun pagawéan anu pohara saena! Hayu urang jaga sumanget ieu. Rapat réngsé!" }
   ];
 }
 
@@ -331,12 +331,12 @@ ATURAN UTAMA DARI PEMILIK USAHA:
           systemInstruction = `Kamu adalah sistem simulasi rapat meja bundar di Ramu Roastery (Spesialis Kopi Nusantara).
 WAKTU OPERASIONAL SAAT INI: ${formattedDate} (${greeting}).
 ATURAN RAPAT:
-1. Rapat SELALU dibuka oleh Rama (GM) sebagai pembicara pertama dengan sapaan "${greeting}".
+1. Rapat SELALU dibuka oleh Kang Dudung (GM) sebagai pembicara pertama dengan sapaan "${greeting}".
 2. Tuliskan naskah dialog rapat yang hidup dan terfokus pada topik.
 3. Pilih 3 hingga 5 agen yang relevan dengan topik.
 4. Format HARUS JSON murni tanpa markdown pembungkus: [{"speaker": "Nama Agen", "text": "Dialog..."}].`;
 
-          promptText = `Topik rapat pleno: "${topic}". Waktu nyata: ${formattedDate} (${greeting}). Mulai rapat dengan sapaan "${greeting}" oleh Rama (GM).`;
+          promptText = `Topik rapat pleno: "${topic}". Waktu nyata: ${formattedDate} (${greeting}). Mulai rapat dengan sapaan "${greeting}" oleh Kang Dudung (GM).`;
         }
 
         const model = clientGenAI.getGenerativeModel({
@@ -359,7 +359,7 @@ ATURAN RAPAT:
     // Post-processing safeguard: ensure greeting matches real-time
     if (Array.isArray(discussion) && discussion.length > 0) {
       const first = discussion[0];
-      if (first && (first.speaker.includes("Rama") || first.speaker.includes("GM"))) {
+      if (first && (first.speaker.includes("Dudung") || first.speaker.includes("Rama") || first.speaker.includes("GM"))) {
         first.text = first.text.replace(/^(Selamat\s+(pagi|siang|sore|malam))/i, greeting);
       }
     }
