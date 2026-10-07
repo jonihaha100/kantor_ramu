@@ -300,6 +300,7 @@ export default function MeetingPanel({ onClose, onSpeakerChange, onViewProjects,
             { id: "Mang Dadang", name: "Mang Dadang (Gudang)" },
             { id: "Kang Aceng", name: "Kang Aceng (Logistik)" },
             { id: "Mang Encep", name: "Mang Encep (Sourcing)" },
+            { id: "Kang Asep", name: "Kang Asep (Security)" },
           ].map(agent => (
             <button
               key={agent.id}

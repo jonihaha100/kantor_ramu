@@ -179,7 +179,23 @@ const AGENTS_LIST: AgentProfile[] = [
     role: "General Manager & Operations Lead",
     keywords: ["kang dudung", "dudung", "rama", "gm", "general manager", "manajer", "arahan", "kpi", "evaluasi", "strategi", "koordinasi"],
     generateAnswer: (topic, greeting) => {
-      return `Sampurasun juragan bos! Sadaya 11 divisi roastery jalan lemes tur tartib sapertos biasa. Sinergi antara kebon patani, lab sangrai, tim wéb dugi logistik kurir satset pisan. Abdi siap ngawal instruksi prioritas salajengna ti bos!`;
+      return `Sampurasun juragan bos! Sadaya 12 divisi roastery jalan lemes tur tartib sapertos biasa. Sinergi antara kebon patani, lab sangrai, tim wéb, kaamanan siber dugi logistik kurir satset pisan. Abdi siap ngawal instruksi prioritas salajengna ti bos!`;
+    }
+  },
+  {
+    name: "Kang Asep",
+    fullName: "Kang Asep (Security)",
+    role: "Cyber Security & Digital Watchman (Hansip Cyber 24/7)",
+    keywords: ["kang asep", "asep", "security", "keamanan", "cyber", "siber", "hacker", "heker", "firewall", "ddos", "spam", "bot", "ronda", "hansip", "cctv", "pentest", "ssl", "enkripsi", "bruteforce", "waf", "piriwit", "aman"],
+    generateAnswer: (topic, greeting) => {
+      const t = topic.toLowerCase();
+      if (t.includes("serang") || t.includes("heker") || t.includes("hacker") || t.includes("ddos") || t.includes("bot")) {
+        return `Aman sentosa juragan bos! Piriwit digital Kang Asep nembes nyetop 87 bot liar nu nyobian spam checkout sareng nyusup ka server! Firewall Cloudflare sareng rate-limit dikonci pageuh, moal aya heker nu lolos! 🚨🛡️`;
+      }
+      if (t.includes("status") || t.includes("aman") || t.includes("pantau") || t.includes("ronda")) {
+        return `Sampurasun juragan bos! Laporan ronda siber 24 jam: Uptime 100%, sertifikat SSL ngagenclang hejo lemes, database kurenkripsi 256-bit, port server dikonci pageuh. CCTV digital mantau teras, aman jaya! 👮‍♂️🛡️`;
+      }
+      return `Sampurasun juragan bos! Hansip Asep standby 24 jam ngaronda website, gateway pembayaran, sareng server roastery. Sadaya lalu lintas data diparios sateuacan lebet. Sistem aman sentosa tanpa rembes! 🛡️⚡`;
     }
   }
 ];
@@ -279,11 +295,23 @@ function generateTailoredMeetingDiscussion(topic: string, greeting: string = "Se
     ];
   }
 
+  if (t.includes("security") || t.includes("keamanan") || t.includes("heker") || t.includes("hacker") || t.includes("ddos") || t.includes("firewall") || t.includes("ronda") || t.includes("hansip")) {
+    return [
+      { speaker: "Kang Dudung (GM)", text: `${greeting} rekan-rekan. Rapat evaluasi kaamanan sistem urang kawitan. Topik: "${topic}". Kang Asep sareng Ujang, kumaha status benteng siber wéb urang?` },
+      { speaker: "Kang Asep (Security)", text: "Sampurasun juragan bos! Ronda siber 24 jam aman sentosa. Piriwit digital nembes niup 142 IP address liar nu nyobian spam login. Firewall WAF dikonci pageuh!" },
+      { speaker: "Ujang (Web Dev)", text: "Muhun Kang Asep, kode Next.js 15 sareng database Prisma diproteksi token CSRF sareng rate-limiting. Data transaksi Midtrans QRIS dienkripsi lemes." },
+      { speaker: "Ceu Edah (Finance)", text: "Alus pisan Kang Asep! Duit kas urang kudu aman tina heker, mun aya nu wani maok langsung baledog ku kuitansi bon!" },
+      { speaker: "Teh Euis (CS)", text: "Layanan WA palanggan oge aman sentosa tanpa aya gangguan spam link palsu, Euis standby 24 jam ngajaga." },
+      { speaker: "Kang Dudung (GM)", text: "Mantep Kang Asep! Hansip Cyber andalan roastery, jaga teras ameh wéb store urang aman 100%. Rapat ditutup!" }
+    ];
+  }
+
   // General Operational Discussion (Plenary)
   return [
     { speaker: "Kang Dudung (GM)", text: `${greeting} barudak Ramu Roastery sadayana. Rapat koordinasi roastery dibuka. Topik urang dinten ieu: "${topic}". Mangga review ti masing-masing divisi.` },
     { speaker: "Teh Euis (CS)", text: "Ti sisi palanggan, respon sae pisan. Pamenta repeat order produk filter coffee naek 25%." },
     { speaker: "Ujang (Web Dev)", text: "Infrastruktur wéb store stabil pisan, loading 0.8 detik. Integrasi QRIS Midtrans jalan lemes tanpa kendala." },
+    { speaker: "Kang Asep (Security)", text: "Sistem kaamanan siber 24 jam aman jaya, sertifikat SSL ngagenclang héjo, 0 serangan lolos!" },
     { speaker: "Ceu Edah (Finance)", text: "Omzet harian tembus Rp 14.225.000 kalayan margin kandel 42%. Arus kas aman terkendali moal aya kakirangan!" },
     { speaker: "Kang Tatang (R&D)", text: "Riset varietas anyar parantos siap diluncurkeun. Karakter rasa beresih tur konsisten standar specialty internasional." },
     { speaker: "Mang Dadang (Inventory)", text: "Gudang sareng mesin roasting siap nampung lonjakan pesanan. Jadwal sangrai enjing tos tertata rapih." },

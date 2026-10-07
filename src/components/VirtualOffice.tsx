@@ -26,6 +26,7 @@ export type AgentRole =
   | "Kang Deden (Ads)"
   | "Neng Iteung (Content)"
   | "Mang Encep (Sourcing)"
+  | "Kang Asep (Security)"
   | null;
 
 type MenuTab = "Office HQ" | "AI Agents" | "Projects" | "Storage Room" | "Roastery" | "Finances" | "Reports" | "WhatsApp CS" | "Account";
@@ -51,6 +52,7 @@ const ALL_AGENTS_DATA: {
   { id: "Mang Dadang (Inventory)", name: "Mang Dadang", role: "Mandor Gudang", dept: "Roastery", emoji: "👨‍🔧", color: "bg-orange-500", status: "Active", currentTask: "Ngontrol karung green beans & mesin roaster Probat" },
   { id: "Kang Aceng (Logistics)", name: "Kang Aceng", role: "Kurir Satset", dept: "Supply Chain", emoji: "👨‍🔧", color: "bg-violet-500", status: "Active", currentTask: "Gaspol motor matic nganter paket kargo tepat waktu" },
   { id: "Mang Encep (Sourcing)", name: "Mang Encep", role: "Sobat Patani Kopi", dept: "Agriculture", emoji: "👨‍🌾", color: "bg-lime-500", status: "Active", currentTask: "Nyaba ka kebon kopi Takengon silaturahmi jeung patani" },
+  { id: "Kang Asep (Security)", name: "Kang Asep", role: "Cyber Security & Hansip Digital (24/7)", dept: "Security", emoji: "👮‍♂️", color: "bg-sky-600", status: "Active 24/7", currentTask: "Ngaronda firewall, DDoS & lalu lintas web ameh aman sentosa 🛡️🚨" },
 ];
 
 function NavItem({ 
@@ -549,7 +551,7 @@ export default function VirtualOffice() {
                   RAMU ROASTERY HQ
                 </div>
                 <span className="hidden sm:inline-block px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[11px] font-mono font-bold border border-indigo-500/30">
-                  11 AI Agents Alive
+                  12 AI Agents Alive
                 </span>
                 <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[11px] font-mono font-bold border border-amber-500/30 shadow-sm">
                   <span>👑</span>
@@ -731,7 +733,7 @@ export default function VirtualOffice() {
                   <div className="flex items-center gap-2">
                     <span>Ramu Digital Workforce:</span>
                     <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30">
-                      11 / 11 Online
+                      12 / 12 Online
                     </span>
                   </div>
                 </div>
@@ -746,13 +748,13 @@ export default function VirtualOffice() {
           <div className="flex-1 p-8 text-white bg-[#0f172a] overflow-y-auto font-mono">
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h1 className="text-2xl font-bold">👥 AI Agents Directory (11 Pegawai)</h1>
+                <h1 className="text-2xl font-bold">👥 AI Agents Directory (12 Pegawai)</h1>
                 <p className="text-slate-400 text-xs mt-1">
                   Seluruh agen virtual beroperasi secara otonom dengan peran spesifik di Ramu Roastery.
                 </p>
               </div>
               <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-bold">
-                11/11 Active Workforce
+                12/12 Active Workforce
               </span>
             </div>
 
@@ -1220,7 +1222,7 @@ export default function VirtualOffice() {
                   </span>
                 </div>
                 <p className="text-slate-400 text-xs mt-1.5 leading-relaxed">
-                  Konsolidasi hasil pekerjaan 11 divisi pekerja oleh Kang Dudung (GM) serta Laporan Tutup Buku Bulanan (P&L & Valuasi Stok) profesional.
+                  Konsolidasi hasil pekerjaan 12 divisi pekerja oleh Kang Dudung (GM) serta Laporan Tutup Buku Bulanan (P&L & Valuasi Stok) profesional.
                 </p>
               </div>
 
@@ -1307,8 +1309,8 @@ export default function VirtualOffice() {
                 }`}
               >
                 <span>👥</span>
-                <span>Laporan 11 Pekerja</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/20 font-mono">11 Divisi</span>
+                <span>Laporan 12 Pekerja</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/20 font-mono">12 Divisi</span>
               </button>
 
               <button
@@ -1466,10 +1468,10 @@ export default function VirtualOffice() {
             {reportsSubTab === "workers" && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
-                {/* 11 Workers Left Picker Sidebar */}
+                {/* 12 Workers Left Picker Sidebar */}
                 <div className="lg:col-span-4 space-y-2">
                   <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                    Daftar 11 Pekerja Ramu
+                    Daftar 12 Pekerja Ramu
                   </div>
                   <div className="space-y-1.5 max-h-[680px] overflow-y-auto pr-1">
                     {workerList.map((worker: any) => {

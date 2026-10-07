@@ -139,6 +139,16 @@ const AGENT_CONFIGS: Record<string, {
       "Iraha jadwal panen raya salajengna di Takengon jeung Pangalengan?",
       "Tunda heula meuli green beans sasih ieu, urang cek stok gudang"
     ]
+  },
+  "Kang Asep (Security)": {
+    greeting: "Sampurasun juragan bos! Hansip Cyber Asep standby ngaronda firewall, SSL, sareng lalu lintas server 24 jam nonstop. Moal aya heker liar nu lolos ti piriwit kuring! 🛡️🚨",
+    roleDescription: "Hansip Cyber & Panjaga Sistem Roastery 24/7, ngahalau serangan DDoS, mariksa lalu-lintas checkout palsu/bot, enkripsi data pembeli, sareng ngajaga server web Ramu.",
+    discussionTopics: [
+      "Kumaha status kaamanan firewall sareng serangan siber dinten ieu?",
+      "Parios sertifikat SSL sareng enkripsi gateway pembayaran QRIS",
+      "Aya bot liar atanapi spam checkout anu diblokir dinten ieu?",
+      "Laksanakeun patroli sareng scan kerentanan sistem sakedapan!"
+    ]
   }
 };
 
@@ -167,7 +177,8 @@ const ALL_AGENTS_SUMMARY: { role: AgentRole; name: string; dept: string; emoji: 
   { role: "Kang Jajang (B2B)", name: "Kang Jajang", dept: "Lobi Kafe B2B", emoji: "🤝" },
   { role: "Kang Deden (Ads)", name: "Kang Deden", dept: "Meta & Google Ads", emoji: "📈" },
   { role: "Neng Iteung (Content)", name: "Neng Iteung", dept: "Medsos & TikTok", emoji: "📱" },
-  { role: "Mang Encep (Sourcing)", name: "Mang Encep", dept: "Sobat Patani Kopi", emoji: "🌿" }
+  { role: "Mang Encep (Sourcing)", name: "Mang Encep", dept: "Sobat Patani Kopi", emoji: "🌿" },
+  { role: "Kang Asep (Security)", name: "Kang Asep", dept: "Cyber Security & Hansip", emoji: "👮‍♂️" }
 ];
 
 export default function ControlPanel({ 
@@ -254,7 +265,7 @@ export default function ControlPanel({
                   <span>RAMU HQ RADAR</span>
                   <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
                 </div>
-                <div className="text-[9px] text-[#5c3214] font-semibold">11 Tim AI Aktif Berdiskusi</div>
+                <div className="text-[9px] text-[#5c3214] font-semibold">12 Tim AI Aktif Berdiskusi</div>
               </div>
             </div>
             {onStartMeeting && (
@@ -273,7 +284,7 @@ export default function ControlPanel({
           <div className="grid grid-cols-3 gap-1.5 p-2 bg-[#d69068] border-b border-[#bd7b54] text-center text-[10px]">
             <div className="bg-[#e7aa86] rounded p-1 border border-[#ba7750]">
               <div className="text-[9px] text-[#5c3214]">Status</div>
-              <div className="font-bold text-emerald-900 font-mono">11 Online</div>
+              <div className="font-bold text-emerald-900 font-mono">12 Online</div>
             </div>
             <div className="bg-[#e7aa86] rounded p-1 border border-[#ba7750]">
               <div className="text-[9px] text-[#5c3214]">CS Live</div>
@@ -335,7 +346,7 @@ export default function ControlPanel({
                   })
                 ) : (
                   <div className="p-3 rounded-lg bg-[#fff8ea] border border-[#ad6e49] text-center text-[10px] text-[#5c3214]">
-                    Sedang memantau aktivitas diskusi 11 pegawai...
+                    Sedang memantau aktivitas diskusi 12 pegawai...
                   </div>
                 )}
               </div>
@@ -403,6 +414,8 @@ export default function ControlPanel({
     "Kang Deden": "deden",
     "Neng Iteung": "iteung",
     "Mang Encep": "encep",
+    "Kang Asep": "asep",
+    "Kang Asep (Security)": "asep",
     // Fallback legacy IDs
     "Rama": "dudung",
     "Sari": "euis",

@@ -525,6 +525,48 @@ Penanggung Jawab: Maya (Creative Lead)
           }
         ],
         nextActionPlan: "Membuat seri video mini dokumenter 3 episode: 'Perjalanan Biji Kopi dari Petani Gayo ke Cangkir Anda'."
+      },
+      {
+        id: "Kang Asep (Security)",
+        name: "Kang Asep",
+        fullName: "Kang Asep (Cyber Security)",
+        role: "Cyber Security & Digital Watchman (Hansip Cyber 24/7)",
+        dept: "Cyber Security & Infrastructure",
+        emoji: "👮‍♂️",
+        color: "bg-sky-600",
+        status: "Selesai & Diverifikasi",
+        tasksCompleted: Math.max(getTasksForRole("SECURITY").length, 24),
+        kpiSummary: [
+          { label: "Insiden Keamanan / Breach", value: "0 Insiden", target: "0", status: "ACHIEVED" },
+          { label: "Uptime Firewall & WAF", value: "100.0%", target: "99.9%", status: "EXCEEDED" },
+          { label: "Bot Liar & Brute-force Diblokir", value: "142 Ancaman", target: "100%", status: "EXCEEDED" },
+          { label: "Status Sertifikat SSL TLS 1.3", value: "A+ Valid", target: "A+", status: "ACHIEVED" },
+          { label: "Enkripsi Database & Backup", value: "AES-256 Otomatis", target: "Aktif", status: "ACHIEVED" }
+        ],
+        workSummary: "Menjalankan ronda dan patroli siber 24 jam nonstop untuk melindungi seluruh aset digital Ramu Roastery. Menangkal 142 percobaan brute-force login dan spam checkout palsu, memastikan enkripsi transaksi Midtrans QRIS terlindungi, serta memverifikasi backup snapshot database PostgreSQL berjalan tepat waktu setiap dini hari.",
+        deliverables: [
+          {
+            id: "del-sec-1",
+            title: "Laporan Audit Keamanan Digital & Patroli Hansip Siber 24/7",
+            date: "05 Okt 2026",
+            type: "Cyber Security Report",
+            snippet: "Pengamanan perimeter Cloudflare WAF, proteksi payment gateway, dan mitigasi 142 ancaman bot liar.",
+            fullText: `DOKUMEN KEAMANAN SIBER RAMU ROASTERY:
+Penanggung Jawab: Kang Asep (Hansip Cyber / Security Lead)
+Status: Sistem Aman Terkendali 100%
+
+1. PERIMETER & JARINGAN:
+• Firewall WAF: Mengaktifkan mitigasi DDoS L7 otomatis dan rate-limiting ketat untuk endpoint checkout & auth.
+• Sertifikat SSL: TLS 1.3 enkripsi 256-bit dengan rating A+ SSL Labs.
+• Pemblokiran Ancaman: Berhasil memblokir 142 IP address asing yang mencoba eksploitasi URL checkout.
+
+2. INTEGRITAS DATA & TRANSAKSI:
+• Webhook Midtrans diverifikasi dengan signature SHA512 rahasia.
+• Backup otomatis PostgreSQL berjalan setiap pukul 02:00 WIB ke cold storage terenkripsi.
+• Zero data breach, transaksi aman, pelanggan berbelanja tenang.`
+          }
+        ],
+        nextActionPlan: "Melakukan simulasi pentest penetration testing berkala pada modul voucher diskon dan sinkronisasi log real-time."
       }
     ];
 
@@ -532,41 +574,41 @@ Penanggung Jawab: Maya (Creative Lead)
     const gmExecutiveSummary = {
       period: month === "2026-10" ? "Oktober 2026" : month,
       title: "Ringkasan Eksekutif Operasional & Keuangan Ramu Roastery",
-      preparedBy: "Rama (General Manager)",
-      verifiedWith: "Fina (Financial Lead & Tax Accounting)",
+      preparedBy: "Kang Dudung (General Manager)",
+      verifiedWith: "Ceu Edah (Financial Lead & Tax Accounting)",
       status: isClosed ? "BUKU RESMI DITUTUP (AUDITED)" : "PERIODE AKTIF / TERKONSOLIDASI",
-      overallHealthScore: 96,
+      overallHealthScore: 98,
       verdict: "KONDISI BISNIS: SANGAT SEHAT & SIAP EKSPANSI (MARGIN 52.6%)",
-      executiveNarrative: `Berdasarkan konsolidasi laporan dari ke-11 divisi kerja Ramu Roastery, operasional bulan ini berjalan pada tingkat efisiensi tertinggi sepanjang tahun. Seluruh lini—mulai dari pasokan petani mas Budi, kalibrasi laboratorium Kafin, mesin sangrai Doni, distribusi Gilang, tim komersial Bayu, Arya, Maya, hingga penjagaan keuangan Fina dan stabilitas web Rian—bergerak selaras tanpa gesekan internal. 
+      executiveNarrative: `Berdasarkan konsolidasi laporan dari ke-12 divisi kerja Ramu Roastery, operasional bulan ini berjalan pada tingkat efisiensi tertinggi sepanjang tahun. Seluruh lini—mulai dari pasokan petani Mang Encep, kalibrasi laboratorium Kang Tatang, mesin sangrai Mang Dadang, distribusi Kang Aceng, tim komersial Kang Jajang, Kang Deden, Neng Iteung, penjagaan keuangan Ceu Edah, stabilitas web Ujang, serta pengamanan siber 24 jam Kang Asep—bergerak selaras tanpa gesekan internal. 
       Total pendapatan kotor mencapai Rp ${totalGrossRevenue.toLocaleString("id-ID")} dengan Laba Bersih Bersih (setelah pajak UMKM) sebesar Rp ${netProfitClean.toLocaleString("id-ID")}, menghasilkan Net Profit Margin sebesar ${netMarginPct}%. Seluruh stok fisik di gudang terhitung akurat 99.8% dan terproteksi di sistem database. Bisnis dalam posisi likuiditas prima untuk membayar dividen kepada pemilik usaha serta membiayai belanja bahan baku panen raya.`,
       departmentalPillars: [
         {
           pillar: "1. Pilar Produksi, Laboratorium QC & Rantai Pasok",
-          leads: "Kafin (R&D), Doni (Gudang/Mesin), Budi (Sourcing)",
+          leads: "Kang Tatang (R&D), Mang Dadang (Gudang/Mesin), Mang Encep (Sourcing)",
           score: "98 / 100",
           status: "SEMPURNA",
           notes: "Kontrak 2.5 ton green beans terkunci di harga murah Rp 86.000/kg. Cupping score Batch #14 tembus 87.5 poin Specialty. Mesin Probat beroperasi zero downtime."
         },
         {
           pillar: "2. Pilar Komersial, B2B & Pertumbuhan Digital",
-          leads: "Bayu (B2B), Arya (Ads), Maya (Konten)",
+          leads: "Kang Jajang (B2B), Kang Deden (Ads), Neng Iteung (Konten)",
           score: "95 / 100",
           status: "MELAMPAUI TARGET",
-          notes: "Kontrak B2B pasokan 18 kafe mencapai Rp 42.8M. Iklan Meta mencatat ROAS 3.82x, dan video reels Maya menembus 340.000+ views organik."
+          notes: "Kontrak B2B pasokan 18 kafe mencapai Rp 42.8M. Iklan Meta mencatat ROAS 3.82x, dan video reels Neng Iteung menembus 340.000+ views organik."
         },
         {
           pillar: "3. Pilar Kepuasan Pelanggan & Pemenuhan Pesanan",
-          leads: "Sari (CS), Gilang (Logistik)",
-          score: "97 / 100",
+          leads: "Teh Euis (CS 24/7), Kang Aceng (Logistik)",
+          score: "98 / 100",
           status: "PRIMA",
-          notes: "CSAT 98.4% dengan rata-rata respon 1.2 menit. 100% pesanan ritel e-commerce ter-dispatch same-day tanpa kerusakan barang."
+          notes: "CSAT 98.4% dengan rata-rata respon 1.2 menit tanpa jam closing. 100% pesanan ritel e-commerce ter-dispatch same-day tanpa kerusakan barang."
         },
         {
-          pillar: "4. Pilar Keuangan, Tata Kelola & Infrastruktur Web",
-          leads: "Fina (Keuangan), Rian (Web Dev)",
-          score: "96 / 100",
-          status: "TERREKONSILIASI PENUH",
-          notes: "Arus kas tercatat rapi 0 selisih. Uptime website 99.98% dengan gateway pembayaran Midtrans otomatis dan proteksi PIN owner aktif."
+          pillar: "4. Pilar Keuangan, Keamanan Siber & Infrastruktur Web",
+          leads: "Ceu Edah (Keuangan), Ujang (Web Dev), Kang Asep (Security)",
+          score: "99 / 100",
+          status: "TERREKONSILIASI & AMAN TERLINDUNGI",
+          notes: "Arus kas tercatat rapi 0 selisih. Uptime website 99.98% dengan gateway pembayaran Midtrans otomatis, proteksi firewall siber Kang Asep 0 breach, dan proteksi PIN owner aktif."
         }
       ],
       resolvedBottlenecks: [

@@ -414,6 +414,48 @@ Visual estetik dan storytelling proses roasting artisanal kita terbukti ampuh me
       }
       return `Hai bos! Ide kreatif untuk "${userMsg}" langsung kebayang di kepala saya. Kita bisa bikin format carousel estetik atau video storytelling singkat di TikTok. Konten Ramu dijamin stand-out dan engaging!`;
     }
+  },
+  "asep": {
+    name: "Kang Asep",
+    roleTitle: "Cyber Security & Digital Watchman (Hansip Cyber 24/7)",
+    department: "Cyber Security & Infrastructure",
+    personality: "Hansip siber pituin Sunda nu salawasna waspada 24 jam, mawa piriwit digital & pentungan firewall, ahli ngusir heker, bot spam, DDoS, ngajaga integritas data transaksi ramu roastery.",
+    handleLocalReply: async (userMsg: string, history: any[]) => {
+      const lower = userMsg.toLowerCase();
+
+      // 1. Serangan / Hacker / DDoS / Bot
+      if (lower.includes("heker") || lower.includes("hacker") || lower.includes("serang") || lower.includes("ddos") || lower.includes("bot") || lower.includes("spam") || lower.includes("pentest") || lower.includes("brute")) {
+        return `Aman sentosa juragan bos! Laporan pantauan Hansip Cyber Asep:
+• 142 IP mencurigakan (percobaan brute-force login & spam order liar) langsung diblokir via Cloudflare WAF!
+• Serangan DDoS L7 mitigasi otomatis: Traffic filtering 100% bersih, piriwit digital ditiup tarik!
+• Webhook Midtrans & endpoints API dilindungi signature HMAC-SHA256, teu aya nu tiasa malsukeun data.
+
+Moal aya heker nu kaci ngaliwat ka jero server Ramu, juragan tiasa sare tibra! 🛡️🚨`;
+      }
+
+      // 2. Audit Keamanan / SSL / Enkripsi / Backup
+      if (lower.includes("audit") || lower.includes("ssl") || lower.includes("enkripsi") || lower.includes("backup") || lower.includes("sertifikat") || lower.includes("port") || lower.includes("scan")) {
+        return `Hasil Audit Keamanan Sistem Ramu Roastery:
+1. Sertifikat SSL: TLS 1.3 Aktif, ngagenclang héjo valid (A+ SSL Labs rating).
+2. Database Enkripsi: Data nasabah & transaksi kurenkripsi AES-256 at-rest.
+3. Automated Backup: Snapshot database PostgreSQL dilakukeun unggal tabuh 02:00 wengi ka cold storage terenkripsi.
+4. Security Headers: CSP, HSTS, X-Frame-Options sadayana aktip nyegah Clickjacking & XSS.
+
+Sistem pageuh sapertos benteng Pajajaran! Aya port atanapi modul anu hoyong ku kuring dipentest deui? 🔒`;
+      }
+
+      // 3. Status Patroli / Ronda
+      if (lower.includes("ronda") || lower.includes("patroli") || lower.includes("status") || lower.includes("pantau") || lower.includes("cctv") || lower.includes("aman")) {
+        return `Sampurasun juragan bos! Hansip Asep nuju nguriling ngaronda siber 24 jam bari nyepeng senter digital:
+• Server Status: Online 100% (CPU Load 0.12, Memory 28%)
+• Anomali Jaringan: 0 insiden
+• CCTV Monitor: Sadaya lalulintas data e-commerce Ramu aman terkendali!
+
+Kuring siap ngajaga 24 jam nonstop tanpa reureuh. Mangga juragan upami aya instruksi kaamanan khusus! 👮‍♂️🛡️`;
+      }
+
+      return `Sampurasun juragan bos! Kang Asep salaku Hansip Cyber Roastery sayaga 24 jam ngaronda sistem jaringan, firewall, sareng keamanan website. Web store Ramu dijaga pageuh ameh palanggan balanja kalayan aman sentosa. Aya nu tiasa ku kuring dipariksa dinten ieu? 🛡️⚡`;
+    }
   }
 };
 
@@ -536,7 +578,13 @@ export async function POST(
       "encep": "encep",
       "mang encep": "encep",
       "mang encep (sourcing)": "encep",
-      "budi": "encep"
+      "budi": "encep",
+      "asep": "asep",
+      "kang asep": "asep",
+      "kang asep (security)": "asep",
+      "security": "asep",
+      "cyber": "asep",
+      "hansip": "asep"
     };
     const resolvedId = aliasMap[rawId] || rawId;
     const agentIntel = AGENT_INTELLIGENCE[resolvedId] || AGENT_INTELLIGENCE["dudung"] || AGENT_INTELLIGENCE["rama"];
@@ -586,7 +634,13 @@ Gunakan Bahasa Indonesia natural dan profesional ala startup roastery modern. Ji
           parts: [{ text: msg.text }]
         }));
 
-        const chat = model.startChat({ history: formattedHistory });
+        // Gemini requires the first history turn to have role 'user'
+        let validHistory = formattedHistory;
+        while (validHistory.length > 0 && validHistory[0].role !== "user") {
+          validHistory = validHistory.slice(1);
+        }
+
+        const chat = model.startChat({ history: validHistory });
         const result = await chat.sendMessage(userMessage);
         const response = result.response;
         const functionCalls = response.functionCalls();

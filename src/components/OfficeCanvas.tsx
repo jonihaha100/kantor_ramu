@@ -106,10 +106,11 @@ const CAT_SPOTS: CatSpot[] = [
   { name: "Meja Kang Tatang (R&D)", x: 285, y: 490, preferredState: "sitting", desc: "Nyium seungitna seduhan kopi cupping ☕" },
   { name: "Area Bar Kopi", x: 440, y: 115, preferredState: "butt_wiggle", desc: "Mengincar remah biji kopi sangrai 🎯" },
   { name: "Dekat Jendela Terang", x: 575, y: 80, preferredState: "sitting", desc: "Menikmati hangatnya cahaya matahari pagi ☀️" },
-  { name: "Pintu Roastery", x: 625, y: 280, preferredState: "sitting", desc: "Mengintip kesibukan di gudang roastery 🏭" }
+  { name: "Pintu Roastery", x: 625, y: 280, preferredState: "sitting", desc: "Mengintip kesibukan di gudang roastery 🏭" },
+  { name: "Meja Kang Asep (Security)", x: 580, y: 200, preferredState: "sitting", desc: "Maturan Kang Asep ngaronda server & ningali monitor CCTV 🚨" }
 ];
 
-// Meeting spots around the Cupping Table (Radius ~75px)
+// Meeting spots around the Cupping Table (Radius ~75px) - 12 Workforce spots
 const MEETING_SPOTS = [
   { x: CUPPING_TABLE.x - 75, y: CUPPING_TABLE.y - 10 },
   { x: CUPPING_TABLE.x + 75, y: CUPPING_TABLE.y - 10 },
@@ -122,6 +123,7 @@ const MEETING_SPOTS = [
   { x: CUPPING_TABLE.x - 85, y: CUPPING_TABLE.y + 25 },
   { x: CUPPING_TABLE.x + 85, y: CUPPING_TABLE.y + 25 },
   { x: CUPPING_TABLE.x, y: CUPPING_TABLE.y + 75 },
+  { x: CUPPING_TABLE.x, y: CUPPING_TABLE.y - 75 },
 ];
 
 const INITIAL_AGENTS: AgentData[] = [
@@ -136,6 +138,9 @@ const INITIAL_AGENTS: AgentData[] = [
   { id: "Kang Deden (Ads)", deskX: 250, deskY: 260, x: 250, y: 260, color: "#60a5fa", label: "Kang Deden", hair: "#44403c", roleBadge: "Iklan Ngabret 📈", activity: "working", targetX: 250, targetY: 260, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
   { id: "Neng Iteung (Content)", deskX: 250, deskY: 380, x: 250, y: 380, color: "#c084fc", label: "Neng Iteung", hair: "#991b1b", roleBadge: "TikTok Geulis ✨", activity: "working", targetX: 250, targetY: 380, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
   { id: "Kang Tatang (R&D)", deskX: 250, deskY: 490, x: 250, y: 490, color: "#2dd4bf", label: "Kang Tatang", hair: "#0f172a", roleBadge: "Cupping 87.5 SCA ☕", activity: "working", targetX: 250, targetY: 490, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
+
+  // Pos Keamanan Siber & Pintu Masuk Roastery (HQ Security Command)
+  { id: "Kang Asep (Security)", deskX: 580, deskY: 200, x: 580, y: 200, color: "#0284c7", label: "Kang Asep", hair: "#09090b", roleBadge: "Hansip Cyber 🛡️", activity: "working", targetX: 580, targetY: 200, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: true },
 
   // Roastery Warehouse & Supply Chain (Right Side)
   { id: "Mang Dadang (Inventory)", deskX: 780, deskY: 310, x: 780, y: 310, color: "#f97316", label: "Mang Dadang", hair: "#1c1917", roleBadge: "Mandor Gudang 📦", activity: "working", targetX: 780, targetY: 310, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: false },
@@ -384,6 +389,26 @@ const COLLAB_SCENARIOS = [
       { speaker: "Teh Euis", text: "Seueur nu lieur ngabedakeun rasa proses anaerobik sareng washed Neng Iteung." },
       { speaker: "Neng Iteung", text: "Edun! Iteung langsung ngadamel video edukasi 30 detik dina TikTok ayeuna!" }
     ]
+  },
+  {
+    visitorId: "Kang Asep (Security)",
+    targetId: "Ujang (Web Dev)",
+    emote: "🛡️",
+    dialogue: [
+      { speaker: "Kang Asep", text: "Ujang! Kuring nembes mentung 142 IP address nu nyobian brute-force login web!" },
+      { speaker: "Ujang", text: "Edun Kang Asep! WAF Cloudflare langsung ku Ujang setel mode bajo galak!" },
+      { speaker: "Kang Asep", text: "Sip Jang! Hansip Cyber sayaga ronda, web roastery moal aya nu wani ngacak-ngacak!" }
+    ]
+  },
+  {
+    visitorId: "Kang Asep (Security)",
+    targetId: "Ceu Edah (Finance)",
+    emote: "🚨",
+    dialogue: [
+      { speaker: "Kang Asep", text: "Ceu Edah! Gateway pembayaran Midtrans & QRIS aman sentosa, enkripsi SSL 256-bit!" },
+      { speaker: "Ceu Edah", text: "Nuhun Kang Asep! Duit kas kudu aman, mun aya heker rek maok ku abdi baledog ku kalkulator!" },
+      { speaker: "Kang Asep", text: "Tenang Ceu! Piriwit digital jeung pentungan firewall kuring standby 24 jam!" }
+    ]
   }
 ];
 
@@ -478,6 +503,24 @@ const POD_DISCUSSIONS = [
       { speaker: "Kang Jajang", text: "Ceu Edah, invoice Kafe Sudut Temu termin kahiji parantos cair teu acan?" },
       { speaker: "Ceu Edah", text: "Tos lebet kana rekening BCA roastery jam 10 tadi enjing, aman santosa!" }
     ]
+  },
+  {
+    speaker1Id: "Kang Asep (Security)",
+    speaker2Id: "Kang Dudung (GM)",
+    emote: "🛡️",
+    dialogue: [
+      { speaker: "Kang Asep", text: "Kang Dudung, laporan patroli siber 24 jam: Zero vulnerability, server aman sentosa!" },
+      { speaker: "Kang Dudung", text: "Mantep Kang Asep! Hansip andalan roastery, jaga terus ameh juragan tenang." }
+    ]
+  },
+  {
+    speaker1Id: "Kang Asep (Security)",
+    speaker2Id: "Ujang (Web Dev)",
+    emote: "🚨",
+    dialogue: [
+      { speaker: "Kang Asep", text: "Jang, lalu-lintas checkout wéb naek, sertifikat SSL héjo ngagenclang teu aya celah!" },
+      { speaker: "Ujang", text: "Sip Kang Asep! Ujang sareng Akang jaga gawang bareng, heker moal tiasa nyolong data!" }
+    ]
   }
 ];
 
@@ -517,7 +560,7 @@ const AMBIENT_DESK_THOUGHTS: Record<string, { thoughts: string[]; emote: string 
   "Kang Dudung (GM)": {
     emote: "👑",
     thoughts: [
-      "Marios dasbor omzet 11 divisi roastery bari ngopi tubruk.. 📊",
+      "Marios dasbor omzet 12 divisi roastery bari ngopi tubruk.. 📊",
       "Barudak gawe sarumanget, dividen panen raya aman kacida. 💰",
       "Target ekspansi 5 kafe mitra anyar di Bandung & Jakarta. 🎯",
       "SOP operasional lemes, moal aya nu prot-protan deui. ✨"
@@ -611,6 +654,15 @@ const AMBIENT_DESK_THOUGHTS: Record<string, { thoughts: string[]; emote: string 
       "Patani di gunung Takengon & Pangalengan kenging pangaos adil. 🤝",
       "Jadwal panen raya kopi beureum minggu payun meuni leubeut. ☀️",
       "Sampel kopi micro-lot fermentasi 72 jam siap dites ku Tatang. 🌱"
+    ]
+  },
+  "Kang Asep (Security)": {
+    emote: "🛡️",
+    thoughts: [
+      "Ngoronda lalu-lintas paket jaringan web ramu, firewall pageuh pisan! 🛡️",
+      "Piriwit digital sayaga: 0 serangan DDoS lolos, heker taluk! 🚨",
+      "CCTV digital mantau log server 24/7 bari nyemil gehu haneut. 📹",
+      "Sertifikat SSL ngagenclang hejo, transaksi toko aman sentosa. 🔐"
     ]
   }
 };
@@ -1312,35 +1364,43 @@ export default function OfficeCanvas({
         ctx.fillStyle = "#78350f"; ctx.fillRect(x + 23, y - 9, 4, 3);
 
         // Role-Specific Cute Accessories
-        if (agentId.includes("Rama")) {
+        if (agentId.includes("Dudung") || agentId.includes("Rama")) {
           // Mini Bonsai + Executive Desk Phone
           ctx.fillStyle = "#15803d"; ctx.beginPath(); ctx.arc(x - 26, y - 8, 4, 0, Math.PI * 2); ctx.fill();
           ctx.fillStyle = "#78350f"; ctx.fillRect(x - 28, y - 4, 4, 4);
-        } else if (agentId.includes("Rian")) {
+        } else if (agentId.includes("Ujang") || agentId.includes("Rian")) {
           // Cute Yellow Rubber Ducky + Code Glow
           ctx.fillStyle = "#facc15"; ctx.fillRect(x - 28, y - 10, 6, 5); // Duck body
           ctx.fillStyle = "#ea580c"; ctx.fillRect(x - 29, y - 9, 2, 2); // Duck bill
-        } else if (agentId.includes("Fina")) {
+        } else if (agentId.includes("Edah") || agentId.includes("Fina")) {
           // Calculator + Golden Coin Stack
           ctx.fillStyle = "#475569"; ctx.fillRect(x - 28, y - 10, 6, 8);
           ctx.fillStyle = "#eab308"; ctx.fillRect(x - 28, y + 2, 5, 2); // Coin
-        } else if (agentId.includes("Sari")) {
+        } else if (agentId.includes("Euis") || agentId.includes("Sari")) {
           // Pink Headset + Sticky notes
           ctx.fillStyle = "#ec4899"; ctx.fillRect(x - 28, y - 11, 7, 7);
-        } else if (agentId.includes("Maya")) {
+        } else if (agentId.includes("Iteung") || agentId.includes("Maya")) {
           // Ring Light Tripod + Camera
           ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1;
           ctx.beginPath(); ctx.arc(x - 26, y - 9, 4, 0, Math.PI * 2); ctx.stroke();
-        } else if (agentId.includes("Kafin")) {
+        } else if (agentId.includes("Tatang") || agentId.includes("Kafin")) {
           // Chemistry Erlenmeyer Flask + Cupping Spoon
           ctx.fillStyle = "#38bdf8"; ctx.fillRect(x - 26, y - 9, 5, 6);
           ctx.fillStyle = "#e2e8f0"; ctx.fillRect(x - 28, y - 5, 9, 2); // Spoon
-        } else if (agentId.includes("Doni")) {
+        } else if (agentId.includes("Dadang") || agentId.includes("Doni")) {
           // Moisture Tester + Green Bag
           ctx.fillStyle = "#10b981"; ctx.fillRect(x + 12, y - 14, 7, 8);
-        } else if (agentId.includes("Gilang")) {
+        } else if (agentId.includes("Aceng") || agentId.includes("Gilang")) {
           // Barcode Scanner & Parcel Box
           ctx.fillStyle = "#d97706"; ctx.fillRect(x + 12, y - 14, 8, 8);
+        } else if (agentId.includes("Asep")) {
+          // Flashing Police Beacon / Siren (Red/Blue flash) + CCTV Monitor
+          const sirenColor = Math.sin(timeSec * 8) > 0 ? "#ef4444" : "#3b82f6";
+          ctx.fillStyle = sirenColor; ctx.fillRect(x - 28, y - 13, 7, 8);
+          ctx.fillStyle = "#e2e8f0"; ctx.fillRect(x - 26, y - 15, 3, 2);
+          // CCTV Security Monitor on Desk
+          ctx.fillStyle = "#0f172a"; ctx.fillRect(x + 12, y - 16, 14, 11);
+          ctx.fillStyle = "#06b6d4"; ctx.fillRect(x + 13, y - 15, 12, 9);
         }
       };
 
@@ -3527,20 +3587,28 @@ export default function OfficeCanvas({
         clickedAgent = agent.id as AgentRole;
         // Trigger live coffee sip, happy eyes & greetings ONLY for this agent
         agent.sipTimer = 3.8;
-        if (agent.id.includes("Sari")) {
+        if (agent.id.includes("Euis") || agent.id.includes("Sari")) {
           const sariQuotes = [
             "Halo bos! CS WhatsApp standby 24 jam non-stop tanpa jam closing! 💬☕",
-            "Siap bos! Chat WA masuk jam berapa pun langsung saya balas secepat kilat! ⚡",
-            "Layanan CS 24/7 aktif terus! CSAT kita 98.4% dan pelanggan puas banget. ✨",
+            "Siap juragan bos! Chat WA lebet jam sabaraha wae langsung ku Teh Euis dibales secepat kilat! ⚡",
+            "Layanan CS 24/7 aktif terus! CSAT urang 98.4% sareng palanggan sugema pisan. ✨",
             "Standby di WhatsApp 24/7, pandu grind size & orderan beans tanpa henti! ☕"
           ];
           agent.message = sariQuotes[Math.floor(Math.random() * sariQuotes.length)];
+        } else if (agent.id.includes("Asep")) {
+          const asepQuotes = [
+            "Aman sentosa juragan bos! Hansip Asep standby ngaronda firewall & server 24 jam! 🛡️🚨",
+            "Moal aya heker atawa bot checkout liar nu lolos ti piriwit kuring! 👮‍♂️🔥",
+            "Sistem aman, SSL hejo ngagenclang, serangan DDoS tos dialungkeun ka solokan! 🛡️✨",
+            "Ronda digital jalan teras! Server roastery dijaga pageuh sapertos benteng! 🛡️⚡"
+          ];
+          agent.message = asepQuotes[Math.floor(Math.random() * asepQuotes.length)];
         } else {
           const agentGreetings = [
-            "Halo bos! Mau ngopi atau ada task baru? ☕",
-            "Standby bos! Sambil seruput kopi fresh. ☕",
+            "Sampurasun juragan bos! Mau ngopi atau ada task baru? ☕",
+            "Standby bos! Sambil seruput kopi fresh specialty. ☕",
             "Kopi Ramu emang paling nikmat nemenin kerja! ☕",
-            "Siap laksanakan arahan! Ngopi dulu sebentar. ☕"
+            "Siap laksanakan arahan! Ngopi tubruk heula sakedap. ☕"
           ];
           agent.message = agentGreetings[Math.floor(Math.random() * agentGreetings.length)];
         }
