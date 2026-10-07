@@ -488,6 +488,42 @@ export default function ControlPanel({
     handleAction("custom_chat", txt);
   };
 
+  // Helper to render formatted markdown, bold text, and action badges nicely
+  const renderMessageContent = (text: string, isUser: boolean) => {
+    const lines = text.split("\n");
+    return lines.map((line, lIdx) => {
+      // Highlight Kanban action badges
+      if (line.includes("📋 *[Tiket") || line.includes("📋 *[Tugas")) {
+        return (
+          <div key={lIdx} className="my-1.5 p-1.5 rounded-lg bg-[#ecfdf5] border border-[#a7f3d0] text-[#065f46] text-[10.5px] font-bold flex items-center gap-1.5 shadow-xs">
+            <span>📋</span>
+            <span>{line.replace(/^.*📋\s*\*?\[?/, "").replace(/\*?\]?$/, "")}</span>
+          </div>
+        );
+      }
+
+      // Parse **bold** and *italic*
+      const parts = line.split(/(\*\*[^*]+\*\*)/g);
+      return (
+        <span key={lIdx} className="block leading-relaxed">
+          {parts.map((part, pIdx) => {
+            if (part.startsWith("**") && part.endsWith("**")) {
+              return (
+                <strong key={pIdx} className={isUser ? "font-bold text-white" : "font-bold text-[#1f0e03]"}>
+                  {part.slice(2, -2)}
+                </strong>
+              );
+            }
+            if (part.startsWith("*") && part.endsWith("*") && part.length > 2) {
+              return <em key={pIdx} className="italic opacity-90">{part.slice(1, -1)}</em>;
+            }
+            return part;
+          })}
+        </span>
+      );
+    });
+  };
+
   // --- RETRO THEMED CONTROL PANEL (AI Town Palette: #df9d76, deep coffee brown text) ---
   if (theme === "retro") {
     return (
@@ -506,12 +542,16 @@ export default function ControlPanel({
                name.includes("Encep") ? "👨‍🌾" : 
                name.includes("Jajang") ? "👨‍💼" : 
                name.includes("Deden") ? "👨‍💼" : 
-               name.includes("Dadang") ? "👨‍🔧" : "🚚"}
+               name.includes("Dadang") ? "👨‍🔧" : 
+               name.includes("Asep") ? "👮‍♂️" : "🚚"}
             </div>
             <div>
               <div className="font-bold text-[#2d1808] text-xs font-silkscreen flex items-center gap-1.5">
                 <span>{name}</span>
                 <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
+                <span className="text-[7.5px] bg-[#1e4620] text-emerald-100 px-1 py-0.2 rounded font-sans font-bold shadow-xs">
+                  🟢 Live AI
+                </span>
               </div>
               <div className="text-[10px] text-[#5c3214] font-semibold">{role}</div>
             </div>
@@ -537,10 +577,32 @@ export default function ControlPanel({
 
         {/* Role Sub-bar with Memory Status */}
         <div className="px-3 py-1 bg-[#d38e65] border-b border-[#ad6e49] text-[9.5px] text-[#4a260c] flex items-center justify-between gap-1">
-          <span className="truncate max-w-[210px]">{config?.roleDescription || "Spesialis operasional roastery Ramu."}</span>
+          <span className="truncate max-w-[200px]">{config?.roleDescription || "Spesialis operasional roastery Ramu."}</span>
           <span className="text-[8.5px] bg-[#c37e55] px-1.5 py-0.5 rounded text-[#2c1505] font-bold font-mono shrink-0 shadow-sm">
-            💾 Memori Aktif
+            🧠 Agen Otonom
           </span>
+        </div>
+
+        {/* Dynamic Quick Prompt Bar */}
+        <div className="px-2 py-1 bg-[#caa085]/40 border-b border-[#ad6e49] flex gap-1 overflow-x-auto text-[9.5px] shrink-0 custom-scrollbar">
+          <button
+            onClick={() => handleAction("ask_opinion", `Menurut kamu sebagai ${name}, apa ide atau saran terbaikmu untuk pengembangan Ramu Roastery saat ini?`)}
+            className="px-2 py-0.5 rounded-full bg-[#fff8ea] hover:bg-[#fff2d6] border border-[#ad6e49] text-[#3e2208] shrink-0 font-bold transition flex items-center gap-1 shadow-2xs"
+          >
+            <span>💡</span> Ide {name}
+          </button>
+          <button
+            onClick={() => handleAction("ask_tech", "Bagaimana pendapatmu tentang Anti Gravity IDE dan ekosistem Next.js 15 untuk sistem agen ini?")}
+            className="px-2 py-0.5 rounded-full bg-[#fff8ea] hover:bg-[#fff2d6] border border-[#ad6e49] text-[#3e2208] shrink-0 font-bold transition flex items-center gap-1 shadow-2xs"
+          >
+            <span>🚀</span> Anti Gravity IDE
+          </button>
+          <button
+            onClick={() => handleAction("check_kanban", "Tolong buatkan tugas baru di Kanban board untuk evaluasi mingguan roastery!")}
+            className="px-2 py-0.5 rounded-full bg-[#fff8ea] hover:bg-[#fff2d6] border border-[#ad6e49] text-[#3e2208] shrink-0 font-bold transition flex items-center gap-1 shadow-2xs"
+          >
+            <span>📋</span> Buat Tugas Kanban
+          </button>
         </div>
 
         {/* Chat Messages */}
@@ -555,7 +617,7 @@ export default function ControlPanel({
                   ? "bg-[#3e2208] text-[#fff8ea] rounded-xl rounded-tr-none shadow" 
                   : "bg-[#fff8ea] text-[#3e2208] border-2 border-[#caa085] rounded-xl rounded-tl-none shadow-sm"
               }`}>
-                {msg.text}
+                {renderMessageContent(msg.text, msg.sender === "user")}
               </div>
             </div>
           ))}
@@ -565,7 +627,7 @@ export default function ControlPanel({
               <div className="text-[9px] text-[#5c3214] font-bold px-1 font-silkscreen">{name}</div>
               <div className="bg-[#fff8ea] border-2 border-[#caa085] p-2.5 rounded-xl rounded-tl-none text-[#3e2208] flex items-center gap-2">
                 <Loader2 size={12} className="animate-spin text-[#ad6e49]" />
-                <span className="text-[11px] text-[#ad6e49] font-bold animate-pulse">{name} sedang mengetik...</span>
+                <span className="text-[11px] text-[#ad6e49] font-bold animate-pulse">{name} sedang berpikir & menganalisis konteks...</span>
               </div>
             </div>
           )}
@@ -600,7 +662,7 @@ export default function ControlPanel({
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSendText()}
-              placeholder={`Beri arahan ke ${name}...`}
+              placeholder={`Beri instruksi atau diskusikan ide dengan ${name}...`}
               className="flex-1 bg-[#fff8ea] border-2 border-[#ad6e49] text-[#3e2208] placeholder-[#8d5b38] rounded-lg px-2.5 py-1.5 text-xs focus:outline-none font-mono shadow-inner"
             />
             <button

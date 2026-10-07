@@ -337,50 +337,65 @@ export async function POST(req: Request) {
 
     let discussion;
 
-    if (clientGenAI && hasValidKey) {
-      try {
-        let systemInstruction = "";
-        let promptText = "";
+    const CANDIDATE_MODELS = [
+      "gemini-3.5-flash-lite",
+      "gemini-3.1-flash-lite",
+      "gemini-flash-lite-latest",
+      "gemini-3.5-flash"
+    ];
 
-        if (targetAgent) {
-          // STRICT SINGLE-AGENT MODE: Only the queried agent speaks!
-          systemInstruction = `Kamu adalah ${targetAgent.fullName} di Ramu Roastery (Spesialis Kopi Nusantara).
+    if (clientGenAI && hasValidKey) {
+      let systemInstruction = "";
+      let promptText = "";
+
+      if (targetAgent) {
+        // STRICT SINGLE-AGENT MODE: Only the queried agent speaks!
+        systemInstruction = `Kamu adalah ${targetAgent.fullName} di Ramu Roastery (Spesialis Kopi Nusantara).
 WAKTU OPERASIONAL SAAT INI: ${formattedDate} (${greeting}).
 ATURAN UTAMA DARI PEMILIK USAHA:
 1. Pemilik usaha menanyakan pertanyaan KHUSUS KEPADAMU (${targetAgent.fullName}).
 2. DILARANG KERAS SEMUA AGEN IKUT MENJAWAB! HANYA kamu (${targetAgent.fullName}) yang boleh menjawab!
-3. Jawab pertanyaan pemilik usaha dengan sangat jelas, lugas, ramah, dan tuntas sesuai peranmu (${targetAgent.role}).
+3. Jawab pertanyaan pemilik usaha dengan sangat jelas, lugas, ramah, dan tuntas sesuai peranmu (${targetAgent.role}). Kamu bisa menjawab topik apa saja termasuk software, Anti Gravity IDE, AI, bisnis, dan kopi secara mendalam dan cerdas.
 4. Awali jawabanmu dengan sapaan "${greeting} bos!".
-5. Format output HARUS JSON murni tanpa markdown: [{"speaker": "${targetAgent.fullName}", "text": "Jawaban lengkap..."}].`;
+5. Format output HARUS JSON murni tanpa markdown pembungkus: [{"speaker": "${targetAgent.fullName}", "text": "Jawaban lengkap..."}].`;
 
-          promptText = `Pertanyaan dari bos: "${topic}". Jawab langsung HANYA sebagai ${targetAgent.fullName}.`;
-        } else {
-          // Plenary team meeting
-          systemInstruction = `Kamu adalah sistem simulasi rapat meja bundar di Ramu Roastery (Spesialis Kopi Nusantara).
+        promptText = `Pertanyaan dari bos: "${topic}". Jawab langsung HANYA sebagai ${targetAgent.fullName}. Format JSON array tunggal: [{"speaker": "${targetAgent.fullName}", "text": "..."}]`;
+      } else {
+        // Plenary team meeting
+        systemInstruction = `Kamu adalah sistem simulasi rapat meja bundar di Ramu Roastery (Spesialis Kopi Nusantara).
 WAKTU OPERASIONAL SAAT INI: ${formattedDate} (${greeting}).
 ATURAN RAPAT:
 1. Rapat SELALU dibuka oleh Kang Dudung (GM) sebagai pembicara pertama dengan sapaan "${greeting}".
-2. Tuliskan naskah dialog rapat yang hidup dan terfokus pada topik.
-3. Pilih 3 hingga 5 agen yang relevan dengan topik.
+2. Tuliskan naskah dialog rapat yang hidup, cerdas, solutif, dan terfokus pada topik.
+3. Pilih 3 hingga 5 agen yang relevan dengan topik. Karakter memiliki kepribadian Sunda modern yang profesional.
 4. Format HARUS JSON murni tanpa markdown pembungkus: [{"speaker": "Nama Agen", "text": "Dialog..."}].`;
 
-          promptText = `Topik rapat pleno: "${topic}". Waktu nyata: ${formattedDate} (${greeting}). Mulai rapat dengan sapaan "${greeting}" oleh Kang Dudung (GM).`;
-        }
-
-        const model = clientGenAI.getGenerativeModel({
-          model: "gemini-3.5-flash-lite",
-          systemInstruction
-        });
-
-        const result = await model.generateContent(promptText);
-        const rawText = result.response.text();
-        const jsonMatch = rawText.match(/\[[\s\S]*\]/);
-        discussion = JSON.parse(jsonMatch ? jsonMatch[0] : rawText);
-      } catch (geminiError) {
-        console.warn("Gemini meeting generation failed, using dynamic local engine:", geminiError);
-        discussion = generateTailoredMeetingDiscussion(topic, greeting, explicitRecipient);
+        promptText = `Topik rapat pleno: "${topic}". Waktu nyata: ${formattedDate} (${greeting}). Mulai rapat dengan sapaan "${greeting}" oleh Kang Dudung (GM). Format JSON array: [{"speaker": "...", "text": "..."}]`;
       }
-    } else {
+
+      for (const modelName of CANDIDATE_MODELS) {
+        try {
+          const model = clientGenAI.getGenerativeModel({
+            model: modelName,
+            systemInstruction
+          });
+
+          const result = await model.generateContent(promptText);
+          const rawText = result.response.text();
+          const jsonMatch = rawText.match(/\[[\s\S]*\]/);
+          if (jsonMatch) {
+            discussion = JSON.parse(jsonMatch[0]);
+            if (Array.isArray(discussion) && discussion.length > 0) {
+              break;
+            }
+          }
+        } catch (modelErr: any) {
+          console.warn(`Meeting generation failed on ${modelName}:`, modelErr?.message);
+        }
+      }
+    }
+
+    if (!discussion || !Array.isArray(discussion) || discussion.length === 0) {
       discussion = generateTailoredMeetingDiscussion(topic, greeting, explicitRecipient);
     }
 

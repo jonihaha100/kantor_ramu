@@ -1,33 +1,16 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { GoogleGenerativeAI, FunctionDeclaration } from "@google/generative-ai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const prisma = new PrismaClient();
 
-// Tool declarations for LLM
-const checkStockDeclaration: FunctionDeclaration = {
-  name: "check_stock",
-  description: "Mengecek jumlah stok produk yang ada di database gudang.",
-};
-
-const reportRevenueDeclaration: FunctionDeclaration = {
-  name: "report_revenue",
-  description: "Mendapatkan total omzet/pendapatan harian dan jumlah pesanan hari ini.",
-};
-
-const createTaskDeclaration: FunctionDeclaration = {
-  name: "create_task",
-  description: "Membuat tugas baru di Kanban Board untuk didelegasikan ke anggota tim.",
-  parameters: {
-    type: "OBJECT" as any,
-    properties: {
-      title: { type: "STRING" as any, description: "Judul tugas" },
-      description: { type: "STRING" as any, description: "Detail deskripsi tugas" },
-      role: { type: "STRING" as any, description: "Divisi atau peran penerima tugas" }
-    },
-    required: ["title", "description", "role"]
-  }
-};
+// Multi-model resilience fallback chain (ultra-fast & intelligent Gemini models)
+const CANDIDATE_MODELS = [
+  "gemini-3.5-flash-lite",
+  "gemini-3.1-flash-lite",
+  "gemini-flash-lite-latest",
+  "gemini-3.5-flash"
+];
 
 // Rich multi-turn conversational intelligence for all 11 agents
 const AGENT_INTELLIGENCE: Record<string, {
@@ -589,132 +572,144 @@ export async function POST(
     const resolvedId = aliasMap[rawId] || rawId;
     const agentIntel = AGENT_INTELLIGENCE[resolvedId] || AGENT_INTELLIGENCE["dudung"] || AGENT_INTELLIGENCE["rama"];
 
-    // Retrieve live working memory from database (active tasks & latest meeting)
-    const [recentTasks, latestMeeting] = await Promise.all([
+    // Retrieve live working memory and roastery operational state in parallel
+    const [recentTasks, latestMeeting, products, orders] = await Promise.all([
       prisma.agentTask.findMany({
         where: { status: { in: ["PENDING", "IN_PROGRESS"] } },
-        take: 4,
+        take: 5,
         orderBy: { createdAt: "desc" }
       }).catch(() => []),
       prisma.meetingSession.findFirst({
         orderBy: { createdAt: "desc" }
-      }).catch(() => null)
+      }).catch(() => null),
+      prisma.product.findMany({
+        select: { name: true, stock: true, price: true }
+      }).catch(() => []),
+      prisma.order.findMany({
+        select: { status: true, totalAmount: true }
+      }).catch(() => [])
     ]);
 
     const taskMemorySummary = recentTasks.length > 0
       ? recentTasks.map(t => `- [${t.status}] ${t.title} (Divisi: ${t.role})`).join("\n")
-      : "Tidak ada tugas tertunda, semua operasional lancar.";
+      : "Tidak ada tugas tertunda, semua operasional roastery lancar.";
 
     const meetingMemorySummary = latestMeeting
       ? `Topik: "${latestMeeting.topic}" - Ringkasan: ${latestMeeting.summary || "Kesepakatan tercapai."}`
       : "Belum ada rapat baru.";
 
-    // 1. Try real Gemini API if valid key is available
+    const totalRev = orders.reduce((sum, o) => sum + o.totalAmount, 0);
+    const paidOrders = orders.filter(o => o.status === "PAID");
+    const paidRev = paidOrders.reduce((sum, o) => sum + o.totalAmount, 0);
+    const stockList = products.map(p => `• ${p.name}: ${p.stock} pack (Rp ${p.price.toLocaleString("id-ID")})`).join("\n");
+
+    // 1. Dynamic Autonomous AI Agent Execution via Multi-Model Gemini Chain
     if (hasValidGeminiKey) {
-      try {
-        const genAI = new GoogleGenerativeAI(effectiveKey);
-        const model = genAI.getGenerativeModel({
-          model: "gemini-3.5-flash-lite",
-          systemInstruction: `Kamu adalah ${agentIntel.name}, ${agentIntel.roleTitle} di Ramu Roastery (Spesialis Kopi Nusantara). Divisi: ${agentIntel.department}. Kepribadian: ${agentIntel.personality}.
-Waktu operasional saat ini: ${formattedDate} (${greeting}).
+      const genAI = new GoogleGenerativeAI(effectiveKey);
 
-MEMORI KERJA OPERASIONAL TERBARU:
-- Rapat Terakhir: ${meetingMemorySummary}
-- Tugas Aktif yang Sedang Dikerjakan Tim:
+      const systemInstruction = `Kamu adalah ${agentIntel.name}, ${agentIntel.roleTitle} di Ramu Roastery (Spesialis Kopi Nusantara artisanal).
+Divisi: ${agentIntel.department}.
+Karakter & Kepribadian: ${agentIntel.personality}.
+Waktu saat ini: ${formattedDate} (${greeting}).
+
+KONTEKS OPERASIONAL REAL-TIME KANTOR RAMU:
+1. Stok Produk Gudang Saat Ini:
+${stockList || "Data stok produk aman."}
+2. Keuangan & Penjualan Hari Ini:
+• Total Omzet Terakumulasi: Rp ${totalRev.toLocaleString("id-ID")} (${orders.length} pesanan)
+• Kas Masuk Bersih (Paid): Rp ${paidRev.toLocaleString("id-ID")} (${paidOrders.length} lunas)
+3. Tugas Aktif Tim di Kanban Board:
 ${taskMemorySummary}
+4. Rapat Terakhir Tim di Meja Cupping:
+${meetingMemorySummary}
 
-Gunakan Bahasa Indonesia natural dan profesional ala startup roastery modern. Jika menyapa waktu, selalu gunakan sapaan waktu nyata saat ini (${greeting}). Kamu mengingat tugas dan hasil rapat di atas. Jika user/owner bertanya tentang apa yang sedang kamu/tim kerjakan atau menindaklanjuti rapat, gunakan memori kerja tersebut secara cerdas. Berikan insight operasional nyata, tanggapi pertanyaan spesifik user dengan kontekstual, jangan kaku, dan proaktif mengajak berdiskusi atau menawarkan opsi tindakan.`,
-          tools: [
-            { functionDeclarations: [checkStockDeclaration, reportRevenueDeclaration, createTaskDeclaration] }
-          ]
-        });
+PRINSIP PERILAKU SEBAGAI AI AGENT SEJATI (SANGAT PENTING):
+1. DINAMIS & INTERAKTIF: Kamu BUKAN chatbot kaku ber-template! Kamu adalah agen kecerdasan buatan otonom dengan pemikiran hidup, logis, cerdas, berwawasan luas, dan autentik.
+2. WAWASAN LUAS (SOFTWARE, TECH, ANTI GRAVITY IDE, BISNIS, KOPI): User/owner bebas mengajakmu berdiskusi tentang apa pun—arsitektur software, Next.js 15, Prisma, Anti Gravity IDE, perancangan AI Agents, strategi bisnis roastery, profil sangrai kopi, keamanan siber, hingga obrolan santai. Tanggapi esensi pertanyaan user dengan sangat kaya, solutif, berbobot, dan santai (gaya rekan kerja startup profesional).
+3. IDENTITAS & SUNDA TOUCH: Pertahankan persona ${agentIntel.name} yang ramah, hangat, dan logat Sunda halus/witty yang cerdas. Gunakan istilah teknis atau bisnis yang tepat.
+4. EKSEKUSI TINDAKAN OTONOM (ACTION DISPATCH):
+Jika user/owner meminta membuat tugas baru, menugaskan pekerjaan ke tim, atau mencatat action item ke Kanban, sertakan baris tindakan ini di akhir jawabanmu:
+[ACTION: CREATE_TASK | title: <Judul Singkat Tugas> | description: <Deskripsi Detail Tugas> | role: <DIVISI>]
+Divisi yang valid: CROSS_DEPARTMENT, WEB & TECH, SOURCING, R&D_QUALITY, WAREHOUSE, LOGISTICS, FINANCE, B2B_SALES, MARKETING, CONTENT, SECURITY.
+Sistem roastery kami akan otomatis mem-parsing dan mengeksekusi tugas tersebut ke database!
+5. INISIATIF & PERTANYAAN BALIK: Selalu berikan tanggapan tuntas dan ajak berdiskusi balik dengan saran konkret atau pertanyaan lanjutan agar percakapan terasa hidup layaknya manusia.`;
 
-        const formattedHistory = history.slice(-6).map((msg: any) => ({
-          role: msg.sender === "user" ? "user" : "model",
-          parts: [{ text: msg.text }]
-        }));
+      const formattedHistory = history.slice(-8).map((msg: any) => ({
+        role: msg.sender === "user" ? "user" : "model",
+        parts: [{ text: msg.text }]
+      }));
 
-        // Gemini requires the first history turn to have role 'user'
-        let validHistory = formattedHistory;
-        while (validHistory.length > 0 && validHistory[0].role !== "user") {
-          validHistory = validHistory.slice(1);
-        }
+      // Gemini requires the first history turn to have role 'user'
+      let validHistory = formattedHistory;
+      while (validHistory.length > 0 && validHistory[0].role !== "user") {
+        validHistory = validHistory.slice(1);
+      }
 
-        const chat = model.startChat({ history: validHistory });
-        const result = await chat.sendMessage(userMessage);
-        const response = result.response;
-        const functionCalls = response.functionCalls();
+      // Fallback chain across working Gemini models
+      for (const modelName of CANDIDATE_MODELS) {
+        try {
+          const model = genAI.getGenerativeModel({
+            model: modelName,
+            systemInstruction,
+            generationConfig: {
+              temperature: 0.85,
+              topP: 0.95,
+              maxOutputTokens: 1200
+            }
+          });
 
-        let finalReply = response.text();
+          const chat = model.startChat({ history: validHistory });
+          const result = await chat.sendMessage(userMessage);
+          const responseText = result.response.text();
 
-        if (functionCalls && functionCalls.length > 0) {
-          const call = functionCalls[0];
-          if (call.name === "check_stock") {
-            const products = await prisma.product.findMany();
-            const stockSummary = products.map(p => `${p.name}: ${p.stock} pcs`).join(", ");
-            const toolResult = await chat.sendMessage([{
-              functionResponse: { name: call.name, response: { data: stockSummary } }
-            }]);
-            finalReply = toolResult.response.text();
-          } else if (call.name === "report_revenue") {
-            const orders = await prisma.order.findMany();
-            const totalRev = orders.reduce((sum, o) => sum + o.totalAmount, 0);
-            const toolResult = await chat.sendMessage([{
-              functionResponse: { name: call.name, response: { revenue: totalRev, order_count: orders.length } }
-            }]);
-            finalReply = toolResult.response.text();
-          } else if (call.name === "create_task") {
-            const args: any = call.args;
-            const task = await prisma.agentTask.create({
-              data: {
-                title: args.title || "Tugas Baru",
-                description: args.description || "Instruksi dari diskusi",
-                role: args.role || agentIntel.department,
-                status: "IN_PROGRESS"
+          if (responseText && responseText.trim().length > 0) {
+            let finalReply = responseText.trim();
+
+            // Parse autonomous [ACTION: CREATE_TASK ...] tag
+            const actionMatch = finalReply.match(/\[ACTION:\s*CREATE_TASK\s*\|\s*title:\s*([^|]+)\|\s*description:\s*([^|]+)\|\s*role:\s*([^\]]+)\]/i);
+            if (actionMatch) {
+              const taskTitle = actionMatch[1].trim();
+              const taskDesc = actionMatch[2].trim();
+              const taskRole = actionMatch[3].trim();
+
+              try {
+                const newTask = await prisma.agentTask.create({
+                  data: {
+                    title: taskTitle,
+                    description: taskDesc,
+                    role: taskRole || agentIntel.department,
+                    status: "IN_PROGRESS"
+                  }
+                });
+
+                finalReply = finalReply.replace(actionMatch[0], `\n\n📋 *[Tiket Tugas Berhasil Dibuat di Kanban Board: "${newTask.title}" (#${newTask.id.slice(0, 4)})]*`);
+              } catch (taskErr) {
+                console.warn("Failed to auto-create task from LLM action:", taskErr);
+                finalReply = finalReply.replace(actionMatch[0], `\n\n📋 *[Tugas "${taskTitle}" siap didelegasikan ke Kanban]*`);
               }
+            }
+
+            // Log agent interaction
+            await prisma.agentLog.create({
+              data: {
+                role: agentIntel.department,
+                message: `${agentIntel.name} (${modelName}): ${userMessage.slice(0, 50)}...`,
+                level: "INFO"
+              }
+            }).catch(() => {});
+
+            return NextResponse.json({
+              success: true,
+              data: { reply: finalReply, model: modelName }
             });
-            const toolResult = await chat.sendMessage([{
-              functionResponse: { name: call.name, response: { task_id: task.id, status: "created" } }
-            }]);
-            finalReply = toolResult.response.text();
           }
+        } catch (modelErr: any) {
+          console.warn(`[Agent LLM] Model ${modelName} attempt failed, trying next model:`, modelErr?.message);
         }
-
-        // Log agent interaction
-        await prisma.agentLog.create({
-          data: {
-            role: agentIntel.department,
-            message: `${agentIntel.name}: ${userMessage.slice(0, 60)}...`,
-            level: "INFO"
-          }
-        }).catch(() => {});
-
-        return NextResponse.json({ success: true, data: { reply: finalReply } });
-      } catch (geminiErr: any) {
-        console.warn("Gemini call failed, seamlessly invoking local cognitive engine:", geminiErr?.message);
       }
     }
 
-    // 2. High-Fidelity Contextual Local Cognitive Engine
-    const lowerUser = userMessage.toLowerCase();
-    if (lowerUser.includes("kerja") || lowerUser.includes("tugas") || lowerUser.includes("meeting") || lowerUser.includes("rapat") || lowerUser.includes("lagi apa") || lowerUser.includes("sedang apa")) {
-      if (recentTasks.length > 0) {
-        const relevantTasks = recentTasks.filter(t => 
-          t.role === "CROSS_DEPARTMENT" || 
-          t.role.toLowerCase().includes(agentIntel.department.toLowerCase()) ||
-          t.role.toLowerCase().includes(agentIntel.name.toLowerCase())
-        );
-        const displayTasks = relevantTasks.length > 0 ? relevantTasks : recentTasks;
-        const taskList = displayTasks.map(t => `• ${t.title} [Status: ${t.status}]`).join("\n");
-        return NextResponse.json({
-          success: true,
-          data: {
-            reply: `Siap bos! Dari memori kerja operasional saya saat ini, ada tugas aktif yang sedang dikerjakan tim:\n\n${taskList}\n\n${latestMeeting ? `📌 Terkait rapat terakhir: "${latestMeeting.topic}"\n\n` : ""}Apakah ada arahan atau penyesuaian prioritas untuk tugas ini, bos?`
-          }
-        });
-      }
-    }
-
+    // 2. High-Fidelity Contextual Local Cognitive Fallback (Used only if offline / API key unreachable)
     const reply = await agentIntel.handleLocalReply(userMessage, history);
 
     // Save log to database
@@ -730,7 +725,7 @@ Gunakan Bahasa Indonesia natural dan profesional ala startup roastery modern. Ji
 
     return NextResponse.json({
       success: true,
-      data: { reply }
+      data: { reply, model: "local-cognitive" }
     });
 
   } catch (error: any) {
@@ -738,7 +733,8 @@ Gunakan Bahasa Indonesia natural dan profesional ala startup roastery modern. Ji
     return NextResponse.json({
       success: true,
       data: {
-        reply: "Halo bos! Saya sedang memeriksa sinkronisasi data roastery. Semuanya berjalan aman, ada yang bisa saya bantu sekarang?"
+        reply: "Halo bos! Saya sedang memeriksa sinkronisasi data roastery. Semuanya berjalan aman, ada yang bisa saya bantu sekarang?",
+        model: "safeguard"
       }
     });
   }
