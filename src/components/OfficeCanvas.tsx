@@ -8,7 +8,7 @@ export interface OfficeEventLog {
   time: string;
   speaker: string;
   message: string;
-  type: "collab" | "meeting" | "task" | "system";
+  type: "collab" | "meeting" | "task" | "system" | "thought" | "cupping";
 }
 
 interface OfficeCanvasProps {
@@ -28,6 +28,9 @@ type AgentActivity =
   | "meeting" 
   | "collaborating_walk" 
   | "collaborating_talk"
+  | "pod_chat"
+  | "cupping_walk"
+  | "cupping_taste"
   | "idle";
 
 interface AgentData {
@@ -140,20 +143,22 @@ const INITIAL_AGENTS: AgentData[] = [
   { id: "Budi (Sourcing)", deskX: 830, deskY: 460, x: 830, y: 460, color: "#a3e635", label: "Budi", hair: "#3f2b1d", roleBadge: "Direct Trade Petani", activity: "working", targetX: 830, targetY: 460, waitTimer: 0, message: null, messageTimer: 0, isOfficeWorker: false },
 ];
 
-// Rich peer-to-peer collaboration dialogue sequences
+// Rich peer-to-peer collaboration dialogue sequences (Walking visits)
 const COLLAB_SCENARIOS = [
   {
     visitorId: "Sari (CS)",
     targetId: "Doni (Inventory)",
+    emote: "📦",
     dialogue: [
       { speaker: "Sari", text: "Don, PO Kafe Sudut Temu 20kg siap kirim hari ini?" },
-      { speaker: "Doni", text: "Siap Sar! Baru beres di-packing dan di-seal rapi." },
-      { speaker: "Sari", text: "Mantap, langsung ku konfirmasi ke admin kafe ya!" }
+      { speaker: "Doni", text: "Siap Sar! Baru beres di-packing dan di-seal valve rapi." },
+      { speaker: "Sari", text: "Mantap, langsung ku konfirmasi ke admin kafe via WA!" }
     ]
   },
   {
     visitorId: "Maya (Content)",
     targetId: "Kafin (R&D)",
+    emote: "🎬",
     dialogue: [
       { speaker: "Maya", text: "Kafin! Boleh rekam video pour-over batch Bajawa Honey?" },
       { speaker: "Kafin", text: "Boleh May! Notes aroma peach & madunya semerbak banget." },
@@ -163,6 +168,7 @@ const COLLAB_SCENARIOS = [
   {
     visitorId: "Rama (GM)",
     targetId: "Fina (Finance)",
+    emote: "📊",
     dialogue: [
       { speaker: "Rama", text: "Fin, rekonsiliasi omzet Rp 14.2M hari ini sudah klop?" },
       { speaker: "Fina", text: "Sudah klop Pak Rama, invoice Kafe Sudut Temu sudah lunas." },
@@ -172,6 +178,7 @@ const COLLAB_SCENARIOS = [
   {
     visitorId: "Gilang (Logistics)",
     targetId: "Sari (CS)",
+    emote: "🚚",
     dialogue: [
       { speaker: "Gilang", text: "Sar, resi J&T Cargo batch siang sudah terbit ya." },
       { speaker: "Sari", text: "Thank you mas Gilang, langsung ku teruskan ke WhatsApp pembeli!" },
@@ -181,15 +188,17 @@ const COLLAB_SCENARIOS = [
   {
     visitorId: "Rian (Web Dev)",
     targetId: "Arya (Ads)",
+    emote: "⚡",
     dialogue: [
-      { speaker: "Rian", text: "Arya, conversion tracking Meta Pixel di web store sudah 100% akurat." },
+      { speaker: "Rian", text: "Arya, conversion tracking Meta Pixel di web store 100% akurat." },
       { speaker: "Arya", text: "Mantap Rian! Gua naikin budget kampanye 20% ya." },
-      { speaker: "Rian", text: "Gas! Server edge kita siap tampung lonjakan trafik." }
+      { speaker: "Rian", text: "Gas! Server edge kita siap tampung lonjakan checkout." }
     ]
   },
   {
     visitorId: "Bayu (B2B)",
     targetId: "Budi (Sourcing)",
+    emote: "🤝",
     dialogue: [
       { speaker: "Bayu", text: "Bud, ada coffeeshop Jaksel mau kontrak suplai 100kg/bulan." },
       { speaker: "Budi", text: "Aman Bay! Kontak koperasi di Takengon baru panen raya." },
@@ -199,13 +208,412 @@ const COLLAB_SCENARIOS = [
   {
     visitorId: "Doni (Inventory)",
     targetId: "Kafin (R&D)",
+    emote: "🔥",
     dialogue: [
       { speaker: "Doni", text: "Kaf, moisture content green beans hari ini stabil di 11.2%." },
       { speaker: "Kafin", text: "Ideal banget Don, gas roasting batch specialty berikutnya." },
       { speaker: "Doni", text: "Mesin Probat drumnya udah pre-heat di 205°C!" }
     ]
+  },
+  {
+    visitorId: "Kafin (R&D)",
+    targetId: "Budi (Sourcing)",
+    emote: "☕",
+    dialogue: [
+      { speaker: "Kafin", text: "Bud! Sampel anaerobic natural dari Takengon cupping score 87.5!" },
+      { speaker: "Budi", text: "Wah serius Kaf? Petani Pak Samsul pasti senang dengarnya." },
+      { speaker: "Kafin", text: "Kunci kontraknya Bud, rasa winey & blackcurrant-nya istimewa!" }
+    ]
+  },
+  {
+    visitorId: "Arya (Ads)",
+    targetId: "Maya (Content)",
+    emote: "📈",
+    dialogue: [
+      { speaker: "Arya", text: "May! Video Reels 'Crema Tebal Anti Maag' CTR-nya tembus 3.12%!" },
+      { speaker: "Maya", text: "Keren kan! Visual pouring slow-mo emang paling disukai audiens." },
+      { speaker: "Arya", text: "Gue pasang budget iklan retargeting biar penjualan meroket." }
+    ]
+  },
+  {
+    visitorId: "Fina (Finance)",
+    targetId: "Bayu (B2B)",
+    emote: "💰",
+    dialogue: [
+      { speaker: "Fina", text: "Bayu, pembayaran invoice Kafe Sudut Temu Rp 4.8M udah masuk." },
+      { speaker: "Bayu", text: "Alhamdulillah lunas! Berarti jatah suplai minggu depan siap jalan." },
+      { speaker: "Fina", text: "Faktur pajak PPN 11% juga sudah ku terbitkan ya." }
+    ]
+  },
+  {
+    visitorId: "Rian (Web Dev)",
+    targetId: "Sari (CS)",
+    emote: "💻",
+    dialogue: [
+      { speaker: "Rian", text: "Sar, fitur pemilih gilingan V60 & espresso di web udah lancar?" },
+      { speaker: "Sari", text: "Lancar banget Rian! Gak ada lagi pembeli salah pilih gilingan." },
+      { speaker: "Rian", text: "Sip! CSAT kita bakal tetap bertahan di atas 98%." }
+    ]
+  },
+  {
+    visitorId: "Budi (Sourcing)",
+    targetId: "Rama (GM)",
+    emote: "🌾",
+    dialogue: [
+      { speaker: "Budi", text: "Pak Rama, kontrak direct trade 2 ton petani Pangalengan siap diteken." },
+      { speaker: "Rama", text: "Berapa kesepakatan harga per kilo dengan kelompok tani mas Budi?" },
+      { speaker: "Budi", text: "Rp 86.000/kg pak, win-win buat petani dan margin roastery kita." }
+    ]
+  },
+  {
+    visitorId: "Kafin (R&D)",
+    targetId: "Doni (Inventory)",
+    emote: "☕",
+    dialogue: [
+      { speaker: "Kafin", text: "Don, jadwal roasting sore ini 2 batch Sumatra Kerinci ya." },
+      { speaker: "Doni", text: "Siap Kafin! Biji kopi mentah udah selesai ditimbang 24kg." },
+      { speaker: "Kafin", text: "Jaga RoR drum saat first crack di 8.5°C/menit ya Don." }
+    ]
+  },
+  {
+    visitorId: "Maya (Content)",
+    targetId: "Bayu (B2B)",
+    emote: "✨",
+    dialogue: [
+      { speaker: "Maya", text: "Bay, e-katalog B2B edisi kuartal ini sudah selesai ku desain!" },
+      { speaker: "Bayu", text: "Wah cakep banget May! Foto kemasan Ramu terlihat mewah." },
+      { speaker: "Maya", text: "Semoga mempermudah closing kemitraan kafe-kafe baru ya!" }
+    ]
+  },
+  {
+    visitorId: "Gilang (Logistics)",
+    targetId: "Doni (Inventory)",
+    emote: "🚚",
+    dialogue: [
+      { speaker: "Gilang", text: "Don, pengiriman kargo Bali butuh 15 karton blend espresso." },
+      { speaker: "Doni", text: "Udah standby di pallet 2, kardusnya udah dilapis bubble wrap tebal." },
+      { speaker: "Gilang", text: "Oke, armada kurir Paxel jemput jam 14:00 teng." }
+    ]
+  },
+  {
+    visitorId: "Rama (GM)",
+    targetId: "Kafin (R&D)",
+    emote: "👑",
+    dialogue: [
+      { speaker: "Rama", text: "Kafin, bagaimana perkembangan formula signature blend baru kita?" },
+      { speaker: "Kafin", text: "Sudah seimbang pak! 70% Gayo Arabica dan 30% Robusta Dampit." },
+      { speaker: "Rama", text: "Aroma manis karamelnya kuat, siap kita luncurkan ke pasar." }
+    ]
+  },
+  {
+    visitorId: "Fina (Finance)",
+    targetId: "Budi (Sourcing)",
+    emote: "🧾",
+    dialogue: [
+      { speaker: "Fina", text: "Mas Budi, transfer pelunasan green beans Gayo sudah berhasil terkirim." },
+      { speaker: "Budi", text: "Terima kasih mbak Fina, resi kargo truk pengangkut sudah meluncur." },
+      { speaker: "Fina", text: "Bukti potong pajak PPh 22-nya sudah ku arsipkan rapi." }
+    ]
+  },
+  {
+    visitorId: "Arya (Ads)",
+    targetId: "Rama (GM)",
+    emote: "🎯",
+    dialogue: [
+      { speaker: "Arya", text: "Pak Rama, laporan mingguan Meta Ads mencatatkan ROAS 3.82x." },
+      { speaker: "Rama", text: "Prestasi bagus Arya, CAC di angka berapa sekarang?" },
+      { speaker: "Arya", text: "Stabil di Rp 24.200 per transaksi baru, sangat efisien pak!" }
+    ]
+  },
+  {
+    visitorId: "Doni (Inventory)",
+    targetId: "Budi (Sourcing)",
+    emote: "⚖️",
+    dialogue: [
+      { speaker: "Doni", text: "Mas Budi, 40 karung goni Flores Bajawa baru sampai di dock gudang." },
+      { speaker: "Budi", text: "Cek fisik karungnya Don, pastikan segel GrainPro masih utuh." },
+      { speaker: "Doni", text: "Aman mas, biji kopi wangi kering dan bersih tanpa cacat." }
+    ]
+  },
+  {
+    visitorId: "Sari (CS)",
+    targetId: "Fina (Finance)",
+    emote: "💬",
+    dialogue: [
+      { speaker: "Sari", text: "Mbak Fina, Kafe Rekanan minta invoice resmi atas nama PT mereka." },
+      { speaker: "Fina", text: "Sudah ku generate Sar, PDF faktur pajak sudah ku kirim ke emailmu." },
+      { speaker: "Sari", text: "Siap mbak, langsung ku forward ke WhatsApp owner kafenya!" }
+    ]
+  },
+  {
+    visitorId: "Kafin (R&D)",
+    targetId: "Maya (Content)",
+    emote: "☕",
+    dialogue: [
+      { speaker: "Kafin", text: "May, tasting notes blend ini: Dark Chocolate, Roasted Hazelnut & Molasses." },
+      { speaker: "Maya", text: "Deskripsi rasanya bikin ngiler! Ku cantumkan di postingan Instagram ya." },
+      { speaker: "Kafin", text: "Jangan lupa ingatkan audiens buat resting biji 5 hari setelah sangrai!" }
+    ]
+  },
+  {
+    visitorId: "Rian (Web Dev)",
+    targetId: "Rama (GM)",
+    emote: "⚡",
+    dialogue: [
+      { speaker: "Rian", text: "Pak Rama, laporan performa web store: uptime 99.99% dan loading 0.6 detik." },
+      { speaker: "Rama", text: "Bagus sekali Rian, keamanan payment gateway Midtrans terpantau aman?" },
+      { speaker: "Rian", text: "Sangat aman pak, proteksi webhook SSL aktif tanpa celah." }
+    ]
+  },
+  {
+    visitorId: "Bayu (B2B)",
+    targetId: "Doni (Inventory)",
+    emote: "🤝",
+    dialogue: [
+      { speaker: "Bayu", text: "Don, ada repeat order 50kg House Blend dari jaringan kafe BSD." },
+      { speaker: "Doni", text: "Stok roasted beans kita melimpah 180kg, langsung ku pack kardus!" },
+      { speaker: "Bayu", text: "Sip, klien minta dikirim via kurir sameday besok pagi." }
+    ]
+  },
+  {
+    visitorId: "Maya (Content)",
+    targetId: "Sari (CS)",
+    emote: "💡",
+    dialogue: [
+      { speaker: "Maya", text: "Sar, pertanyaan apa yang paling sering ditanya pelanggan di WhatsApp?" },
+      { speaker: "Sari", text: "Banyak yang bingung bedanya rasa anaerobic sama washed process May." },
+      { speaker: "Maya", text: "Mantap! Gua langsung bikin video edukasi 30 detik buat TikTok!" }
+    ]
   }
 ];
+
+// Desk-to-Desk Neighbor Micro-Discussions (Colleagues chatting without leaving their chairs)
+const POD_DISCUSSIONS = [
+  {
+    speaker1Id: "Rian (Web Dev)",
+    speaker2Id: "Kafin (R&D)",
+    emote: "💻",
+    dialogue: [
+      { speaker: "Rian", text: "Kaf, data cupping score batch Gayo udah live di website!" },
+      { speaker: "Kafin", text: "Sip Rian! Customer bisa langsung cek profil rasanya." }
+    ]
+  },
+  {
+    speaker1Id: "Sari (CS)",
+    speaker2Id: "Maya (Content)",
+    emote: "💬",
+    dialogue: [
+      { speaker: "Sari", text: "May, banyak pelanggan di WA nanya grind size buat V60." },
+      { speaker: "Maya", text: "Ide konten cakep! Gue bikinin video Reels seduh sore ini!" }
+    ]
+  },
+  {
+    speaker1Id: "Arya (Ads)",
+    speaker2Id: "Fina (Finance)",
+    emote: "📈",
+    dialogue: [
+      { speaker: "Arya", text: "Fin, ROAS Meta Ads hari ini 3.82x. Boleh naikin budget 15%?" },
+      { speaker: "Fina", text: "Boleh Arya, margin bersih kita masih tebal di 30.6%." }
+    ]
+  },
+  {
+    speaker1Id: "Bayu (B2B)",
+    speaker2Id: "Rama (GM)",
+    emote: "🤝",
+    dialogue: [
+      { speaker: "Bayu", text: "Pak Rama, Kafe Sudut Temu fix kontrak 120kg/bulan." },
+      { speaker: "Rama", text: "Keren Bayu! Siapkan sample roast profile khusus buat mereka." }
+    ]
+  },
+  {
+    speaker1Id: "Doni (Inventory)",
+    speaker2Id: "Gilang (Logistics)",
+    emote: "📦",
+    dialogue: [
+      { speaker: "Doni", text: "Lang, kardus kemasan 200g udah di-bubble wrap rapi." },
+      { speaker: "Gilang", text: "Oke Don, kurir kargo jemput tepat jam 15:30 nanti." }
+    ]
+  },
+  {
+    speaker1Id: "Budi (Sourcing)",
+    speaker2Id: "Doni (Inventory)",
+    emote: "🌾",
+    dialogue: [
+      { speaker: "Budi", text: "Don, 2 ton green bean Sigarar Utang Pangalengan sampai besok." },
+      { speaker: "Doni", text: "Gudang B siap mas Budi, pallet kayu & humidity meter standby!" }
+    ]
+  },
+  {
+    speaker1Id: "Kafin (R&D)",
+    speaker2Id: "Rama (GM)",
+    emote: "☕",
+    dialogue: [
+      { speaker: "Kafin", text: "Pak Rama, cupping batch Bajawa tembus score 87.5 poin!" },
+      { speaker: "Rama", text: "Luar biasa Kafin, layak kita rilis jadi edisi Reserve." }
+    ]
+  },
+  {
+    speaker1Id: "Maya (Creative)",
+    speaker2Id: "Arya (Ads)",
+    emote: "✨",
+    dialogue: [
+      { speaker: "Maya", text: "Arya, video ASMR espresso kemarin tembus 180k views lho!" },
+      { speaker: "Arya", text: "Pantesan! CPR di Meta Ads langsung turun ke Rp 19.500!" }
+    ]
+  },
+  {
+    speaker1Id: "Sari (CS)",
+    speaker2Id: "Rian (Web Dev)",
+    emote: "⚡",
+    dialogue: [
+      { speaker: "Sari", text: "Rian, opsi pilih gilingan di web store gampang dipahami pembeli." },
+      { speaker: "Rian", text: "Mantap Sar, konversi checkout mobile naik 28% berkat itu!" }
+    ]
+  },
+  {
+    speaker1Id: "Bayu (B2B)",
+    speaker2Id: "Fina (Finance)",
+    emote: "💰",
+    dialogue: [
+      { speaker: "Bayu", text: "Fin, invoice Kafe Sudut Temu termin pertama sudah cair?" },
+      { speaker: "Fina", text: "Sudah masuk rekening BCA roastery jam 10 tadi, aman!" }
+    ]
+  }
+];
+
+// Spontaneous Cupping Table Tastings around the Persian Carpet
+const CUPPING_SESSIONS = [
+  {
+    hostId: "Kafin (R&D)",
+    guestId: "Maya (Content)",
+    dialogue: [
+      { speaker: "Kafin", text: "May, coba seruput cupping spoon batch Bajawa ini. Rasain acidity-nya!" },
+      { speaker: "Maya", text: "Wah! Aroma apricot segar dan aftertaste manis madu semerbak!" },
+      { speaker: "Kafin", text: "Betul! Ini yang kita sebut specialty coffee ber-score 87.5 poin!" }
+    ]
+  },
+  {
+    hostId: "Kafin (R&D)",
+    guestId: "Rama (GM)",
+    dialogue: [
+      { speaker: "Kafin", text: "Pak Rama, ini hasil sangrai roast profile medium dark untuk kafe rekanan." },
+      { speaker: "Rama", text: "Crema-nya tebal sekali, rasa pahitnya gurih tanpa cacat sangrai." },
+      { speaker: "Kafin", text: "Sempurna untuk menu es kopi susu kekinian mitra B2B kita!" }
+    ]
+  },
+  {
+    hostId: "Budi (Sourcing)",
+    guestId: "Kafin (R&D)",
+    dialogue: [
+      { speaker: "Budi", text: "Kafin, ini sampel kopi petik merah fermentasi anaerobik 72 jam Takengon." },
+      { speaker: "Kafin", text: "Aroma keringnya wangi buah berry ungu! Body-nya juicy banget." },
+      { speaker: "Budi", text: "Mantap, petani di Aceh berhasil jaga konsistensi fermentasinya!" }
+    ]
+  }
+];
+
+// Ambient Desk Thoughts: realistic internal monologues showing busy roastery work
+const AMBIENT_DESK_THOUGHTS: Record<string, { thoughts: string[]; emote: string }> = {
+  "Rama (GM)": {
+    emote: "👑",
+    thoughts: [
+      "Memeriksa dasbor kinerja 11 divisi roastery.. 📊",
+      "Proyeksi dividen & reinvestasi panen raya aman. 💰",
+      "Target ekspansi 5 kafe mitra baru bulan ini. 🎯",
+      "SOP operasional & kontrol kualitas berjalan mulus. ✨"
+    ]
+  },
+  "Fina (Finance)": {
+    emote: "📊",
+    thoughts: [
+      "Audit mutasi bank BCA & Mandiri sudah 100% klop. 🧾",
+      "Gross profit margin stabil di 52.8%, sangat sehat! 📈",
+      "Alokasi belanja green beans Takengon terproteksi. 💼",
+      "Rekapitulasi faktur pajak PPN 11% transaksi B2B selesai. ✍️"
+    ]
+  },
+  "Sari (CS)": {
+    emote: "💬",
+    thoughts: [
+      "Standby CS WhatsApp 24/7 tanpa jam closing! 💬",
+      "Respon chat pelanggan tercepat: 1.2 detik! ⚡",
+      "Rekomendasi grind size V60 & espresso terkirim. ☕",
+      "Review bintang 5 baru masuk dari home brewer! ⭐"
+    ]
+  },
+  "Rian (Web Dev)": {
+    emote: "💻",
+    thoughts: [
+      "git commit & push ke edge server: 0 downtime. 💻",
+      "Latency web store 9ms, checkout QRIS kilat! ⚡",
+      "Integrasi Webhook WhatsApp & Midtrans sinkron. 🔗",
+      "Monitoring server VPS & auto-backup database aman. 🛡️"
+    ]
+  },
+  "Bayu (B2B)": {
+    emote: "🤝",
+    thoughts: [
+      "Follow-up proposal suplai ke Kafe Sudut Temu 120kg. 🤝",
+      "Siapkan tester profile roast untuk calon mitra hotel. ☕",
+      "18 kafe rekanan aktif dalam pipeline suplai rutin. 📋",
+      "Draft kontrak B2B volume builder siap ditandatangani. 📑"
+    ]
+  },
+  "Arya (Ads)": {
+    emote: "📈",
+    thoughts: [
+      "ROAS Meta Ads stabil di 3.82x, jauh di atas target! 📈",
+      "Biaya per akuisisi (CAC) ditekan ke Rp 24.200. 🎯",
+      "Retargeting audiens kopi susu menghasilkan konversi tinggi. 💡",
+      "Alokasi budget Meta & TikTok Ads berjalan optimal. 📊"
+    ]
+  },
+  "Maya (Content)": {
+    emote: "🎬",
+    thoughts: [
+      "Editing video Reels: 'Rahasia Kopi Susu Gurih Anti-Maag'. 🎬",
+      "340.000 views organik minggu ini di TikTok @ramuroastery. ✨",
+      "Foto katalog aesthetic kemasan 200g siap tayang. 📸",
+      "Naskah video proses sangrai Probat UG22 sudah siap. 📝"
+    ]
+  },
+  "Kafin (R&D)": {
+    emote: "☕",
+    thoughts: [
+      "Kalibrasi sensorik batch Gayo: aroma melati & madu! 👃",
+      "Cupping score SCA 87.5 poin, kualitas specialty murni. ☕",
+      "Monitoring kurva RoR & DTR mesin sangrai Probat. 🔥",
+      "Eksperimen profil roasting anaerobic natural batch #14. 🧪"
+    ]
+  },
+  "Doni (Inventory)": {
+    emote: "📦",
+    thoughts: [
+      "Stok 180 kg roasted beans siap kirim tersusun rapi. 📦",
+      "Kadar air green beans 11.2%, kelembaban gudang 60% RH. ⚖️",
+      "Mesin sangrai Probat drum pre-heat stabil di 205°C. 🚜",
+      "Chaff collector dan filter pendingin dibersihkan bersih. 🧹"
+    ]
+  },
+  "Gilang (Logistics)": {
+    emote: "🚚",
+    thoughts: [
+      "8 koli karton biji kopi siap serah terima ke J&T Cargo. 🚚",
+      "Semua pesanan ritel sameday ter-dispatch sebelum cut-off. ⏱️",
+      "Resi pengiriman otomatis tersinkron ke WA pembeli. 📱",
+      "Jadwal armada kurir kargo Jakarta & Bandung tepat waktu. 🗺️"
+    ]
+  },
+  "Budi (Sourcing)": {
+    emote: "🌾",
+    thoughts: [
+      "Kontrak direct trade 2 ton varietas Sigarar Utang aman. 🌾",
+      "Petani Takengon & Pangalengan dapat kepastian harga adil. 🤝",
+      "Jadwal panen raya kopi specialty minggu kedua bulan ini. ☀️",
+      "Sampel micro-lot fermentasi 72 jam siap diuji lab. 🌱"
+    ]
+  }
+};
 
 export default function OfficeCanvas({
   onSelectAgent,
@@ -270,7 +678,7 @@ export default function OfficeCanvas({
     server: { message: null, timer: 0 },
   });
 
-  // Active collaboration state
+  // Active collaboration state (walking visits)
   const activeCollabRef = useRef<{
     scenarioIndex: number;
     step: number;
@@ -279,7 +687,54 @@ export default function OfficeCanvas({
     targetId: string;
   } | null>(null);
 
-  const nextCollabDelayRef = useRef(8);
+  const nextCollabDelayRef = useRef(6);
+
+  // Active pod-chat state (desk-to-desk discussions without standing up)
+  const activePodChatRef = useRef<{
+    scenarioIndex: number;
+    step: number;
+    stepTimer: number;
+    speaker1Id: string;
+    speaker2Id: string;
+  } | null>(null);
+
+  const nextPodChatDelayRef = useRef(4);
+
+  // Active cupping table tasting session state
+  const activeCuppingRef = useRef<{
+    scenarioIndex: number;
+    step: number;
+    stepTimer: number;
+    hostId: string;
+    guestId: string;
+    state: "walking" | "tasting" | "returning";
+  } | null>(null);
+
+  const nextCuppingDelayRef = useRef(22);
+
+  // Ambient desk thoughts timer
+  const ambientThoughtTimerRef = useRef(5);
+
+  // Floating animated emote particles (e.g. 💬, ☕, 💡, ✨, 🔥, 📊)
+  const floatingEmotesRef = useRef<{
+    id: string;
+    x: number;
+    y: number;
+    char: string;
+    life: number;
+    maxLife: number;
+  }[]>([]);
+
+  const spawnEmote = (x: number, y: number, char: string) => {
+    floatingEmotesRef.current.push({
+      id: Math.random().toString(),
+      x,
+      y: y - 26,
+      char,
+      life: 2.2,
+      maxLife: 2.2
+    });
+  };
 
   useEffect(() => {
     meetingActiveRef.current = isMeetingActive;
@@ -376,33 +831,112 @@ export default function OfficeCanvas({
         }
       };
 
-      // Helper speech bubble
-      const drawSpeechBubble = (x: number, y: number, text: string, bgColor = "#ffffff", textColor = "#0f172a") => {
+      // Upgraded stylish speech bubble with multi-line wrap, tag badge, shadow & boundaries
+      const drawSpeechBubble = (
+        x: number, 
+        y: number, 
+        text: string, 
+        bgColor = "#ffffff", 
+        textColor = "#0f172a", 
+        speakerTag?: string,
+        badgeBg = "#4f46e5"
+      ) => {
+        ctx.save();
+        ctx.font = "bold 9px monospace";
+        
+        // Multi-line word wrap if length > 26
+        const maxCharsPerLine = 26;
+        let lines: string[] = [];
+        if (text.length <= maxCharsPerLine) {
+          lines = [text];
+        } else {
+          const words = text.split(" ");
+          let curLine = "";
+          for (const w of words) {
+            if ((curLine + " " + w).trim().length <= maxCharsPerLine) {
+              curLine = (curLine + " " + w).trim();
+            } else {
+              if (curLine) lines.push(curLine);
+              curLine = w;
+            }
+          }
+          if (curLine) lines.push(curLine);
+        }
+        
+        if (lines.length > 2) {
+          lines = [lines[0], lines[1].slice(0, 22) + "..."];
+        }
+
+        let maxLineW = 0;
+        lines.forEach(l => {
+          const w = ctx.measureText(l).width;
+          if (w > maxLineW) maxLineW = w;
+        });
+
+        const padX = 10;
+        const lineH = 12;
+        const textH = lines.length * lineH;
+        const bubH = textH + (speakerTag ? 14 : 10);
+        const bubW = Math.max(maxLineW + padX * 2, speakerTag ? ctx.measureText(speakerTag).width + 20 : 64);
+        
+        const bubX = Math.max(12, Math.min(988 - bubW, x - bubW / 2));
+        const bubY = y - bubH - 10;
+
+        // Shadow
+        ctx.shadowColor = "rgba(0, 0, 0, 0.28)";
+        ctx.shadowBlur = 6;
+        ctx.shadowOffsetY = 2;
+
+        // Bubble background
         ctx.fillStyle = bgColor;
-        ctx.strokeStyle = "#94a3b8";
-        ctx.lineWidth = 1;
-        ctx.font = "bold 9.5px monospace";
-        const msgW = Math.min(ctx.measureText(text).width + 16, 230);
-        const bubX = x - msgW / 2;
-        const bubY = y - 32;
-
+        ctx.strokeStyle = "#475569";
+        ctx.lineWidth = 1.2;
         ctx.beginPath();
-        ctx.roundRect(bubX, bubY, msgW, 22, 5);
+        ctx.roundRect(bubX, bubY, bubW, bubH, 6);
         ctx.fill();
         ctx.stroke();
 
-        // Tail
+        ctx.shadowColor = "transparent";
+        ctx.shadowBlur = 0;
+
+        // Bubble Tail pointing to head
+        const tailX = Math.max(bubX + 12, Math.min(bubX + bubW - 12, x));
+        ctx.fillStyle = bgColor;
+        ctx.strokeStyle = "#475569";
         ctx.beginPath();
-        ctx.moveTo(x - 5, bubY + 22);
-        ctx.lineTo(x, bubY + 28);
-        ctx.lineTo(x + 5, bubY + 22);
+        ctx.moveTo(tailX - 4, bubY + bubH);
+        ctx.lineTo(tailX, bubY + bubH + 6);
+        ctx.lineTo(tailX + 4, bubY + bubH);
         ctx.fill();
         ctx.stroke();
 
+        // Speaker Tag Header if provided
+        let textStartY = bubY + 7;
+        if (speakerTag) {
+          ctx.font = "bold 7px monospace";
+          const tagW = ctx.measureText(speakerTag).width;
+          ctx.fillStyle = badgeBg;
+          ctx.beginPath();
+          ctx.roundRect(bubX + 6, bubY + 4, tagW + 6, 8, 2);
+          ctx.fill();
+
+          ctx.fillStyle = "#ffffff";
+          ctx.textAlign = "left";
+          ctx.textBaseline = "middle";
+          ctx.fillText(speakerTag, bubX + 9, bubY + 8);
+          textStartY = bubY + 16;
+        }
+
+        // Text lines
+        ctx.font = "bold 9px monospace";
         ctx.fillStyle = textColor;
         ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(text, x, bubY + 11);
+        ctx.textBaseline = "top";
+        lines.forEach((l, idx) => {
+          ctx.fillText(l, bubX + bubW / 2, textStartY + idx * lineH);
+        });
+
+        ctx.restore();
       };
 
       // --- 2. Architectural Decor: Persian Boho Carpet under Cupping Table ---
@@ -1864,9 +2398,10 @@ export default function OfficeCanvas({
         if (pb.server.message) drawSpeechBubble(SERVER_RACK.x, SERVER_RACK.y - 10, pb.server.message, "#f0fdf4", "#15803d");
       }
 
-      // --- 16. Autonomous Peer Collaboration State Machine ---
+      // --- 16. Autonomous Multi-Tier Office Interaction State Machine ---
       if (!meetingActiveRef.current && !selectedAgent) {
-        if (!activeCollabRef.current) {
+        // 16A. Walking Cross-Department Collaborations
+        if (!activeCollabRef.current && !activeCuppingRef.current) {
           nextCollabDelayRef.current -= deltaTime;
           if (nextCollabDelayRef.current <= 0) {
             const scenarioIdx = Math.floor(Math.random() * COLLAB_SCENARIOS.length);
@@ -1878,8 +2413,9 @@ export default function OfficeCanvas({
               visitor.activity = "collaborating_walk";
               visitor.targetX = target.deskX + (target.isOfficeWorker ? 30 : -30);
               visitor.targetY = target.deskY + 10;
-              visitor.message = "Mampir ke meja...";
+              visitor.message = "Mampir diskusi..";
               visitor.messageTimer = 2.5;
+              spawnEmote(visitor.x, visitor.y, scenario.emote || "💬");
 
               activeCollabRef.current = {
                 scenarioIndex: scenarioIdx,
@@ -1889,12 +2425,12 @@ export default function OfficeCanvas({
                 targetId: target.id
               };
 
-              nextCollabDelayRef.current = 18 + Math.random() * 8;
+              nextCollabDelayRef.current = 12 + Math.random() * 6;
             } else {
-              nextCollabDelayRef.current = 5;
+              nextCollabDelayRef.current = 4;
             }
           }
-        } else {
+        } else if (activeCollabRef.current) {
           const collab = activeCollabRef.current;
           const scenario = COLLAB_SCENARIOS[collab.scenarioIndex];
           const visitor = agentsRef.current.find(a => a.id === collab.visitorId);
@@ -1908,10 +2444,11 @@ export default function OfficeCanvas({
                 visitor.activity = "collaborating_talk";
                 target.activity = "collaborating_talk";
                 collab.step = 0;
-                collab.stepTimer = 3.5;
+                collab.stepTimer = 3.4;
 
                 visitor.message = scenario.dialogue[0].text;
-                visitor.messageTimer = 3.5;
+                visitor.messageTimer = 3.4;
+                spawnEmote(visitor.x, visitor.y, scenario.emote || "💬");
 
                 if (onOfficeEvent) {
                   onOfficeEvent({
@@ -1927,35 +2464,25 @@ export default function OfficeCanvas({
               collab.stepTimer -= deltaTime;
               if (collab.stepTimer <= 0) {
                 collab.step += 1;
-                if (collab.step === 1 && scenario.dialogue[1]) {
-                  target.message = scenario.dialogue[1].text;
-                  target.messageTimer = 3.5;
-                  collab.stepTimer = 3.5;
+                if (collab.step < scenario.dialogue.length) {
+                  const line = scenario.dialogue[collab.step];
+                  const currentSpeaker = line.speaker === visitor.label ? visitor : target;
+                  currentSpeaker.message = line.text;
+                  currentSpeaker.messageTimer = 3.2;
+                  collab.stepTimer = 3.2;
+                  spawnEmote(currentSpeaker.x, currentSpeaker.y, collab.step % 2 === 1 ? "💡" : "✨");
 
                   if (onOfficeEvent) {
                     onOfficeEvent({
                       id: Math.random().toString(),
                       time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
-                      speaker: scenario.dialogue[1].speaker,
-                      message: scenario.dialogue[1].text,
-                      type: "collab"
-                    });
-                  }
-                } else if (collab.step === 2 && scenario.dialogue[2]) {
-                  visitor.message = scenario.dialogue[2].text;
-                  visitor.messageTimer = 3.0;
-                  collab.stepTimer = 3.0;
-
-                  if (onOfficeEvent) {
-                    onOfficeEvent({
-                      id: Math.random().toString(),
-                      time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
-                      speaker: scenario.dialogue[2].speaker,
-                      message: scenario.dialogue[2].text,
+                      speaker: line.speaker,
+                      message: line.text,
                       type: "collab"
                     });
                   }
                 } else {
+                  spawnEmote(target.x, target.y, "🤝");
                   visitor.activity = "walking";
                   visitor.targetX = visitor.deskX;
                   visitor.targetY = visitor.deskY;
@@ -1967,6 +2494,234 @@ export default function OfficeCanvas({
                 }
               }
             }
+          }
+        }
+
+        // 16B. Pod Discussions (Desk-to-Desk without walking)
+        if (!activeCollabRef.current && !activeCuppingRef.current) {
+          if (!activePodChatRef.current) {
+            nextPodChatDelayRef.current -= deltaTime;
+            if (nextPodChatDelayRef.current <= 0) {
+              const podIdx = Math.floor(Math.random() * POD_DISCUSSIONS.length);
+              const pod = POD_DISCUSSIONS[podIdx];
+              const spk1 = agentsRef.current.find(a => a.id === pod.speaker1Id);
+              const spk2 = agentsRef.current.find(a => a.id === pod.speaker2Id);
+
+              if (spk1 && spk2 && spk1.activity === "working" && spk2.activity === "working" && !spk1.message && !spk2.message) {
+                spk1.activity = "pod_chat";
+                spk2.activity = "pod_chat";
+                spk1.message = pod.dialogue[0].text;
+                spk1.messageTimer = 3.4;
+                spawnEmote(spk1.x, spk1.y, pod.emote || "💬");
+
+                activePodChatRef.current = {
+                  scenarioIndex: podIdx,
+                  step: 0,
+                  stepTimer: 3.4,
+                  speaker1Id: spk1.id,
+                  speaker2Id: spk2.id
+                };
+
+                if (onOfficeEvent) {
+                  onOfficeEvent({
+                    id: Math.random().toString(),
+                    time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+                    speaker: pod.dialogue[0].speaker,
+                    message: pod.dialogue[0].text,
+                    type: "collab"
+                  });
+                }
+
+                nextPodChatDelayRef.current = 10 + Math.random() * 5;
+              } else {
+                nextPodChatDelayRef.current = 4;
+              }
+            }
+          } else {
+            const pod = activePodChatRef.current;
+            const scenario = POD_DISCUSSIONS[pod.scenarioIndex];
+            const spk1 = agentsRef.current.find(a => a.id === pod.speaker1Id);
+            const spk2 = agentsRef.current.find(a => a.id === pod.speaker2Id);
+
+            if (spk1 && spk2) {
+              pod.stepTimer -= deltaTime;
+              if (pod.stepTimer <= 0) {
+                pod.step += 1;
+                if (pod.step === 1 && scenario.dialogue[1]) {
+                  spk2.message = scenario.dialogue[1].text;
+                  spk2.messageTimer = 3.4;
+                  pod.stepTimer = 3.4;
+                  spawnEmote(spk2.x, spk2.y, "✨");
+
+                  if (onOfficeEvent) {
+                    onOfficeEvent({
+                      id: Math.random().toString(),
+                      time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+                      speaker: scenario.dialogue[1].speaker,
+                      message: scenario.dialogue[1].text,
+                      type: "collab"
+                    });
+                  }
+                } else {
+                  spawnEmote(spk1.x, spk1.y, "🤝");
+                  spk1.activity = "working";
+                  spk2.activity = "working";
+                  activePodChatRef.current = null;
+                }
+              }
+            } else {
+              activePodChatRef.current = null;
+            }
+          }
+        }
+
+        // 16C. Spontaneous Cupping Table Tastings
+        if (!activeCollabRef.current && !activePodChatRef.current) {
+          if (!activeCuppingRef.current) {
+            nextCuppingDelayRef.current -= deltaTime;
+            if (nextCuppingDelayRef.current <= 0) {
+              const cupIdx = Math.floor(Math.random() * CUPPING_SESSIONS.length);
+              const cupSession = CUPPING_SESSIONS[cupIdx];
+              const host = agentsRef.current.find(a => a.id === cupSession.hostId);
+              const guest = agentsRef.current.find(a => a.id === cupSession.guestId);
+
+              if (host && guest && host.activity === "working" && guest.activity === "working") {
+                host.activity = "cupping_walk";
+                host.targetX = CUPPING_TABLE.x - 35;
+                host.targetY = CUPPING_TABLE.y;
+                host.message = "Yuk cupping kopi!";
+                host.messageTimer = 2.5;
+
+                guest.activity = "cupping_walk";
+                guest.targetX = CUPPING_TABLE.x + 35;
+                guest.targetY = CUPPING_TABLE.y;
+                guest.message = "Siap, ambil spoon!";
+                guest.messageTimer = 2.5;
+
+                spawnEmote(host.x, host.y, "☕");
+                spawnEmote(guest.x, guest.y, "✨");
+
+                activeCuppingRef.current = {
+                  scenarioIndex: cupIdx,
+                  step: 0,
+                  stepTimer: 0,
+                  hostId: host.id,
+                  guestId: guest.id,
+                  state: "walking"
+                };
+
+                nextCuppingDelayRef.current = 32 + Math.random() * 15;
+              } else {
+                nextCuppingDelayRef.current = 8;
+              }
+            }
+          } else {
+            const cup = activeCuppingRef.current;
+            const session = CUPPING_SESSIONS[cup.scenarioIndex];
+            const host = agentsRef.current.find(a => a.id === cup.hostId);
+            const guest = agentsRef.current.find(a => a.id === cup.guestId);
+
+            if (host && guest) {
+              if (cup.state === "walking") {
+                const distH = Math.hypot(host.targetX - host.x, host.targetY - host.y);
+                const distG = Math.hypot(guest.targetX - guest.x, guest.targetY - guest.y);
+                if (distH < 10 && distG < 10) {
+                  cup.state = "tasting";
+                  host.activity = "cupping_taste";
+                  guest.activity = "cupping_taste";
+                  host.sipTimer = 3.5;
+                  guest.sipTimer = 3.5;
+                  cup.step = 0;
+                  cup.stepTimer = 3.6;
+
+                  host.message = session.dialogue[0].text;
+                  host.messageTimer = 3.6;
+                  spawnEmote(host.x, host.y, "☕");
+
+                  if (onOfficeEvent) {
+                    onOfficeEvent({
+                      id: Math.random().toString(),
+                      time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+                      speaker: session.dialogue[0].speaker,
+                      message: session.dialogue[0].text,
+                      type: "cupping"
+                    });
+                  }
+                }
+              } else if (cup.state === "tasting") {
+                cup.stepTimer -= deltaTime;
+                if (cup.stepTimer <= 0) {
+                  cup.step += 1;
+                  if (cup.step < session.dialogue.length) {
+                    const line = session.dialogue[cup.step];
+                    const currentSpeaker = line.speaker === host.label ? host : guest;
+                    currentSpeaker.message = line.text;
+                    currentSpeaker.messageTimer = 3.4;
+                    cup.stepTimer = 3.4;
+                    spawnEmote(currentSpeaker.x, currentSpeaker.y, "✨");
+
+                    if (onOfficeEvent) {
+                      onOfficeEvent({
+                        id: Math.random().toString(),
+                        time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+                        speaker: line.speaker,
+                        message: line.text,
+                        type: "cupping"
+                      });
+                    }
+                  } else {
+                    cup.state = "returning";
+                    spawnEmote(host.x, host.y, "☕");
+                    spawnEmote(guest.x, guest.y, "✨");
+
+                    host.activity = "walking";
+                    host.targetX = host.deskX;
+                    host.targetY = host.deskY;
+                    host.message = "Notes tercatat, lanjut!";
+                    host.messageTimer = 2.2;
+
+                    guest.activity = "walking";
+                    guest.targetX = guest.deskX;
+                    guest.targetY = guest.deskY;
+                    guest.message = "Kopinya juara!";
+                    guest.messageTimer = 2.2;
+
+                    activeCuppingRef.current = null;
+                  }
+                }
+              }
+            } else {
+              activeCuppingRef.current = null;
+            }
+          }
+        }
+
+        // 16D. Ambient Desk Thoughts (Individual employee work status)
+        if (!activeCollabRef.current && !activePodChatRef.current && !activeCuppingRef.current) {
+          ambientThoughtTimerRef.current -= deltaTime;
+          if (ambientThoughtTimerRef.current <= 0) {
+            const idleWorkers = agentsRef.current.filter(a => a.activity === "working" && !a.message);
+            if (idleWorkers.length > 0) {
+              const chosen = idleWorkers[Math.floor(Math.random() * idleWorkers.length)];
+              const pool = AMBIENT_DESK_THOUGHTS[chosen.id];
+              if (pool && pool.thoughts.length > 0) {
+                const thought = pool.thoughts[Math.floor(Math.random() * pool.thoughts.length)];
+                chosen.message = thought;
+                chosen.messageTimer = 3.2;
+                spawnEmote(chosen.x, chosen.y, pool.emote);
+
+                if (onOfficeEvent && Math.random() < 0.35) {
+                  onOfficeEvent({
+                    id: Math.random().toString(),
+                    time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
+                    speaker: chosen.label,
+                    message: thought,
+                    type: "task"
+                  });
+                }
+              }
+            }
+            ambientThoughtTimerRef.current = 5 + Math.random() * 4;
           }
         }
       }
@@ -2101,7 +2856,11 @@ export default function OfficeCanvas({
 
         // Check if agent is currently drinking coffee or in discussion
         const isDrinking = agent.activity === "drinking" || (agent.sipTimer !== undefined && agent.sipTimer > 0);
-        const isCollaborating = agent.activity === "collaborating_talk" || (meetingActiveRef.current && meetingSpeaker && meetingSpeaker.speaker.toLowerCase().includes(agent.label.toLowerCase()));
+        const isCollaborating = 
+          agent.activity === "collaborating_talk" || 
+          agent.activity === "pod_chat" || 
+          agent.activity === "cupping_taste" || 
+          (meetingActiveRef.current && meetingSpeaker && meetingSpeaker.speaker.toLowerCase().includes(agent.label.toLowerCase()));
 
         // --- 18. Render Agent Sprite (Stardew Valley Style with Living Eyes & Gestures) ---
         let px = agent.x - 18; 
@@ -2129,12 +2888,26 @@ export default function OfficeCanvas({
         const blinkCycle = (timeSec * 1.8 + i * 1.3) % 4.2;
         const isBlinking = blinkCycle < 0.16;
 
-        // Eye looking direction (toward conversation partner if collaborating)
+        // Eye looking direction (toward conversation partner if collaborating, pod chatting, or cupping)
         let eyeOffset = 0; // -1 = left, 0 = forward, +1 = right
         if (agent.activity === "collaborating_talk" && activeCollabRef.current) {
           const collab = activeCollabRef.current;
           const isVisitor = agent.id === collab.visitorId;
           const otherAgent = agentsRef.current.find(a => a.id === (isVisitor ? collab.targetId : collab.visitorId));
+          if (otherAgent) {
+            eyeOffset = otherAgent.x > agent.x ? 1 : -1;
+          }
+        } else if (agent.activity === "pod_chat" && activePodChatRef.current) {
+          const pod = activePodChatRef.current;
+          const otherId = agent.id === pod.speaker1Id ? pod.speaker2Id : pod.speaker1Id;
+          const otherAgent = agentsRef.current.find(a => a.id === otherId);
+          if (otherAgent) {
+            eyeOffset = otherAgent.x > agent.x ? 1 : -1;
+          }
+        } else if (agent.activity === "cupping_taste" && activeCuppingRef.current) {
+          const cup = activeCuppingRef.current;
+          const otherId = agent.id === cup.hostId ? cup.guestId : cup.hostId;
+          const otherAgent = agentsRef.current.find(a => a.id === otherId);
           if (otherAgent) {
             eyeOffset = otherAgent.x > agent.x ? 1 : -1;
           }
@@ -2298,34 +3071,77 @@ export default function OfficeCanvas({
         ctx.fillText(agent.label, agent.x, tagY + 7);
 
         // Role/Task Pill beneath name
-        if (agent.activity === "working" || agent.activity === "collaborating_talk" || isDrinking) {
+        if (agent.activity === "working" || agent.activity === "collaborating_talk" || agent.activity === "pod_chat" || agent.activity === "cupping_taste" || agent.activity === "cupping_walk" || isDrinking) {
           ctx.font = "bold 7.5px monospace";
-          const badgeText = isDrinking ? "☕ Coffee Break" : (agent.activity === "collaborating_talk" ? "💬 Collab" : agent.roleBadge);
+          let badgeText = agent.roleBadge;
+          let badgeColor = "#86efac";
+
+          if (isDrinking) {
+            badgeText = "☕ Coffee Break";
+            badgeColor = "#fef08a";
+          } else if (agent.activity === "cupping_taste") {
+            badgeText = "☕ Cupping Note";
+            badgeColor = "#fde047";
+          } else if (agent.activity === "cupping_walk") {
+            badgeText = "☕ Menuju Cupping";
+            badgeColor = "#fde047";
+          } else if (agent.activity === "collaborating_talk") {
+            badgeText = "💬 Kolaborasi";
+            badgeColor = "#38bdf8";
+          } else if (agent.activity === "pod_chat") {
+            badgeText = "💬 Diskusi Meja";
+            badgeColor = "#c084fc";
+          }
+
           const badgeW = ctx.measureText(badgeText).width;
           const bX = agent.x - badgeW / 2 - 4;
           const bY = tagY + 16;
 
-          ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+          ctx.fillStyle = "rgba(15, 23, 42, 0.88)";
           ctx.beginPath();
           ctx.roundRect(bX, bY, badgeW + 8, 12, 3);
           ctx.fill();
 
-          ctx.fillStyle = isDrinking ? "#fef08a" : (agent.activity === "collaborating_talk" ? "#38bdf8" : "#86efac");
+          ctx.fillStyle = badgeColor;
           ctx.fillText(badgeText, agent.x, bY + 6);
         }
 
-        // Agent Speech Bubble
+        // Agent Speech Bubble with department colors and speaker pill
         if (agent.message) {
-          drawSpeechBubble(agent.x, py, agent.message);
+          const isCuppingMsg = agent.activity === "cupping_taste";
+          const isCollabMsg = agent.activity === "collaborating_talk" || agent.activity === "pod_chat";
+          const bubBg = isCuppingMsg ? "#fffbeb" : (isCollabMsg ? "#f0f9ff" : "#ffffff");
+          drawSpeechBubble(agent.x, py, agent.message, bubBg, "#0f172a", agent.label, agent.color);
         }
       });
 
-      // --- 19. Interactive Canvas Control Buttons ---
+      // Update & render floating animated emotes
+      for (let i = floatingEmotesRef.current.length - 1; i >= 0; i--) {
+        const em = floatingEmotesRef.current[i];
+        em.life -= deltaTime;
+        em.y -= deltaTime * 16;
+        if (em.life <= 0) {
+          floatingEmotesRef.current.splice(i, 1);
+        } else {
+          const alpha = Math.max(0, Math.min(1, em.life / em.maxLife));
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.font = "14px monospace";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(em.char, em.x, em.y);
+          ctx.restore();
+        }
+      }
+
+      // --- 19. Interactive Canvas Control Buttons (4 Retro Arcade Buttons) ---
+      const btnY = 540; const btnH = 32; const btnW = 145;
+
       // 1. Coffee Break Button
-      const cbX = 205; const cbY = 535; const cbW = 125; const cbH = 32;
+      const cbX = 170;
       ctx.fillStyle = "#b45309";
       ctx.beginPath();
-      ctx.roundRect(cbX, cbY, cbW, cbH, 8);
+      ctx.roundRect(cbX, btnY, btnW, btnH, 8);
       ctx.fill();
       ctx.strokeStyle = "#fbbf24";
       ctx.lineWidth = 1.5;
@@ -2335,10 +3151,10 @@ export default function OfficeCanvas({
       ctx.font = "bold 11px monospace";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText("☕ Coffee Break", cbX + cbW/2, cbY + cbH/2);
+      ctx.fillText("☕ Coffee Break", cbX + btnW/2, btnY + btnH/2);
 
       // 2. Call Meeting Button
-      const btnX = 345; const btnY = 535; const btnW = 125; const btnH = 32;
+      const meetX = 330;
       ctx.save();
       if (meetingActiveRef.current) {
         ctx.fillStyle = "#ef4444";
@@ -2350,7 +3166,7 @@ export default function OfficeCanvas({
         ctx.shadowBlur = 6;
       }
       ctx.beginPath();
-      ctx.roundRect(btnX, btnY, btnW, btnH, 8);
+      ctx.roundRect(meetX, btnY, btnW, btnH, 8);
       ctx.fill();
       ctx.strokeStyle = "#ffffff";
       ctx.lineWidth = 1.8;
@@ -2361,7 +3177,47 @@ export default function OfficeCanvas({
       ctx.font = "bold 11px monospace";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(meetingActiveRef.current ? "🔴 End Meeting" : "📢 Call Meeting", btnX + btnW/2, btnY + btnH/2);
+      ctx.fillText(meetingActiveRef.current ? "🔴 End Meeting" : "📢 Call Meeting", meetX + btnW/2, btnY + btnH/2);
+
+      // 3. Diskusi Tim Button
+      const collabX = 490;
+      ctx.save();
+      ctx.fillStyle = "#0284c7";
+      ctx.shadowColor = "rgba(2, 132, 199, 0.6)";
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      ctx.roundRect(collabX, btnY, btnW, btnH, 8);
+      ctx.fill();
+      ctx.strokeStyle = "#38bdf8";
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 11px monospace";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("💬 Diskusi Tim", collabX + btnW/2, btnY + btnH/2);
+
+      // 4. Sesi Cupping Button
+      const cupX = 650;
+      ctx.save();
+      ctx.fillStyle = "#059669";
+      ctx.shadowColor = "rgba(5, 150, 105, 0.6)";
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      ctx.roundRect(cupX, btnY, btnW, btnH, 8);
+      ctx.fill();
+      ctx.strokeStyle = "#34d399";
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 11px monospace";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("☕ Sesi Cupping", cupX + btnW/2, btnY + btnH/2);
 
       animationFrameId = requestAnimationFrame(render);
     };
@@ -2456,20 +3312,101 @@ export default function OfficeCanvas({
     }
   };
 
+  const triggerRandomCollab = () => {
+    if (meetingActiveRef.current) return;
+    const scenarioIdx = Math.floor(Math.random() * COLLAB_SCENARIOS.length);
+    const scenario = COLLAB_SCENARIOS[scenarioIdx];
+    const visitor = agentsRef.current.find(a => a.id === scenario.visitorId);
+    const target = agentsRef.current.find(a => a.id === scenario.targetId);
+
+    if (visitor && target) {
+      activeCollabRef.current = null;
+      activeCuppingRef.current = null;
+      activePodChatRef.current = null;
+
+      visitor.activity = "collaborating_walk";
+      visitor.targetX = target.deskX + (target.isOfficeWorker ? 30 : -30);
+      visitor.targetY = target.deskY + 10;
+      visitor.message = "Mampir diskusi.. 💬";
+      visitor.messageTimer = 2.5;
+      spawnEmote(visitor.x, visitor.y, scenario.emote || "💬");
+
+      activeCollabRef.current = {
+        scenarioIndex: scenarioIdx,
+        step: 0,
+        stepTimer: 0,
+        visitorId: visitor.id,
+        targetId: target.id
+      };
+      nextCollabDelayRef.current = 15;
+    }
+  };
+
+  const triggerCuppingSession = () => {
+    if (meetingActiveRef.current) return;
+    const cupIdx = Math.floor(Math.random() * CUPPING_SESSIONS.length);
+    const session = CUPPING_SESSIONS[cupIdx];
+    const host = agentsRef.current.find(a => a.id === session.hostId);
+    const guest = agentsRef.current.find(a => a.id === session.guestId);
+
+    if (host && guest) {
+      activeCollabRef.current = null;
+      activeCuppingRef.current = null;
+      activePodChatRef.current = null;
+
+      host.activity = "cupping_walk";
+      host.targetX = CUPPING_TABLE.x - 35;
+      host.targetY = CUPPING_TABLE.y;
+      host.message = "Yuk cupping kopi! ☕";
+      host.messageTimer = 2.5;
+
+      guest.activity = "cupping_walk";
+      guest.targetX = CUPPING_TABLE.x + 35;
+      guest.targetY = CUPPING_TABLE.y;
+      guest.message = "Siap, bawa cupping spoon! ✨";
+      guest.messageTimer = 2.5;
+
+      spawnEmote(host.x, host.y, "☕");
+      spawnEmote(guest.x, guest.y, "✨");
+
+      activeCuppingRef.current = {
+        scenarioIndex: cupIdx,
+        step: 0,
+        stepTimer: 0,
+        hostId: host.id,
+        guestId: guest.id,
+        state: "walking"
+      };
+      nextCuppingDelayRef.current = 30;
+    }
+  };
+
   // Click handler: supports agents and cute interactive props
   const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const { x, y } = getCanvasCoords(e);
     if (x < 0 || x > 1000 || y < 0 || y > 600) return;
 
-    // 1. Coffee Break Button click (200 to 335, 525 to 575)
-    if (x >= 200 && x <= 335 && y >= 525 && y <= 575) {
+    // 1. Coffee Break Button click (165 to 320, 530 to 580)
+    if (x >= 165 && x <= 320 && y >= 530 && y <= 580) {
       triggerCoffeeBreak();
       return;
     }
 
-    // 2. Meeting Button click (generous hit box 340 to 475, 525 to 575)
-    if (x >= 340 && x <= 475 && y >= 525 && y <= 575) {
+    // 2. Meeting Button click (325 to 480, 530 to 580)
+    if (x >= 325 && x <= 480 && y >= 530 && y <= 580) {
       triggerCallMeeting();
+      return;
+    }
+
+    // 3. Diskusi Tim Button click (485 to 640, 530 to 580)
+    if (x >= 485 && x <= 640 && y >= 530 && y <= 580) {
+      triggerRandomCollab();
+      return;
+    }
+
+    // 4. Sesi Cupping Button click (645 to 800, 530 to 580)
+    if (x >= 645 && x <= 800 && y >= 530 && y <= 580) {
+      triggerCuppingSession();
       return;
     }
 

@@ -673,6 +673,12 @@ export default function VirtualOffice() {
                               setDirectAgentSpeech({ speaker, text });
                               setTimeout(() => setDirectAgentSpeech(null), 5000);
                             }}
+                            officeEvents={officeEvents}
+                            onSelectAgent={(agent) => {
+                              setSelectedAgent(agent);
+                              setIsMeetingActive(false);
+                            }}
+                            onStartMeeting={() => handleToggleMeeting(true)}
                           />
                         )}
                       </div>

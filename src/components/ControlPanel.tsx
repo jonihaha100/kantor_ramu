@@ -14,6 +14,15 @@ interface ControlPanelProps {
   onClose: () => void;
   theme?: "retro" | "dark";
   onAgentSpeech?: (speaker: string, text: string) => void;
+  officeEvents?: {
+    id: string;
+    time: string;
+    speaker: string;
+    message: string;
+    type: "chat" | "task" | "system" | "meeting" | "collab" | "pod" | "thought" | "cupping";
+  }[];
+  onSelectAgent?: (agent: AgentRole) => void;
+  onStartMeeting?: () => void;
 }
 
 const AGENT_CONFIGS: Record<string, {
@@ -147,7 +156,29 @@ const RND_DATA = [
   { name: 'Batch 5', acidity: 5, body: 6, sweetness: 8 },
 ];
 
-export default function ControlPanel({ selectedAgent, onClose, theme = "retro", onAgentSpeech }: ControlPanelProps) {
+const ALL_AGENTS_SUMMARY: { role: AgentRole; name: string; dept: string; emoji: string }[] = [
+  { role: "Rama (GM)", name: "Rama", dept: "General Manager", emoji: "👨‍💼" },
+  { role: "Sari (CS)", name: "Sari", dept: "24/7 WhatsApp CS", emoji: "👩‍💼" },
+  { role: "Rian (Web Dev)", name: "Rian", dept: "E-Commerce Tech", emoji: "👨‍💻" },
+  { role: "Fina (Finance)", name: "Fina", dept: "Finance & Tax", emoji: "👩‍💼" },
+  { role: "Kafin (R&D)", name: "Kafin", dept: "R&D & Cupping", emoji: "👨‍🔬" },
+  { role: "Doni (Inventory)", name: "Doni", dept: "Roastery & Stock", emoji: "👨‍🔧" },
+  { role: "Gilang (Logistics)", name: "Gilang", dept: "Logistics & Cargo", emoji: "🚚" },
+  { role: "Bayu (B2B)", name: "Bayu", dept: "B2B Cafe Contracts", emoji: "🤝" },
+  { role: "Arya (Ads)", name: "Arya", dept: "Meta & Google Ads", emoji: "📈" },
+  { role: "Maya (Content)", name: "Maya", dept: "Social Media & Reels", emoji: "📱" },
+  { role: "Budi (Sourcing)", name: "Budi", dept: "Green Beans Sourcing", emoji: "🌿" }
+];
+
+export default function ControlPanel({ 
+  selectedAgent, 
+  onClose, 
+  theme = "retro", 
+  onAgentSpeech,
+  officeEvents,
+  onSelectAgent,
+  onStartMeeting
+}: ControlPanelProps) {
   const [conversations, setConversations] = useState<Record<string, ChatMessage[]>>(() => {
     if (typeof window !== "undefined") {
       try {
@@ -209,22 +240,131 @@ export default function ControlPanel({ selectedAgent, onClose, theme = "retro", 
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  // Exact AI Town / AI Office Empty State (Peach Tan Box with Centered Pixel Text)
+  // Live Office Discussion Stream & Agent Directory when no agent is selected
   if (!selectedAgent) {
     if (theme === "retro") {
       return (
-        <div className="flex flex-col h-full bg-[#df9d76] text-[#3e2208] items-center justify-center p-6 text-center select-none font-silkscreen relative overflow-hidden">
-          {/* Subtle Scanline / CRT texture */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.08)_0%,transparent_80%)] pointer-events-none"></div>
-          
-          <div className="text-3xl mb-3 opacity-90 drop-shadow-sm animate-bounce">
-            💬
+        <div className="flex flex-col h-full bg-[#df9d76] text-[#3e2208] relative font-mono select-none overflow-hidden">
+          {/* Retro Live Radar Header */}
+          <div className="p-3 bg-[#c9865f] border-b-2 border-[#ad6e49] shrink-0 flex items-center justify-between shadow-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-base">📻</span>
+              <div>
+                <div className="font-bold text-[#2d1808] text-xs font-silkscreen flex items-center gap-1.5">
+                  <span>RAMU HQ RADAR</span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-700 animate-pulse"></span>
+                </div>
+                <div className="text-[9px] text-[#5c3214] font-semibold">11 Tim AI Aktif Berdiskusi</div>
+              </div>
+            </div>
+            {onStartMeeting && (
+              <button
+                onClick={onStartMeeting}
+                className="px-2 py-1 text-[9px] font-bold text-white bg-[#4f46e5] hover:bg-[#4338ca] rounded border border-[#3730a3] transition shadow font-mono flex items-center gap-1"
+                title="Panggil seluruh tim untuk rapat pleno di Cupping Table"
+              >
+                <span>📢</span>
+                <span>Rapat</span>
+              </button>
+            )}
           </div>
-          <p className="text-xs sm:text-sm leading-relaxed max-w-[210px] tracking-wide text-[#3e2208] drop-shadow-sm font-bold">
-            Click on a character to see chat history.
-          </p>
-          <div className="mt-4 px-2.5 py-1 rounded bg-[#c5855e] border border-[#a86a45] text-[#2c1505] text-[10px] font-mono tracking-wider font-bold">
-            11 AI Agents Alive
+
+          {/* Quick Metrics Bar */}
+          <div className="grid grid-cols-3 gap-1.5 p-2 bg-[#d69068] border-b border-[#bd7b54] text-center text-[10px]">
+            <div className="bg-[#e7aa86] rounded p-1 border border-[#ba7750]">
+              <div className="text-[9px] text-[#5c3214]">Status</div>
+              <div className="font-bold text-emerald-900 font-mono">11 Online</div>
+            </div>
+            <div className="bg-[#e7aa86] rounded p-1 border border-[#ba7750]">
+              <div className="text-[9px] text-[#5c3214]">CS Live</div>
+              <div className="font-bold text-emerald-900 font-mono">24 Jam 🟢</div>
+            </div>
+            <div className="bg-[#e7aa86] rounded p-1 border border-[#ba7750]">
+              <div className="text-[9px] text-[#5c3214]">Cupping</div>
+              <div className="font-bold text-[#2d1808] font-mono">87.5 SCA</div>
+            </div>
+          </div>
+
+          {/* Feed & Directory Container */}
+          <div className="flex-1 overflow-y-auto p-2.5 space-y-3 custom-scrollbar text-xs">
+            {/* Live Office Chatter Stream */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5 px-0.5">
+                <span className="text-[10px] font-bold text-[#3e2208] uppercase tracking-wide flex items-center gap-1">
+                  <span>💬</span> Live Obrolan Kantor
+                </span>
+                <span className="text-[9px] text-[#6d3e1a] font-medium">Real-time</span>
+              </div>
+
+              <div className="space-y-1.5">
+                {officeEvents && officeEvents.length > 0 ? (
+                  officeEvents.slice(0, 6).map((ev) => {
+                    const matchedAgent = ALL_AGENTS_SUMMARY.find(a => ev.speaker.includes(a.name));
+                    const isCupping = ev.type === "cupping";
+                    const isCollab = ev.type === "collab" || ev.type === "pod";
+                    const isMeeting = ev.type === "meeting";
+
+                    return (
+                      <div
+                        key={ev.id}
+                        onClick={() => matchedAgent && onSelectAgent && onSelectAgent(matchedAgent.role)}
+                        className={`p-2 rounded-lg border text-[11px] leading-snug transition cursor-pointer shadow-sm ${
+                          matchedAgent ? "hover:border-[#7c441e] hover:shadow" : ""
+                        } ${
+                          isCupping
+                            ? "bg-[#fffbeb] border-[#fde68a] text-[#78350f]"
+                            : isMeeting
+                            ? "bg-[#eff6ff] border-[#bfdbfe] text-[#1e3a8a]"
+                            : isCollab
+                            ? "bg-[#f0fdf4] border-[#bbf7d0] text-[#14532d]"
+                            : "bg-[#fff8ea] border-[#ad6e49] text-[#2d1808]"
+                        }`}
+                        title={matchedAgent ? `Klik untuk mulai chat dengan ${ev.speaker}` : undefined}
+                      >
+                        <div className="flex items-center justify-between text-[9px] mb-1 font-bold">
+                          <span className="flex items-center gap-1">
+                            <span>{ev.speaker}</span>
+                          </span>
+                          <span className="text-[8px] opacity-70 font-mono">[{ev.time}]</span>
+                        </div>
+                        <div className="font-sans text-[11px] font-medium text-[#2a1708]">
+                          "{ev.message}"
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="p-3 rounded-lg bg-[#fff8ea] border border-[#ad6e49] text-center text-[10px] text-[#5c3214]">
+                    Sedang memantau aktivitas diskusi 11 pegawai...
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Agent Quick Directory */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5 px-0.5">
+                <span className="text-[10px] font-bold text-[#3e2208] uppercase tracking-wide flex items-center gap-1">
+                  <span>👥</span> Mulai Chat Pegawai
+                </span>
+                <span className="text-[9px] text-[#6d3e1a]">Pilih Agen</span>
+              </div>
+              <div className="grid grid-cols-2 gap-1.5">
+                {ALL_AGENTS_SUMMARY.map((a) => (
+                  <button
+                    key={a.name}
+                    onClick={() => onSelectAgent && onSelectAgent(a.role)}
+                    className="p-1.5 rounded-lg bg-[#fff8ea] hover:bg-[#fffdf7] border border-[#ad6e49] hover:border-[#6a3715] text-left transition flex items-center gap-1.5 shadow-sm group"
+                  >
+                    <span className="text-base group-hover:scale-110 transition-transform">{a.emoji}</span>
+                    <div className="overflow-hidden">
+                      <div className="font-bold text-[10px] text-[#2d1808] truncate font-mono">{a.name}</div>
+                      <div className="text-[8px] text-[#6d3e1a] truncate">{a.dept}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       );
